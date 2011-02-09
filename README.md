@@ -13,7 +13,7 @@ This repository contains various examples of using
   </tbody>
 </table>
 
-![jclouds logo](http://cloud.github.com/downloads/jclouds/jclouds/jclouds_centered.jpg)
+[jclouds logo](http://cloud.github.com/downloads/jclouds/jclouds/jclouds_centered.jpg)
 
 ## License
 

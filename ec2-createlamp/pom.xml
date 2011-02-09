@@ -35,16 +35,6 @@
             <artifactId>aws-ec2</artifactId>
             <version>1.0-beta-9</version>
         </dependency>
-        <dependency>
-            <groupId>org.jclouds.driver</groupId>
-            <artifactId>jclouds-jsch</artifactId>
-            <version>1.0-beta-9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.42</version>
-        </dependency>
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>

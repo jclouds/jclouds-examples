@@ -1,6 +1,6 @@
 # ec2-createlamp
 
-This is a simple example command line client that creates a lamp server and everything you need to do that in ec2
+This is a simple example command line client that creates a lamp server and everything you need to do that in [EC2](http://code.google.com/p/jclouds/wiki/EC2)
 
 ## Build
 

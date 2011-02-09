@@ -1,6 +1,6 @@
 # blobstore-basics
 
-This is a simple example command line client that creates a container in a BlobStore provider and lists the size of all the other containers.
+This is a simple example command line client that creates a container in a [BlobStore](http://code.google.com/p/jclouds/wiki/BlobStore) provider and lists the size of all the other containers.
 
 ## Build
 

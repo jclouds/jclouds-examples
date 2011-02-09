@@ -8,11 +8,11 @@ This repository contains various examples of using
   <tbody>
     <tr>
       <td><a href="jclouds-examples/tree/master/ec2-createlamp/">EC2 Create LAMP (Java)</a></td>
-      <td>Example code to create a LAMP server on EC2 using the provider-specific EC2Client</td>
+      <td>Example code to create a LAMP server on [EC2](http://code.google.com/p/jclouds/wiki/EC2) using the provider-specific EC2Client</td>
     </tr>
     <tr>
       <td><a href="jclouds-examples/tree/master/blobstore-basics/">BlobStore Basics (Java)</a></td>
-      <td>Example code to create a container, blob, and list your blobs using the portable BlobStore API</td>
+      <td>Example code to create a container, blob, and list your blobs using the portable [BlobStore API](http://code.google.com/p/jclouds/wiki/BlobStore)</td>
     </tr>
   </tbody>
 </table>

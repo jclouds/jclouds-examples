@@ -7,8 +7,12 @@ This repository contains various examples of using
   <thead><tr><th>project</th><th>description</th></tr></thead>
   <tbody>
     <tr>
-      <td><a href="jclouds-examples/tree/master/ec2-createlamp/">EC2 createlamp</a></td>
+      <td><a href="jclouds-examples/tree/master/ec2-createlamp/">EC2 createlamp (Java)</a></td>
       <td>Example code to create a LAMP server on EC2 using the provider-specific EC2Client</td>
+    </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/blobstore-basic/">BlobStore Basics (Java)</a></td>
+      <td>Example code to create a container, blob, and list your blobs using the portable BlobStore API</td>
     </tr>
   </tbody>
 </table>

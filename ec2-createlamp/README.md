@@ -10,9 +10,17 @@ Ensure you have maven 3.02 or higher installed, then execute 'mvn install' to bu
 
 Invoke the jar, passing your aws credentials and the name you wish to create or destroy
 
-ex.
-  java -jar target/ec2-createlamp-jar-with-dependencies.jar accesskey secretkey create adrianalmighty
-  java -jar target/ec2-createlamp-jar-with-dependencies.jar accesskey secretkey destroy adrianalmighty
+### Creating your Instance
+
+The create command will create a keypair, security group, and an instance.  It also blocks until the web server is running.
+
+java -jar target/ec2-createlamp-jar-with-dependencies.jar accesskey secretkey create adrianalmighty
+
+### Destroying your Instance
+
+The destroy command will clear up the instance, key, and security group.
+
+java -jar target/ec2-createlamp-jar-with-dependencies.jar accesskey secretkey destroy adrianalmighty
 
 ## License
 

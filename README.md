@@ -18,6 +18,10 @@ This repository contains various examples of using
       <td><a href="jclouds-examples/tree/master/ec2-createlamp/">EC2 Create LAMP (Java)</a></td>
       <td>Example code to create a LAMP server on <a href="http://code.google.com/p/jclouds/wiki/EC2">EC2</a> using the provider-specific EC2Client</td>
     </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/deploy-war-via-ant/">Deploy a webapp (ant)</a></td>
+      <td>Example code to deploy a web application to the cloud using <a href="http://cargo.codehaus.org/">Cargo</a> and the jclouds ant plugin</td>
+    </tr>
   </tbody>
 </table>
 

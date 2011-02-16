@@ -22,7 +22,6 @@
 
 <project xmlns:artifact="urn:maven-artifact-ant" name="cargooverssh" default="cargooverssh" basedir=".">
   <property file="build.properties" />
-  <property name="jclouds.version" value="1.0-beta-9a" />
   <property name="privatekeyfile" value="${user.home}/.ssh/id_rsa" />
   <property name="publickeyfile" value="${user.home}/.ssh/id_rsa.pub" />
   <property name="listenport" value="8080" />
@@ -53,8 +52,8 @@
   <artifact:dependencies pathId="jclouds.classpath">
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-ant" version="1.0.6"/>
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-core-container-tomcat" version="1.0.6"/>
-    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="${jclouds.version}"/>
-    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="${jclouds.version}"/>
+    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="1.0-SNAPSHOT" />
+    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="1.0-SNAPSHOT" />
     <remoteRepository refid="jclouds-snapshot.repository"/>
     <localRepository refid="local.repository"/>
   </artifact:dependencies>

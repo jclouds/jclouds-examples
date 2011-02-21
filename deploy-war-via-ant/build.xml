@@ -45,17 +45,13 @@
   <path id="maven-ant-tasks.classpath" path="build/maven-ant-tasks"/>
   <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath"/>
 
-  <artifact:localRepository id="local.repository" path="${user.home}/.m2/repository"/>
-  <artifact:remoteRepository id="jclouds-snapshot.repository" url="https://oss.sonatype.org/content/repositories/snapshots"/>
-
   <!-- Setup maven so that we can get latest version of jclouds, jclouds, and jruby -->
   <artifact:dependencies pathId="jclouds.classpath">
+    <dependency groupid="com.jcraft" artifactId="jsch" version="0.1.44-1"/>
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-ant" version="1.0.6"/>
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-core-container-tomcat" version="1.0.6"/>
-    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="1.0-SNAPSHOT" />
-    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="1.0-SNAPSHOT" />
-    <remoteRepository refid="jclouds-snapshot.repository"/>
-    <localRepository refid="local.repository"/>
+    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="1.0-beta-9b" />
+    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="1.0-beta-9b" />
   </artifact:dependencies>
 
   <typedef name="compute" classname="org.jclouds.tools.ant.taskdefs.compute.ComputeTask" classpathref="jclouds.classpath" />

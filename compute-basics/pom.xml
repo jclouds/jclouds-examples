@@ -33,12 +33,12 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-compute</artifactId>
-            <version>1.0-beta-9a</version>
+            <version>1.0-beta-9b</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allcompute</artifactId>
-            <version>1.0-beta-9a</version>
+            <version>1.0-beta-9b</version>
         </dependency>
         <!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -47,29 +47,18 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>gogrid</artifactId>
-            <version>1.0-beta-9a</version>
+            <version>1.0-beta-9b</version>
         </dependency>
         -->
         <dependency>
             <groupId>org.jclouds.driver</groupId>
             <artifactId>jclouds-jsch</artifactId>
-            <version>1.0-beta-9a</version>
-        </dependency>
-        <!-- note this dependency is implicit in 1.0-beta-9b -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
+            <version>1.0-beta-9b</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.42</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>r07</version>
+            <version>0.1.44-1</version>
         </dependency>
     </dependencies>
     <build>

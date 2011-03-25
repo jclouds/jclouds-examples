@@ -26,6 +26,10 @@ This repository contains various examples of using
       <td><a href="jclouds-examples/tree/master/deploy-war-via-ant/">Deploy a webapp (ant)</a></td>
       <td>Example code to deploy a web application to the cloud using <a href="http://cargo.codehaus.org/">Cargo</a> and the jclouds ant plugin</td>
     </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/blobstore-largeblob/">Large Blob support (Java)</a></td>
+      <td>Example code to create a container and use a parallel strategy to upload a large blob, the portable <a href="http://code.google.com/p/jclouds/wiki/BlobStore">BlobStore API</a></td>
+    </tr>
   </tbody>
 </table>
 

@@ -29,6 +29,30 @@
     <name>blobstore-largeblob</name>
     <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
+    <repositories>
+        <repository>
+            <id>jclouds-sona-snapshots-nexus</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>jboss-public-releases</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+
     <dependencies>
         <dependency>
             <groupId>org.jclouds</groupId>

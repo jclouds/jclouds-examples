@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import javax.ws.rs.core.MediaType;
+
 import org.jclouds.aws.domain.Region;
 import org.jclouds.blobstore.AsyncBlobStore;
 import org.jclouds.blobstore.BlobStore;
@@ -35,7 +37,6 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.util.BlobStoreUtils;
-import org.jclouds.http.apachehc.config.ApacheHCHttpCommandExecutorServiceModule;
 import org.jclouds.http.config.JavaUrlHttpCommandExecutorServiceModule;
 import org.jclouds.logging.log4j.config.Log4JLoggingModule;
 import org.jclouds.netty.config.NettyPayloadModule;
@@ -48,7 +49,8 @@ import com.google.inject.Module;
 /**
  * Demonstrates the use of {@link BlobStore}.
  * 
- * Usage is: java MainApp  \"provider\" \"identity\" \"credential\" \"localFileName\" \"containerName\" \"objectName\" plainhttp threadcount   
+ * Usage is: java MainApp \"provider\" \"identity\" \"credential\" \"localFileName\"
+ * \"containerName\" \"objectName\" plainhttp threadcount
  * 
  * \"plainhttp\" and \"threadcound\" is optional if all the rest of parameters are omitted
  * 
@@ -61,52 +63,54 @@ public class MainApp {
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: \"provider\" \"identity\" \"credential\" \"localFileName\" \"containerName\" \"objectName\" plainhttp threadcount";
 
    public final static Properties PLAIN_HTTP_ENDPOINTS = new Properties();
-   
+
    static {
       PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_ENDPOINT, "http://s3.amazonaws.com");
-      PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + Region.US_STANDARD + "." + ENDPOINT, 
-         "http://s3.amazonaws.com");
+      PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + Region.US_STANDARD + "." + ENDPOINT,
+               "http://s3.amazonaws.com");
       PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + Region.US_WEST_1 + "." + ENDPOINT,
-         "http://s3-us-west-1.amazonaws.com");
-      PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + "EU" + "." + ENDPOINT, 
-         "http://s3-eu-west-1.amazonaws.com");
+               "http://s3-us-west-1.amazonaws.com");
+      PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + "EU" + "." + ENDPOINT,
+               "http://s3-eu-west-1.amazonaws.com");
       PLAIN_HTTP_ENDPOINTS.setProperty(PROPERTY_REGION + "." + Region.AP_SOUTHEAST_1 + "." + ENDPOINT,
-         "http://s3-ap-southeast-1.amazonaws.com");
+               "http://s3-ap-southeast-1.amazonaws.com");
    }
-   
-   final static Iterable<? extends Module> NETTY_MODULES =
-      ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
-      // we may test different http layer with the following   
-      // ImmutableSet.of(new ApacheHCHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
-   
+
+   final static Iterable<? extends Module> NETTY_MODULES = ImmutableSet.of(
+            new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
+
+   // we may test different http layer with the following
+   // ImmutableSet.of(new ApacheHCHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new
+   // NettyPayloadModule());
+
    static String getSpeed(long speed) {
       if (speed < 1024) {
-          return "" + speed + " bytes/s";
+         return "" + speed + " bytes/s";
       } else if (speed < 1048576) {
-          return "" + (speed/1024) + " kbytes/s";
+         return "" + (speed / 1024) + " kbytes/s";
       } else {
-          return "" + (speed/1048576) + " Mbytes/s";
+         return "" + (speed / 1048576) + " Mbytes/s";
       }
    }
-   
+
    static void printSpeed(String message, long start, long length) {
       long sec = (System.currentTimeMillis() - start) / 1000;
       if (sec == 0)
-          return;
+         return;
       long speed = length / sec;
       System.out.print(message);
       if (speed < 1024) {
-          System.out.print(" " + length + " bytes");
+         System.out.print(" " + length + " bytes");
       } else if (speed < 1048576) {
-          System.out.print(" " + (length/1024) + " kB");
+         System.out.print(" " + (length / 1024) + " kB");
       } else if (speed < 1073741824) {
-          System.out.print(" " + (length/1048576) + " MB");
+         System.out.print(" " + (length / 1048576) + " MB");
       } else {
-          System.out.print(" " + (length/1073741824) + " GB");
+         System.out.print(" " + (length / 1073741824) + " GB");
       }
       System.out.println(" with " + getSpeed(speed) + " (" + length + " bytes)");
    }
-   
+
    public static void main(String[] args) throws IOException {
 
       if (args.length < PARAMETERS)
@@ -124,14 +128,15 @@ public class MainApp {
       String containerName = args[4];
       String objectName = args[5];
       boolean plainhttp = args.length >= 7 && "plainhttp".equals(args[6]);
-      String threadcount = args.length >= 8 ? args[7] : null; 
+      String threadcount = args.length >= 8 ? args[7] : null;
 
       // Init
       Properties overrides = new Properties();
       if (plainhttp)
          overrides.putAll(PLAIN_HTTP_ENDPOINTS); // default is https
       if (threadcount != null)
-         overrides.setProperty("jclouds.mpu.parallel.degree", threadcount); // without setting, default is 4 threads
+         overrides.setProperty("jclouds.mpu.parallel.degree", threadcount); // without setting,
+      // default is 4 threads
       overrides.setProperty(provider + ".identity", identity);
       overrides.setProperty(provider + ".credential", credential);
       BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, NETTY_MODULES, overrides);
@@ -139,21 +144,23 @@ public class MainApp {
       try {
          long start = System.currentTimeMillis();
          // Create Container
-         AsyncBlobStore blobStore = context.getAsyncBlobStore(); // it can be changed to sync BlobStore
+         AsyncBlobStore blobStore = context.getAsyncBlobStore(); // it can be changed to sync
+         // BlobStore
          blobStore.createContainerInLocation(null, containerName);
-         
+
          File input = new File(fileName);
 
          // Add a Blob
-         Blob blob = blobStore.blobBuilder(objectName).payload(input).build();
+         Blob blob = blobStore.blobBuilder(objectName).payload(input).contentType(MediaType.APPLICATION_OCTET_STREAM)
+                  .contentDisposition(objectName).build();
          long length = blob.getPayload().getContentMetadata().getContentLength();
-         blob.getPayload().getContentMetadata().setContentType("application/unknown");
-         blob.getPayload().getContentMetadata().setContentDisposition(objectName);
          // Upload a file
          ListenableFuture<String> futureETag = blobStore.putBlobMultipart(containerName, blob);
-         String eTag = futureETag.get(); // asynchronously wait for the upload
 
-         printSpeed("Sucessfully uploaded ", start, length);
+         // asynchronously wait for the upload
+         String eTag = futureETag.get();
+
+         printSpeed("Sucessfully uploaded eTag(" + eTag + ")", start, length);
 
       } catch (InterruptedException e) {
          System.err.println(e.getMessage());

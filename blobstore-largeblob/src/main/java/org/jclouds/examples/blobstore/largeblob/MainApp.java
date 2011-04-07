@@ -20,6 +20,7 @@
 package org.jclouds.examples.blobstore.largeblob;
 
 import static org.jclouds.Constants.PROPERTY_ENDPOINT;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import static org.jclouds.location.reference.LocationConstants.ENDPOINT;
 import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGION;
 
@@ -149,13 +150,14 @@ public class MainApp {
          blobStore.createContainerInLocation(null, containerName);
 
          File input = new File(fileName);
+         long length = input.length();
 
          // Add a Blob
          Blob blob = blobStore.blobBuilder(objectName).payload(input).contentType(MediaType.APPLICATION_OCTET_STREAM)
                   .contentDisposition(objectName).build();
-         long length = blob.getPayload().getContentMetadata().getContentLength();
+
          // Upload a file
-         ListenableFuture<String> futureETag = blobStore.putBlobMultipart(containerName, blob);
+         ListenableFuture<String> futureETag = blobStore.putBlob(containerName, blob, multipart());
 
          // asynchronously wait for the upload
          String eTag = futureETag.get();

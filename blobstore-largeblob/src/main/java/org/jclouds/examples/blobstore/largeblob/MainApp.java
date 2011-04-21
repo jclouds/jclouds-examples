@@ -20,6 +20,7 @@
 package org.jclouds.examples.blobstore.largeblob;
 
 import static org.jclouds.Constants.PROPERTY_ENDPOINT;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import static org.jclouds.location.reference.LocationConstants.ENDPOINT;
 import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGION;
 
@@ -37,9 +38,8 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.util.BlobStoreUtils;
-import org.jclouds.http.config.JavaUrlHttpCommandExecutorServiceModule;
-import org.jclouds.logging.log4j.config.Log4JLoggingModule;
-import org.jclouds.netty.config.NettyPayloadModule;
+import org.jclouds.http.ning.config.NingHttpCommandExecutorServiceModule;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -76,8 +76,9 @@ public class MainApp {
                "http://s3-ap-southeast-1.amazonaws.com");
    }
 
-   final static Iterable<? extends Module> NETTY_MODULES = ImmutableSet.of(
-            new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
+   final static Iterable<? extends Module> NETTY_MODULES = 
+      //ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
+      ImmutableSet.of(new NingHttpCommandExecutorServiceModule(), new SLF4JLoggingModule());
 
    // we may test different http layer with the following
    // ImmutableSet.of(new ApacheHCHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new
@@ -149,13 +150,11 @@ public class MainApp {
          blobStore.createContainerInLocation(null, containerName);
 
          File input = new File(fileName);
-
-         // Add a Blob
-         Blob blob = blobStore.blobBuilder(objectName).payload(input).contentType(MediaType.APPLICATION_OCTET_STREAM)
-                  .contentDisposition(objectName).build();
-         long length = blob.getPayload().getContentMetadata().getContentLength();
+         long length = input.length();
+         Blob blob = blobStore.blobBuilder(objectName).payload(input)
+               .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
          // Upload a file
-         ListenableFuture<String> futureETag = blobStore.putBlobMultipart(containerName, blob);
+         ListenableFuture<String> futureETag = blobStore.putBlob(containerName, blob, multipart());
 
          // asynchronously wait for the upload
          String eTag = futureETag.get();
@@ -164,8 +163,10 @@ public class MainApp {
 
       } catch (InterruptedException e) {
          System.err.println(e.getMessage());
+         e.printStackTrace();
       } catch (ExecutionException e) {
          System.err.println(e.getMessage());
+         e.printStackTrace();
       } finally {
          // Close connecton
          context.close();

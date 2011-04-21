@@ -135,7 +135,11 @@
         <priority value="ERROR" />
         <appender-ref ref="ASYNCHTTPWIRE" />
     </category>
-    
+	<category name="com.ning.http">
+        <priority value="DEBUG" />
+        <appender-ref ref="ASYNCHTTPWIRE" />
+    </category>
+        
     <category name="jclouds.headers">
         <priority value="DEBUG" />
         <appender-ref ref="ASYNCWIRE" />

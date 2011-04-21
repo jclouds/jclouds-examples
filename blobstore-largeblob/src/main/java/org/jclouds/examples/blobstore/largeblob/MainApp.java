@@ -38,9 +38,8 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.util.BlobStoreUtils;
-import org.jclouds.http.config.JavaUrlHttpCommandExecutorServiceModule;
-import org.jclouds.logging.log4j.config.Log4JLoggingModule;
-import org.jclouds.netty.config.NettyPayloadModule;
+import org.jclouds.http.ning.config.NingHttpCommandExecutorServiceModule;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -77,8 +76,9 @@ public class MainApp {
                "http://s3-ap-southeast-1.amazonaws.com");
    }
 
-   final static Iterable<? extends Module> NETTY_MODULES = ImmutableSet.of(
-            new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
+   final static Iterable<? extends Module> NETTY_MODULES = 
+      //ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
+      ImmutableSet.of(new NingHttpCommandExecutorServiceModule(), new SLF4JLoggingModule());
 
    // we may test different http layer with the following
    // ImmutableSet.of(new ApacheHCHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new
@@ -151,11 +151,9 @@ public class MainApp {
 
          File input = new File(fileName);
          long length = input.length();
-
          // Add a Blob
-         Blob blob = blobStore.blobBuilder(objectName).payload(input).contentType(MediaType.APPLICATION_OCTET_STREAM)
-                  .contentDisposition(objectName).build();
-
+         Blob blob = blobStore.blobBuilder(objectName).payload(input)
+               .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
          // Upload a file
          ListenableFuture<String> futureETag = blobStore.putBlob(containerName, blob, multipart());
 
@@ -166,8 +164,10 @@ public class MainApp {
 
       } catch (InterruptedException e) {
          System.err.println(e.getMessage());
+         e.printStackTrace();
       } catch (ExecutionException e) {
          System.err.println(e.getMessage());
+         e.printStackTrace();
       } finally {
          // Close connecton
          context.close();

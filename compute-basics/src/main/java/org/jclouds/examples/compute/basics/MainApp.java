@@ -21,18 +21,18 @@ package org.jclouds.examples.compute.basics;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Predicates.not;
+import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.jclouds.compute.options.TemplateOptions.Builder.overrideCredentialsWith;
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
-import static org.jclouds.scriptbuilder.domain.Statements.appendFile;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
-import static org.jclouds.scriptbuilder.domain.Statements.interpret;
-import static org.jclouds.scriptbuilder.domain.Statements.newStatementList;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -46,17 +46,16 @@ import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.domain.Credentials;
-import org.jclouds.scriptbuilder.InitBuilder;
+import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.scriptbuilder.domain.Statement;
-import org.jclouds.scriptbuilder.domain.Statements;
+import org.jclouds.scriptbuilder.domain.StatementList;
+import org.jclouds.scriptbuilder.statements.login.SudoStatements;
+import org.jclouds.scriptbuilder.statements.login.UserAdd;
+import org.jclouds.scriptbuilder.statements.ssh.SshStatements;
 import org.jclouds.ssh.jsch.config.JschSshClientModule;
 
 import com.google.common.base.Predicates;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.io.Files;
 import com.google.inject.Module;
 
@@ -78,7 +77,6 @@ public class MainApp {
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: provider identity credential groupName (add|exec|destroy)";
 
    public static void main(String[] args) {
-
       if (args.length < PARAMETERS)
          throw new IllegalArgumentException(INVALID_SYNTAX);
 
@@ -110,11 +108,13 @@ public class MainApp {
                // ex. you can connect via ssh publicip
                Statement bootInstructions = addUserAndAuthorizeSudo(login.creds.identity, login.publicKey);
 
+               System.out.println(bootInstructions.render(OsFamily.UNIX));
+
                // in this case, we don't care about template option such as operating system, or
                // hardware profile. jclouds will select one for us, which tends to be Ubuntu or
                // CentOS
                NodeMetadata node = getOnlyElement(compute.createNodesInGroup(groupName, 1, runScript(bootInstructions)));
-               System.out.printf("<< node %s: %s%n", node.getId(), Iterables.concat(node.getPrivateAddresses(), node
+               System.out.printf("<< node %s: %s%n", node.getId(), concat(node.getPrivateAddresses(), node
                         .getPublicAddresses()));
 
             case EXEC:
@@ -131,7 +131,7 @@ public class MainApp {
                                  .wrapInInitScript(false));// run command directly as it is
 
                for (Entry<? extends NodeMetadata, ExecResponse> response : responses.entrySet()) {
-                  System.out.printf("<< node %s: %s%n", response.getKey().getId(), Iterables.concat(response.getKey()
+                  System.out.printf("<< node %s: %s%n", response.getKey().getId(), concat(response.getKey()
                            .getPrivateAddresses(), response.getKey().getPublicAddresses()));
                   System.out.printf("<<     %s%n", response.getValue());
                }
@@ -197,28 +197,9 @@ public class MainApp {
       }
    }
 
-   private static Statement addUserAndAuthorizeSudo(String user, String publicKey) {
-      return new InitBuilder("setup-" + user,// name of the script
-               "/tmp",// working directory
-               "/tmp/logs",// location of stdout.log and stderr.log
-               ImmutableMap.of("newUser", user, "defaultHome", "/home/users"), // variables
-               ImmutableList.<Statement> of(createUserWithPublicKey(user, publicKey), makeSudoersOnlyPermitting(user)));
-   }
-
-   // must be used inside InitBuilder, as this sets the shell variables used in this statement
-   static Statement createUserWithPublicKey(String username, String publicKey) {
-      // note directory must be created first
-      return newStatementList(interpret("mkdir -p $DEFAULT_HOME/$NEW_USER/.ssh",
-               "useradd --shell /bin/bash -d $DEFAULT_HOME/$NEW_USER $NEW_USER\n"), appendFile(
-               "$DEFAULT_HOME/$NEW_USER/.ssh/authorized_keys", Splitter.on('\n').split(publicKey)),
-               interpret("chmod 600 $DEFAULT_HOME/$NEW_USER/.ssh/authorized_keys",
-                        "chown -R $NEW_USER $DEFAULT_HOME/$NEW_USER\n"));
-   }
-
-   // must be used inside InitBuilder, as this sets the shell variables used in this statement
-   static Statement makeSudoersOnlyPermitting(String username) {
-      return newStatementList(Statements.interpret("rm /etc/sudoers", "touch /etc/sudoers", "chmod 0440 /etc/sudoers",
-               "chown root /etc/sudoers\n"), appendFile("/etc/sudoers", ImmutableSet.of("root ALL = (ALL) ALL",
-               "%adm ALL = (ALL) ALL", username + " ALL = (ALL) NOPASSWD: ALL")));
+   private static Statement addUserAndAuthorizeSudo(String user, String publicKey) throws NoSuchAlgorithmException,
+            CertificateException {
+      return new StatementList(UserAdd.builder().login(user).password("foobar").authorizeRSAPublicKey(publicKey).group(
+               "wheel").build(), SudoStatements.createWheel(), SshStatements.lockSshd());
    }
 }

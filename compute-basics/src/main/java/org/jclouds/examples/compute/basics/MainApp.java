@@ -31,12 +31,10 @@ import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.File;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContextFactory;
@@ -49,6 +47,7 @@ import org.jclouds.domain.Credentials;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.scriptbuilder.domain.Statement;
 import org.jclouds.scriptbuilder.domain.StatementList;
+import org.jclouds.scriptbuilder.statements.login.ShadowStatements;
 import org.jclouds.scriptbuilder.statements.login.SudoStatements;
 import org.jclouds.scriptbuilder.statements.login.UserAdd;
 import org.jclouds.scriptbuilder.statements.ssh.SshStatements;
@@ -62,8 +61,10 @@ import com.google.inject.Module;
 /**
  * Demonstrates the use of {@link ComputeService}.
  * <p/>
- * Usage is: {@code java MainApp provider identity credential groupName (add|exec|destroy)} if
- * {@code exec} is used, the following parameter is a command, which should be passed in quotes
+ * Usage is:
+ * {@code java MainApp provider identity credential groupName (add|exec|destroy)}
+ * if {@code exec} is used, the following parameter is a command, which should
+ * be passed in quotes
  * 
  * @author Adrian Cole
  */
@@ -92,7 +93,7 @@ public class MainApp {
       // note that you can check if a provider is present ahead of time
       if (!contains(ComputeServiceUtils.getSupportedProviders(), provider))
          throw new IllegalArgumentException("provider " + provider + " not in supported list: "
-                  + ComputeServiceUtils.getSupportedProviders());
+               + ComputeServiceUtils.getSupportedProviders());
 
       Login login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
 
@@ -102,47 +103,48 @@ public class MainApp {
 
       try {
          switch (action) {
-            case ADD:
-               System.out.printf(">> adding node to group %s%n", groupName);
-               // note this will create a user with the same name as you on the node.
-               // ex. you can connect via ssh publicip
-               Statement bootInstructions = addUserAndAuthorizeSudo(login.creds.identity, login.publicKey);
+         case ADD:
+            System.out.printf(">> adding node to group %s%n", groupName);
+            // note this will create a user with the same name as you on the
+            // node. ex. you can connect via ssh publicip
+            Statement bootInstructions = addUserAndAuthorizeSudo(login.creds.identity, login.publicKey);
 
-               System.out.println(bootInstructions.render(OsFamily.UNIX));
+            System.out.println(bootInstructions.render(OsFamily.UNIX));
 
-               // in this case, we don't care about template option such as operating system, or
-               // hardware profile. jclouds will select one for us, which tends to be Ubuntu or
-               // CentOS
-               NodeMetadata node = getOnlyElement(compute.createNodesInGroup(groupName, 1, runScript(bootInstructions)));
-               System.out.printf("<< node %s: %s%n", node.getId(), concat(node.getPrivateAddresses(), node
-                        .getPublicAddresses()));
+            // in this case, we don't care about template option such as
+            // operating system, or hardware profile. jclouds will select one
+            // for us, which tends to be Ubuntu or CentOS
+            NodeMetadata node = getOnlyElement(compute.createNodesInGroup(groupName, 1, runScript(bootInstructions)));
+            System.out.printf("<< node %s: %s%n", node.getId(),
+                  concat(node.getPrivateAddresses(), node.getPublicAddresses()));
 
-            case EXEC:
-               System.out.printf(">> running [%s] on group %s as %s%n", command, groupName, login.creds.identity);
+         case EXEC:
+            System.out.printf(">> running [%s] on group %s as %s%n", command, groupName, login.creds.identity);
 
-               // when you run commands, you can pass options to decide whether to run it as root,
-               // supply or own credentials vs from cache, and wrap in an init script vs directly
-               // invoke
-               Map<? extends NodeMetadata, ExecResponse> responses = compute.runScriptOnNodesMatching(
-                        inGroup(groupName), // predicate used to select nodes
-                        exec(command), // what you actually intend to run
-                        overrideCredentialsWith(login.creds) // use my local user and ssh key
-                                 .runAsRoot(false) // don't attempt to run as root (sudo)
-                                 .wrapInInitScript(false));// run command directly as it is
+            // when you run commands, you can pass options to decide whether to
+            // run it as root, supply or own credentials vs from cache, and wrap
+            // in an init script vs directly invoke
+            Map<? extends NodeMetadata, ExecResponse> responses = compute.runScriptOnNodesMatching(//
+                  inGroup(groupName), // predicate used to select nodes
+                  exec(command), // what you actually intend to run
+                  overrideCredentialsWith(login.creds) // use my local user &
+                                                       // ssh key
+                        .runAsRoot(false) // don't attempt to run as root (sudo)
+                        .wrapInInitScript(false));// run command directly
 
-               for (Entry<? extends NodeMetadata, ExecResponse> response : responses.entrySet()) {
-                  System.out.printf("<< node %s: %s%n", response.getKey().getId(), concat(response.getKey()
-                           .getPrivateAddresses(), response.getKey().getPublicAddresses()));
-                  System.out.printf("<<     %s%n", response.getValue());
-               }
-               break;
-            case DESTROY:
-               System.out.printf(">> destroying nodes in group %s%n", groupName);
-               // you can use predicates to select which nodes you wish to destroy.
-               Set<? extends NodeMetadata> destroyed = compute.destroyNodesMatching(//
-                        Predicates.<NodeMetadata> and(not(TERMINATED), inGroup(groupName)));
-               System.out.printf("<< destroyed nodes %s%n", destroyed);
-               break;
+            for (Entry<? extends NodeMetadata, ExecResponse> response : responses.entrySet()) {
+               System.out.printf("<< node %s: %s%n", response.getKey().getId(),
+                     concat(response.getKey().getPrivateAddresses(), response.getKey().getPublicAddresses()));
+               System.out.printf("<<     %s%n", response.getValue());
+            }
+            break;
+         case DESTROY:
+            System.out.printf(">> destroying nodes in group %s%n", groupName);
+            // you can use predicates to select which nodes you wish to destroy.
+            Set<? extends NodeMetadata> destroyed = compute.destroyNodesMatching(//
+                  Predicates.<NodeMetadata> and(not(TERMINATED), inGroup(groupName)));
+            System.out.printf("<< destroyed nodes %s%n", destroyed);
+            break;
          }
       } catch (RunNodesException e) {
          System.err.println("error adding node to group " + groupName + ": " + e.getMessage());
@@ -162,7 +164,8 @@ public class MainApp {
    static int error = 0;
 
    private static ComputeService initComputeService(String provider, String identity, String credential) {
-      // example of specific properties, in this case optimizing image list to only amazon supplied
+      // example of specific properties, in this case optimizing image list to
+      // only amazon supplied
       Properties properties = new Properties();
       properties.setProperty("jclouds.ec2.ami-owners", "137112412989");
 
@@ -170,14 +173,13 @@ public class MainApp {
       Iterable<Module> modules = ImmutableSet.<Module> of(new JschSshClientModule());
 
       return new ComputeServiceContextFactory().createContext(provider, identity, credential, modules, properties)
-               .getComputeService();
+            .getComputeService();
    }
 
    private static Login getLoginForCommandExecution(Action action) {
       try {
-         Credentials creds = new Credentials(System.getProperty("user.name"), Files.toString(new File(System
-                  .getProperty("user.home")
-                  + "/.ssh/id_rsa"), UTF_8));
+         Credentials creds = new Credentials(System.getProperty("user.name"), Files.toString(
+               new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8));
          String publicKey = Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa.pub"), UTF_8);
          return new Login(creds, publicKey);
       } catch (Exception e) {
@@ -197,9 +199,9 @@ public class MainApp {
       }
    }
 
-   private static Statement addUserAndAuthorizeSudo(String user, String publicKey) throws NoSuchAlgorithmException,
-            CertificateException {
-      return new StatementList(UserAdd.builder().login(user).password("foobar").authorizeRSAPublicKey(publicKey).group(
-               "wheel").build(), SudoStatements.createWheel(), SshStatements.lockSshd());
+   private static Statement addUserAndAuthorizeSudo(String user, String publicKey) {
+      return new StatementList(UserAdd.builder().login(user).password("foobar").authorizeRSAPublicKey(publicKey)
+            .group("wheel").build(), SudoStatements.createWheel(), SshStatements.lockSshd(),
+            ShadowStatements.resetLoginUserPasswordTo("foobar"));
    }
 }

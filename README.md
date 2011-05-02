@@ -15,6 +15,10 @@ This repository contains various examples of using
       <td>Example code to create a container, blob, and list your blobs using the portable <a href="http://code.google.com/p/jclouds/wiki/BlobStore">BlobStore API</a></td>
     </tr>
     <tr>
+      <td><a href="jclouds-examples/tree/master/blobstore-clojure/">BlobStore Basic (Clojure)</a></td>
+      <td>Example code to create a container, and list your containers using the portable <a href="https://github.com/jclouds/jclouds/blob/master/blobstore/src/main/clojure/org/jclouds/blobstore2.clj">blobstore2 functions</a></td>
+    </tr>
+    <tr>
       <td><a href="jclouds-examples/tree/master/ec2-computeservice-spot/">Use EC2 Extensions in ComputeService (Java)</a></td>
       <td>Example code to create a spot instance on <a href="http://code.google.com/p/jclouds/wiki/EC2">EC2</a> using <a href="http://code.google.com/p/jclouds/wiki/ComputeGuide">ComputeService API</a> extensions</td>
     </tr>

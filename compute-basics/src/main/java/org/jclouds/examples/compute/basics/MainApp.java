@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C) 2010 Cloud Conscious, LLC. <info@cloudconscious.com>
+ * Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
  *
  * ====================================================================
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,13 +44,8 @@ import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.domain.Credentials;
-import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.scriptbuilder.domain.Statement;
-import org.jclouds.scriptbuilder.domain.StatementList;
-import org.jclouds.scriptbuilder.statements.login.ShadowStatements;
-import org.jclouds.scriptbuilder.statements.login.SudoStatements;
-import org.jclouds.scriptbuilder.statements.login.UserAdd;
-import org.jclouds.scriptbuilder.statements.ssh.SshStatements;
+import org.jclouds.scriptbuilder.statements.login.AdminAccess;
 import org.jclouds.ssh.jsch.config.JschSshClientModule;
 
 import com.google.common.base.Predicates;
@@ -95,7 +90,7 @@ public class MainApp {
          throw new IllegalArgumentException("provider " + provider + " not in supported list: "
                + ComputeServiceUtils.getSupportedProviders());
 
-      Login login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
+      Credentials login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
 
       ComputeService compute = initComputeService(provider, identity, credential);
 
@@ -107,9 +102,7 @@ public class MainApp {
             System.out.printf(">> adding node to group %s%n", groupName);
             // note this will create a user with the same name as you on the
             // node. ex. you can connect via ssh publicip
-            Statement bootInstructions = addUserAndAuthorizeSudo(login.creds.identity, login.publicKey);
-
-            System.out.println(bootInstructions.render(OsFamily.UNIX));
+            Statement bootInstructions = AdminAccess.standard();
 
             // in this case, we don't care about template option such as
             // operating system, or hardware profile. jclouds will select one
@@ -119,7 +112,7 @@ public class MainApp {
                   concat(node.getPrivateAddresses(), node.getPublicAddresses()));
 
          case EXEC:
-            System.out.printf(">> running [%s] on group %s as %s%n", command, groupName, login.creds.identity);
+            System.out.printf(">> running [%s] on group %s as %s%n", command, groupName, login.identity);
 
             // when you run commands, you can pass options to decide whether to
             // run it as root, supply or own credentials vs from cache, and wrap
@@ -127,8 +120,8 @@ public class MainApp {
             Map<? extends NodeMetadata, ExecResponse> responses = compute.runScriptOnNodesMatching(//
                   inGroup(groupName), // predicate used to select nodes
                   exec(command), // what you actually intend to run
-                  overrideCredentialsWith(login.creds) // use my local user &
-                                                       // ssh key
+                  overrideCredentialsWith(login) // use my local user &
+                                                 // ssh key
                         .runAsRoot(false) // don't attempt to run as root (sudo)
                         .wrapInInitScript(false));// run command directly
 
@@ -176,12 +169,10 @@ public class MainApp {
             .getComputeService();
    }
 
-   private static Login getLoginForCommandExecution(Action action) {
+   private static Credentials getLoginForCommandExecution(Action action) {
       try {
-         Credentials creds = new Credentials(System.getProperty("user.name"), Files.toString(
+         return new Credentials(System.getProperty("user.name"), Files.toString(
                new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8));
-         String publicKey = Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa.pub"), UTF_8);
-         return new Login(creds, publicKey);
       } catch (Exception e) {
          System.err.println("error reading ssh key " + e.getMessage());
          System.exit(1);
@@ -189,19 +180,4 @@ public class MainApp {
       }
    }
 
-   public static class Login {
-      private final Credentials creds;
-      private final String publicKey;
-
-      public Login(Credentials creds, String publicKey) {
-         this.creds = creds;
-         this.publicKey = publicKey;
-      }
-   }
-
-   private static Statement addUserAndAuthorizeSudo(String user, String publicKey) {
-      return new StatementList(UserAdd.builder().login(user).password("foobar").authorizeRSAPublicKey(publicKey)
-            .group("wheel").build(), SudoStatements.createWheel(), SshStatements.lockSshd(),
-            ShadowStatements.resetLoginUserPasswordTo("foobar"));
-   }
 }

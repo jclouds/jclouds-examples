@@ -24,10 +24,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jclouds.examples</groupId>
-    <artifactId>blobstore-largeblob</artifactId>
+    <artifactId>blobstore-hdfs</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>blobstore-largeblob</name>
-    <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
+    <name>blobstore-hdfs</name>
+    <description>demonstrates how we can build hfds payloads as an extension to the current payloads in blobstore</description>
 
     <repositories>
         <repository>
@@ -43,6 +43,16 @@
         <repository>
             <id>jboss-public-releases</id>
             <url>https://repository.jboss.org/nexus/content/groups/public-jboss</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+		<repository>
+            <id>cloudera-public-releases</id>
+            <url>https://repository.cloudera.com/content/repositories/releases/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -114,6 +124,11 @@
             <version>1.0-beta-9b</version>
         </dependency>
         -->
+	<dependency>
+		<groupId>org.apache.hadoop</groupId>
+		<artifactId>hadoop-core</artifactId>
+		<version>0.20.2-cdh3u0</version>
+	</dependency>
     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -125,7 +140,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.jclouds.examples.blobstore.largeblob.MainApp</mainClass>
+                            <mainClass>org.jclouds.examples.blobstore.hdfs.MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -139,7 +154,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.jclouds.examples.blobstore.largeblob.MainApp</mainClass>
+                            <mainClass>org.jclouds.examples.blobstore.hdfs.MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -17,47 +17,45 @@
  * ====================================================================
  */
 
-package org.jclouds.examples.blobstore.largeblob;
+package org.jclouds.examples.blobstore.hdfs;
 
 import static org.jclouds.Constants.PROPERTY_ENDPOINT;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import static org.jclouds.location.reference.LocationConstants.ENDPOINT;
 import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGION;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.core.MediaType;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.jclouds.aws.domain.Region;
-import org.jclouds.blobstore.AsyncBlobStore;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.util.BlobStoreUtils;
+import org.jclouds.examples.blobstore.hdfs.config.HdfsModule;
+import org.jclouds.examples.blobstore.hdfs.io.payloads.HdfsPayload;
 import org.jclouds.http.config.JavaUrlHttpCommandExecutorServiceModule;
 import org.jclouds.logging.log4j.config.Log4JLoggingModule;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
-import org.jclouds.netty.config.NettyPayloadModule;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Module;
 
 /**
- * Demonstrates the use of {@link BlobStore}.
+ * Demonstrates the use of {@link BlobStore} to upload from HDFS to a blob container
  * 
- * Usage is: java MainApp \"provider\" \"identity\" \"credential\" \"localFileName\"
+ * Usage is: java MainApp \"provider\" \"identity\" \"credential\" \"hdfsUrl\"
  * \"containerName\" \"objectName\" plainhttp threadcount
  * 
  * \"plainhttp\" and \"threadcound\" is optional if all the rest of parameters are omitted
  * 
  * @author Tibor Kiss
- * @author Adrian Cole
  */
 public class MainApp {
 
@@ -78,13 +76,8 @@ public class MainApp {
                "http://s3-ap-southeast-1.amazonaws.com");
    }
 
-   final static Iterable<? extends Module> MODULES = 
-   ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
-   // ImmutableSet.of(new NingHttpCommandExecutorServiceModule(), new SLF4JLoggingModule());
-
-   // we may test different http layer with the following
-   // ImmutableSet.of(new ApacheHCHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new
-   // NettyPayloadModule());
+   final static Iterable<? extends Module> HDFS_MODULES = 
+      ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new HdfsModule());
 
    static String getSpeed(long speed) {
       if (speed < 1024) {
@@ -120,14 +113,13 @@ public class MainApp {
          throw new IllegalArgumentException(INVALID_SYNTAX);
 
       // Args
-
       String provider = args[0];
       if (!Iterables.contains(BlobStoreUtils.getSupportedProviders(), provider))
          throw new IllegalArgumentException("provider " + provider + " not in supported list: "
                   + BlobStoreUtils.getSupportedProviders());
       String identity = args[1];
       String credential = args[2];
-      String fileName = args[3];
+      String hdfsUrl = args[3];
       String containerName = args[4];
       String objectName = args[5];
       boolean plainhttp = args.length >= 7 && "plainhttp".equals(args[6]);
@@ -142,38 +134,29 @@ public class MainApp {
       // default is 4 threads
       overrides.setProperty(provider + ".identity", identity);
       overrides.setProperty(provider + ".credential", credential);
-      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, MODULES, overrides);
+      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, HDFS_MODULES, overrides);
 
       try {
          long start = System.currentTimeMillis();
+         Configuration conf = new Configuration();
+         Path path = new Path(hdfsUrl);
+         FileSystem fileSystem = path.getFileSystem(conf);
+         long length = fileSystem.getFileStatus(path).getLen();
+         HdfsPayload input = new HdfsPayload(path, conf, 0);
+
          // Create Container
-         AsyncBlobStore blobStore = context.getAsyncBlobStore(); // it can be changed to sync
+         BlobStore blobStore = context.getBlobStore(); // it can be changed to sync
          // BlobStore
          blobStore.createContainerInLocation(null, containerName);
+         Blob blob = blobStore.blobBuilder(objectName).payload(input)
+               .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
+         
+         blobStore.putBlob(containerName, blob, multipart());
 
-         File input = new File(fileName);
-         long length = input.length();
+         printSpeed("Sucessfully uploaded", start, length);
 
-         // Add a Blob
-         Blob blob = blobStore.blobBuilder(objectName).payload(input).contentType(MediaType.APPLICATION_OCTET_STREAM)
-                  .contentDisposition(objectName).build();
-
-         // Upload a file
-         ListenableFuture<String> futureETag = blobStore.putBlob(containerName, blob, multipart());
-
-         // asynchronously wait for the upload
-         String eTag = futureETag.get();
-
-         printSpeed("Sucessfully uploaded eTag(" + eTag + ")", start, length);
-
-      } catch (InterruptedException e) {
-         System.err.println(e.getMessage());
-         e.printStackTrace();
-      } catch (ExecutionException e) {
-         System.err.println(e.getMessage());
-         e.printStackTrace();
       } finally {
-         // Close connecton
+         // Close connection
          context.close();
          System.exit(0);
       }

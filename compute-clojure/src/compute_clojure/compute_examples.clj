@@ -31,7 +31,7 @@
         output (val response)]
     (println (format "<< node: %s %s %s %s%n" (.getId node) (private-ips node) (public-ips node) output))))
 
-(defn add [compute group]
+(defn create [compute group]
   "Create a new node in the given group"
   (do
     (println (format ">> adding node to group: %s%n" group))

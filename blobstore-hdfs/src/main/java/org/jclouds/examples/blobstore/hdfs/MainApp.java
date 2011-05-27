@@ -30,6 +30,7 @@ import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.jclouds.aws.domain.Region;
@@ -57,7 +58,7 @@ import com.google.inject.Module;
  * 
  * @author Tibor Kiss
  */
-public class MainApp {
+public class MainApp extends Configured {
 
    public static int PARAMETERS = 6;
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: \"provider\" \"identity\" \"credential\" \"localFileName\" \"containerName\" \"objectName\" plainhttp threadcount";
@@ -106,7 +107,60 @@ public class MainApp {
       }
       System.out.println(" with " + getSpeed(speed) + " (" + length + " bytes)");
    }
+   
 
+   /**
+    * @param provider
+    * @param identity
+    * @param credential
+    * @param hdfsUrl
+    * @param containerName
+    * @param objectName
+    * @param plainhttp
+    * @param threadcount
+    * @throws IOException
+    */
+   private void upload(String provider, String identity,
+         String credential, String hdfsUrl, String containerName,
+         String objectName, boolean plainhttp, String threadcount)
+         throws IOException {
+      // Init
+      Properties overrides = new Properties();
+      if (plainhttp)
+         overrides.putAll(PLAIN_HTTP_ENDPOINTS); // default is https
+      if (threadcount != null)
+         overrides.setProperty("jclouds.mpu.parallel.degree", threadcount); // without setting,
+      // default is 4 threads
+      overrides.setProperty(provider + ".identity", identity);
+      overrides.setProperty(provider + ".credential", credential);
+      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, HDFS_MODULES, overrides);
+
+      try {
+         long start = System.currentTimeMillis();
+         Configuration conf = getConf();
+         if (conf == null) {
+            conf = new Configuration();
+            setConf(conf);
+         }
+         // Create Container
+         BlobStore blobStore = context.getBlobStore(); // it can be changed to sync
+         // BlobStore
+         blobStore.createContainerInLocation(null, containerName);
+         Blob blob = blobStore.blobBuilder(objectName).payload(
+               new HdfsPayload(new Path(hdfsUrl), conf))
+               .contentType(MediaType.APPLICATION_OCTET_STREAM)
+               .contentDisposition(objectName).build();
+         long length = blob.getPayload().getContentMetadata().getContentLength();
+         blobStore.putBlob(containerName, blob, multipart());
+
+         printSpeed("Sucessfully uploaded", start, length);
+
+      } finally {
+         // Close connection
+         context.close();
+      }
+   }   
+   
    public static void main(String[] args) throws IOException {
 
       if (args.length < PARAMETERS)
@@ -125,41 +179,10 @@ public class MainApp {
       boolean plainhttp = args.length >= 7 && "plainhttp".equals(args[6]);
       String threadcount = args.length >= 8 ? args[7] : null;
 
-      // Init
-      Properties overrides = new Properties();
-      if (plainhttp)
-         overrides.putAll(PLAIN_HTTP_ENDPOINTS); // default is https
-      if (threadcount != null)
-         overrides.setProperty("jclouds.mpu.parallel.degree", threadcount); // without setting,
-      // default is 4 threads
-      overrides.setProperty(provider + ".identity", identity);
-      overrides.setProperty(provider + ".credential", credential);
-      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, HDFS_MODULES, overrides);
-
-      try {
-         long start = System.currentTimeMillis();
-         Configuration conf = new Configuration();
-         Path path = new Path(hdfsUrl);
-         FileSystem fileSystem = path.getFileSystem(conf);
-         long length = fileSystem.getFileStatus(path).getLen();
-         HdfsPayload input = new HdfsPayload(path, conf, 0);
-
-         // Create Container
-         BlobStore blobStore = context.getBlobStore(); // it can be changed to sync
-         // BlobStore
-         blobStore.createContainerInLocation(null, containerName);
-         Blob blob = blobStore.blobBuilder(objectName).payload(input)
-               .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
-         
-         blobStore.putBlob(containerName, blob, multipart());
-
-         printSpeed("Sucessfully uploaded", start, length);
-
-      } finally {
-         // Close connection
-         context.close();
-         System.exit(0);
-      }
-
+      MainApp app = new MainApp();
+      app.upload(provider, identity, credential, hdfsUrl, containerName,
+            objectName, plainhttp, threadcount);
+      System.exit(0);
    }
+
 }

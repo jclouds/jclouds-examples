@@ -20,7 +20,7 @@ karaf@root>config:propset accessKeyId XXXXXX
 
 karaf@root>config:propset secretKey XXXXXX
 
-karaf@root>config:update secretKey XXXXXX
+karaf@root>config:update
 
 An alternative is to create a cfg file with the key values listed above and throw it under karaf/etc.
 

@@ -78,7 +78,7 @@ public class MainApp {
                "http://s3-ap-southeast-1.amazonaws.com");
    }
 
-   final static Iterable<? extends Module> NETTY_MODULES = 
+   final static Iterable<? extends Module> MODULES = 
       ImmutableSet.of(new JavaUrlHttpCommandExecutorServiceModule(), new Log4JLoggingModule(), new NettyPayloadModule());
 
    // we may test different http layer with the following
@@ -141,7 +141,7 @@ public class MainApp {
       // default is 4 threads
       overrides.setProperty(provider + ".identity", identity);
       overrides.setProperty(provider + ".credential", credential);
-      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, NETTY_MODULES, overrides);
+      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, MODULES, overrides);
 
       try {
          long start = System.currentTimeMillis();

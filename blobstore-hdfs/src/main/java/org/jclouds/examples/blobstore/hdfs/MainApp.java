@@ -184,5 +184,4 @@ public class MainApp extends Configured {
             objectName, plainhttp, threadcount);
       System.exit(0);
    }
-
 }

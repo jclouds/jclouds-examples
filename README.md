@@ -23,7 +23,7 @@ This repository contains various examples of using
       <td>Example code to create a container, and list your containers using the portable <a href="https://github.com/jclouds/jclouds/blob/master/blobstore/src/main/clojure/org/jclouds/blobstore2.clj">blobstore2 functions</a></td>
     </tr>
     <tr>
-      <td><a href="jclouds-examples/tree/master/blobstore-karaf-shell/">BlobStore via Karaf Shell</a></td>
+      <td><a href="jclouds-examples/tree/master/blobstore-karaf-shell">BlobStore via Karaf Shell</a></td>
       <td>Example to read and write to a blobstore from inside the Apache Karaf Shell.</td>
     </tr>
     <tr>

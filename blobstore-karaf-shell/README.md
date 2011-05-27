@@ -11,10 +11,15 @@ From within Apache Karaf (2.2.0 or higher) type:
 karaf@root>osgi:install -s mvn:org.jclouds.examples/blobstore-karaf-shell/1.0-SNAPSHOT
 
 Once the sample is install, create a new configuration named "org.jclouds.blobstore" and add the provider,the access key id and the secret key. 
+
 karaf@root>config:edit org.jclouds.blobstore
+
 karaf@root>config:propset provider aws-s3
+
 karaf@root>config:propset accessKeyId XXXXXX
+
 karaf@root>config:propset secretKey XXXXXX
+
 karaf@root>config:update secretKey XXXXXX
 
 An alternative is to create a cfg file with the key values listed above and throw it under karaf/etc.

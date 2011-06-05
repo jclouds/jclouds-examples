@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jclouds.examples</groupId>
     <artifactId>ec2-createlamp</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>ec2-createlamp</name>
     <description>jclouds ec2 example that creates an instance and all you need to access it</description>
 
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>
-            <version>1.0-beta-9b</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
     <build>

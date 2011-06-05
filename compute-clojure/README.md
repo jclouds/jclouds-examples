@@ -10,11 +10,11 @@ Ensure you have [Leiningen](http://github.com/technomancy/leiningen) installed, 
 
     bash$ lein repl
     user> (use 'org.jclouds.compute2)
-    user> (use 'compute-clojure)
+    user> (use 'compute-clojure.compute-examples)
     user> (def compute (compute-service "aws-ec2" "AMAZON-IDENTITY" "AMAZON-CREDENTIAL" :ssh))
     user> (create compute "example-node-group")
-	user> (exec compute "echo hello" "example-node-group" (get-credentials))
-	user> (destroy compute "example-node-group")
+    user> (exec compute "echo hello" "example-node-group" (get-credentials))
+    user> (destroy compute "example-node-group")
 
 ## License
 

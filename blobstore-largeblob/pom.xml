@@ -25,21 +25,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jclouds.examples</groupId>
     <artifactId>blobstore-largeblob</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>blobstore-largeblob</name>
     <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
     <repositories>
-        <repository>
-            <id>jclouds-sona-snapshots-nexus</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
         <repository>
             <id>jboss-public-releases</id>
             <url>https://repository.jboss.org/nexus/content/groups/public-jboss</url>
@@ -57,52 +47,32 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-netty</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.2.4.Final</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-apachehc</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jclouds.driver</groupId>
-			<artifactId>jclouds-slf4j</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-log4j</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.0</version>
+			<groupId>org.jclouds.driver</groupId>
+			<artifactId>jclouds-slf4j</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -111,7 +81,7 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>googlestorage</artifactId>
-            <version>1.0-beta-9b</version>
+            <version>1.0.0</version>
         </dependency>
         -->
     </dependencies>

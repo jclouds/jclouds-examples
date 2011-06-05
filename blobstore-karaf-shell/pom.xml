@@ -28,7 +28,7 @@
 
     <groupId>org.jclouds.examples</groupId>
     <artifactId>blobstore-karaf-shell</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>blobstore-karaf-shell</name>
     <packaging>bundle</packaging>
     <description>jclouds karaf example that uses a blobstore from the karaf shell</description>
@@ -106,12 +106,12 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

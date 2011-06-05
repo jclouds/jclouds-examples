@@ -9,9 +9,6 @@
     [org.jclouds.scriptbuilder.domain Statement Statements]
     [org.jclouds.scriptbuilder.statements.login AdminAccess]))
 
-(defn in-group? [group]
-  #(= group (.getGroup %)))
-
 (defn print-nodes-in-group [compute group]
   (let [nodes (nodes-with-details-matching compute #(= group (.getGroup %)))]
     (map #(println (format "<< node %s private ips:%s public-ips:%s%n" (.getId %) (private-ips %) (public-ips %))) nodes)))

@@ -44,9 +44,11 @@ import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.domain.Credentials;
+import org.jclouds.encryption.bouncycastle.config.BouncyCastleCryptoModule;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.scriptbuilder.domain.Statement;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
-import org.jclouds.ssh.jsch.config.JschSshClientModule;
+import org.jclouds.sshj.config.SshjSshClientModule;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
@@ -163,7 +165,8 @@ public class MainApp {
       properties.setProperty("jclouds.ec2.ami-owners", "137112412989");
 
       // example of injecting a ssh implementation
-      Iterable<Module> modules = ImmutableSet.<Module> of(new JschSshClientModule());
+      Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),
+            new BouncyCastleCryptoModule());
 
       return new ComputeServiceContextFactory().createContext(provider, identity, credential, modules, properties)
             .getComputeService();

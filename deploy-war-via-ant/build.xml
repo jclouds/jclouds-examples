@@ -32,11 +32,11 @@
   <delete dir="build/cargo"/>
   <mkdir dir="build/cargo"/>
 
-  <get src="http://opensource.become.com/apache//maven/binaries/maven-ant-tasks-2.1.1.jar" dest="build/maven-ant-tasks"/>
+  <get src="http://opensource.become.com/apache//maven/binaries/maven-ant-tasks-2.1.3.jar" dest="build/maven-ant-tasks"/>
   <get src="http://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war" dest="${warfile}"/>
 
   <input
-    message="Which provider would you like to use (aws-ec2, bluelock-vcdirector, cloudservers-uk, cloudservers-us, cloudsigma-zrh, eucalyptus-partnercloud-ec2, elastichosts-lon-b, elastichosts-lon-p, elastichosts-sat-p, gogrid, openhosting-east1, serverlove-z1-man, skalicloud-sdg-my, slicehost, trmk-ecloud, trmk-vcloudexpress)?"
+    message="Which provider would you like to use (aws-ec2, bluelock-vcdirector, cloudservers-uk, cloudservers-us, cloudsigma-zrh, eucalyptus-partnercloud-ec2, elastichosts-lon-b, elastichosts-lon-p, elastichosts-sat-p, gogrid, openhosting-east1, serverlove-z1-man, skalicloud-sdg-my, slicehost, trmk-ecloud, trmk-vcloudexpress, greenhousedata-element-vcloud)?"
     validargs="aws-ec2,bluelock-vcdirector,cloudservers-uk,cloudservers-us,cloudsigma-zrh,eucalyptus-partnercloud-ec2,elastichosts-lon-b,elastichosts-lon-p,elastichosts-sat-p,gogrid,openhosting-east1,serverlove-z1-man,skalicloud-sdg-my,slicehost,trmk-ecloud,trmk-vcloudexpress"
     addproperty="provider"
   />
@@ -50,8 +50,8 @@
     <dependency groupid="com.jcraft" artifactId="jsch" version="0.1.44-1"/>
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-ant" version="1.0.6"/>
     <dependency groupid="org.codehaus.cargo" artifactId="cargo-core-container-tomcat" version="1.0.6"/>
-    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="1.0-beta-9b" />
-    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="1.0-beta-9b" />
+    <dependency groupId="org.jclouds.provider" artifactId="${provider}" version="1.1.0" />
+    <dependency groupId="org.jclouds" artifactId="jclouds-antcontrib" version="1.1.0" />
   </artifact:dependencies>
 
   <typedef name="compute" classname="org.jclouds.tools.ant.taskdefs.compute.ComputeTask" classpathref="jclouds.classpath" />

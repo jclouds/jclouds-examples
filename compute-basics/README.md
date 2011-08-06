@@ -6,6 +6,8 @@ This is a simple example command line client that creates a node in a [ComputeSe
 
 Ensure you have maven 3.02 or higher installed, then execute 'mvn install' to build the example.  Note you also need an ssh key setup in your home directory.
 
+If you don't already have ~/.ssh/id_rsa present, generate a key with the command 'ssh-keygen -t rsa' and leave the passphrase blank.
+
 ## Run
 
 Invoke the jar, passing the name of the cloud provider you with to access (ex. aws-ec2, gogrid), identity (ex. accesskey, username), credential (ex. secretkey, password), then the name of the group you'd like to add the node to. The 4th parameter must be add, exec or destroy, noting that destroy will destroy all nodes in the group. If the 4th parameter is exec, you must quote a command to execute across the group of nodes.

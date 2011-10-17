@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jclouds.examples</groupId>
     <artifactId>blobstore-largeblob</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
     <name>blobstore-largeblob</name>
     <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
@@ -47,32 +47,32 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.1.1</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.1.1</version>
+            <version>1.2.0</version>
         </dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-netty</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-apachehc</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-log4j</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jclouds.driver</groupId>
 			<artifactId>jclouds-slf4j</artifactId>
-			<version>1.1.1</version>
+			<version>1.2.0</version>
 		</dependency>
 		<!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -81,7 +81,7 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>googlestorage</artifactId>
-            <version>1.1.1</version>
+            <version>1.2.0</version>
         </dependency>
         -->
     </dependencies>

@@ -80,8 +80,7 @@ public class MainApp {
          blobStore.createContainerInLocation(null, containerName);
 
          // Add Blob
-         Blob blob = blobStore.newBlob("test");
-         blob.setPayload("testdata");
+         Blob blob = blobStore.blobBuilder("test").payload("testdata").build();
          blobStore.putBlob(containerName, blob);
 
          // List Container

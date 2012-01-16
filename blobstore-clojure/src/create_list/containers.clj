@@ -1,5 +1,6 @@
 (ns create-list.containers
-  (:use org.jclouds.blobstore2))
+  (:use org.jclouds.blobstore2)
+  (:import org.jclouds.blobstore.BlobStore))
 
 (defn create-and-list
   "create a container, then list all containers in your account"

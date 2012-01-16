@@ -29,16 +29,17 @@
    <name>compute-basics</name>
    <description>jclouds compute example that adds a node to a group, then executes "echo hello" on all nodes</description>
 
+
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-compute</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-allcompute</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
       </dependency>
       <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
@@ -47,7 +48,7 @@
       <dependency>
         <groupId>org.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
       </dependency>
       -->
       <dependency>
@@ -59,7 +60,7 @@
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-bouncycastle</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
         <exclusions>
            <!-- bouncy castle is a provider, so
               it must be signed and used as-is.
@@ -75,12 +76,12 @@
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-sshj</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-enterprise</artifactId>
-        <version>1.3.0-rc-2</version>
+        <version>1.3.0</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>

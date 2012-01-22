@@ -229,7 +229,7 @@ public class MainApp {
         String user = System.getProperty("user.name");
         String privateKey = Files.toString(
             new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8);
-        return new LoginCredentials.Builder().
+        return LoginCredentials.builder().
             user(user).privateKey(privateKey).build();
       } catch (Exception e) {
          System.err.println("error reading ssh key " + e.getMessage());

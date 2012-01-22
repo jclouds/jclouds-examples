@@ -26,7 +26,7 @@ import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
-import static org.jclouds.compute.options.TemplateOptions.Builder.overrideCredentialsWith;
+import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginCredentials;
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
@@ -35,9 +35,9 @@ import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.jclouds.compute.ComputeService;
@@ -48,7 +48,7 @@ import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.compute.util.ComputeServiceUtils;
-import org.jclouds.domain.Credentials;
+import org.jclouds.domain.LoginCredentials;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.scriptbuilder.domain.Statement;
@@ -109,7 +109,7 @@ public class MainApp {
          throw new IllegalArgumentException("provider " + provider + " not in supported list: "
                + ComputeServiceUtils.getSupportedProviders());
 
-      Credentials login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
+      LoginCredentials login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
 
       ComputeService compute = initComputeService(provider, identity, credential);
 
@@ -150,7 +150,7 @@ public class MainApp {
             Map<? extends NodeMetadata, ExecResponse> responses = compute.runScriptOnNodesMatching(//
                   inGroup(groupName), // predicate used to select nodes
                   exec(command), // what you actually intend to run
-                  overrideCredentialsWith(login) // use my local user &
+                  overrideLoginCredentials(login) // use my local user &
                                                  // ssh key
                         .runAsRoot(false) // don't attempt to run as root (sudo)
                         .wrapInInitScript(false));// run command directly
@@ -169,7 +169,7 @@ public class MainApp {
             responses = compute.runScriptOnNodesMatching(//
                   inGroup(groupName),
                   Files.toString(file, Charsets.UTF_8), // passing in a string with the contents of the file
-                  overrideCredentialsWith(login)
+                  overrideLoginCredentials(login)
                         .runAsRoot(false)
                         .nameTask("_" + file.getName().replaceAll("\\..*", ""))); // ensuring task name isn't
                                                        // the same as the file so status checking works properly
@@ -224,10 +224,13 @@ public class MainApp {
             .getComputeService();
    }
 
-   private static Credentials getLoginForCommandExecution(Action action) {
+   private static LoginCredentials getLoginForCommandExecution(Action action) {
       try {
-         return new Credentials(System.getProperty("user.name"), Files.toString(
-               new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8));
+        String user = System.getProperty("user.name");
+        String privateKey = Files.toString(
+            new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8);
+        return new LoginCredentials.Builder().
+            user(user).privateKey(privateKey).build();
       } catch (Exception e) {
          System.err.println("error reading ssh key " + e.getMessage());
          System.exit(1);

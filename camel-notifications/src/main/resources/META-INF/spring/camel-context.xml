@@ -52,6 +52,9 @@
             </setHeader>
             <filter>
                 <simple>${body.size} != 0</simple>
+                <setBody>
+                    <groovy>request.body.collect { it.id  }</groovy>
+                </setBody>
                 <to uri="smtps://{{smtp.username}}@{{smtp.server}}?password={{smtp.password}}"/>
             </filter>
         </route>

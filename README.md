@@ -42,6 +42,10 @@ This repository contains various examples of using
       <td><a href="jclouds-examples/tree/master/blobstore-largeblob/">Large Blob support (Java)</a></td>
       <td>Example code to create a container and use a parallel strategy to upload a large blob, the portable <a href="http://code.google.com/p/jclouds/wiki/BlobStore">BlobStore API</a></td>
     </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/camel-notifications/">Camel notifications</a></td>
+      <td>Example code that uses jclouds from inside Apache Camel routes. The examples provides routes that poll the compute provider for running nodes and sends notifications via email. </td>
+    </tr>
   </tbody>
 </table>
 

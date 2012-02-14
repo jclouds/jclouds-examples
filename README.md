@@ -15,6 +15,10 @@ This repository contains various examples of using
       <td>Example code using <a href="https://github.com/jclouds/jclouds/blob/master/compute/src/main/clojure/org/jclouds/compute2.clj">compute2</a> to create a node, execute a command and destroy the node.</td>
     </tr>
     <tr>
+      <td><a href="jclouds-examples/tree/master/minecraft-compute/">Start a Minecraft Server (Java)</a></td>
+      <td>Example code to add nodes to a group and start Minecraft servers on them using the portable <a href="http://code.google.com/p/jclouds/wiki/ComputeGuide">ComputeService API</a></td>
+    </tr>
+    <tr>
       <td><a href="jclouds-examples/tree/master/blobstore-basics/">BlobStore Basics (Java)</a></td>
       <td>Example code to create a container, blob, and list your blobs using the portable <a href="http://code.google.com/p/jclouds/wiki/BlobStore">BlobStore API</a></td>
     </tr>

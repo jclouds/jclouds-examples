@@ -81,7 +81,7 @@ public class MinecraftController implements Closeable {
    }
 
    private NodeMetadata createNodeWithMinecraft() {
-      int javaPlusOverhead = maxHeap + 2;
+      int javaPlusOverhead = maxHeap + 256;
       NodeMetadata node = nodeManager.createNodeWithAdminUserAndJDKInGroupOpeningPortAndMinRam(group, port,
             javaPlusOverhead);
       nodeManager.startDaemonOnNode(daemonFactory.get(), node.getId());

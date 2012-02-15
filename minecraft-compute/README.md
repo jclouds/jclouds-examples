@@ -22,7 +22,7 @@ java -jar target/minecraft-compute-jar-with-dependencies.jar provider identity c
 
 Ex. for GleSYS
 
-java -jar target/minecraft-compute-jar-with-dependencies.jar gogrid user apikey mygroup add
+java -jar target/minecraft-compute-jar-with-dependencies.jar glesys user apikey mygroup add
 
 Ex. for Amazon EC2
 

@@ -24,7 +24,6 @@ import static com.google.common.base.Throwables.propagate;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Maps.transformValues;
 import static com.google.common.collect.Sets.filter;
-import static org.jclouds.compute.options.TemplateOptions.Builder.inboundPorts;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.all;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
@@ -46,6 +45,7 @@ import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.RunScriptOnNodesException;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
 import org.jclouds.logging.Logger;
 import org.jclouds.scriptbuilder.InitBuilder;
 import org.jclouds.scriptbuilder.domain.Statement;
@@ -98,16 +98,23 @@ public class NodeManager {
       throw propagate(e);
    }
 
-   public NodeMetadata createNodeWithAdminUserAndJDKInGroupOpeningPort(String group, int port) {
+   public NodeMetadata createNodeWithAdminUserAndJDKInGroupOpeningPortAndMinRam(String group, int port, int minRam) {
       ImmutableMap<String, String> userMetadata = ImmutableMap.<String, String> of("Name", group);
-
-      logger.info(">> creating node in group %s, opening ports 22, %s with admin user and jdk", group, port);
-
+      
+      // we want everything as defaults except ram
+      Template defaultTemplate = compute.templateBuilder().build();
+      Template minecraft = compute.templateBuilder().fromTemplate(defaultTemplate).minRam(minRam).build();
+      
+      // setup the template to customize the node with jdk, etc. also opening ports.
       Statement bootstrap = newStatementList(AdminAccess.standard(), InstallJDK.fromURL());
+      minecraft.getOptions().inboundPorts(22, port).userMetadata(userMetadata).runScript(bootstrap);
+
+      logger.info(">> creating node type(%s) in group %s, opening ports 22, %s with admin user and jdk", minecraft
+            .getHardware().getId(), group, port);
+
       try {
 
-         NodeMetadata node = getOnlyElement(compute.createNodesInGroup(group, 1,
-               inboundPorts(22, port).userMetadata(userMetadata).runScript(bootstrap)));
+         NodeMetadata node = getOnlyElement(compute.createNodesInGroup(group, 1, minecraft));
 
          logger.info("<< available node(%s) os(%s) publicAddresses%s", node.getId(), node.getOperatingSystem(),
                node.getPublicAddresses());

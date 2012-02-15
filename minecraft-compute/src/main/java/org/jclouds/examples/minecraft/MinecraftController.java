@@ -55,15 +55,17 @@ public class MinecraftController implements Closeable {
    private final Provider<MinecraftDaemon> daemonFactory;
    private final int port;
    private final String group;
+   private final int maxHeap;
 
    @Inject
    MinecraftController(Closer closer, NodeManager nodeManager, Provider<MinecraftDaemon> daemonFactory,
-         @Named("minecraft.port") int port, @Named("minecraft.group") String group) {
+         @Named("minecraft.port") int port, @Named("minecraft.group") String group,  @Named("minecraft.mx") int maxHeap) {
       this.closer = closer;
       this.nodeManager = nodeManager;
       this.daemonFactory = daemonFactory;
       this.port = port;
       this.group = group;
+      this.maxHeap = maxHeap;
    }
 
    public Iterable<HostAndPort> list() {
@@ -79,7 +81,9 @@ public class MinecraftController implements Closeable {
    }
 
    private NodeMetadata createNodeWithMinecraft() {
-      NodeMetadata node = nodeManager.createNodeWithAdminUserAndJDKInGroupOpeningPort(group, port);
+      int javaPlusOverhead = maxHeap + 2;
+      NodeMetadata node = nodeManager.createNodeWithAdminUserAndJDKInGroupOpeningPortAndMinRam(group, port,
+            javaPlusOverhead);
       nodeManager.startDaemonOnNode(daemonFactory.get(), node.getId());
       return node;
    }

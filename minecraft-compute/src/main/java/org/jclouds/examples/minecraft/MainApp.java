@@ -20,8 +20,6 @@
 package org.jclouds.examples.minecraft;
 
 import static com.google.common.collect.Iterables.contains;
-import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
-import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
 import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGIONS;
 
 import java.util.Map;
@@ -116,16 +114,16 @@ public class MainApp {
       Properties properties = new Properties();
       properties.setProperty("minecraft.port", "25565");
       properties.setProperty("minecraft.group", group);
-      properties.setProperty("minecraft.ms", "256");
-      properties.setProperty("minecraft.mx", "256");
+      properties.setProperty("minecraft.ms", "512");
+      properties.setProperty("minecraft.mx", "512");
       properties.setProperty("minecraft.url",
             "https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar");
       if ("aws-ec2".equals(provider)) {
          // since minecraft download is in s3 on us-east, lowest latency is from
          // there
          properties.setProperty(PROPERTY_REGIONS, "us-east-1");
-         properties.setProperty(PROPERTY_EC2_AMI_QUERY, "owner-id=137112412989;state=available;image-type=machine");
-         properties.setProperty(PROPERTY_EC2_CC_AMI_QUERY, "");
+         properties.setProperty("jclouds.ec2.ami-query", "owner-id=137112412989;state=available;image-type=machine");
+         properties.setProperty("jclouds.ec2.cc-ami-query", "");
       }
       // example of injecting a ssh implementation
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),

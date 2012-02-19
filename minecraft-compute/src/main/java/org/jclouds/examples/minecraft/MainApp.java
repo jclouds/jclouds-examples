@@ -25,6 +25,7 @@ import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGIONS;
 import java.util.Map;
 import java.util.Properties;
 
+import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.ComputeServiceContextFactory;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.events.StatementOnNodeCompletion;
@@ -40,10 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.eventbus.AllowConcurrentEvents;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HostAndPort;
-import com.google.inject.Injector;
 import com.google.inject.Module;
 
 /**
@@ -140,10 +139,10 @@ public class MainApp {
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),
             new EnterpriseConfigurationModule(), new ConfigureMinecraftDaemon());
 
-      Injector injector = new ComputeServiceContextFactory()
-            .createContext(provider, identity, credential, modules, properties).utils().injector();
-      injector.getInstance(EventBus.class).register(ScriptLogger.INSTANCE);
-      return injector.getInstance(MinecraftController.class);
+      ComputeServiceContext context = new ComputeServiceContextFactory()
+            .createContext(provider, identity, credential, modules, properties);
+      context.utils().eventBus().register(ScriptLogger.INSTANCE);
+      return context.utils().injector().getInstance(MinecraftController.class);
    }
 
    static enum ScriptLogger {

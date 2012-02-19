@@ -26,13 +26,24 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.jclouds.compute.ComputeServiceContextFactory;
+import org.jclouds.compute.domain.ExecResponse;
+import org.jclouds.compute.events.StatementOnNodeCompletion;
+import org.jclouds.compute.events.StatementOnNodeFailure;
+import org.jclouds.compute.events.StatementOnNodeSubmission;
 import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.eventbus.AllowConcurrentEvents;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HostAndPort;
+import com.google.inject.Injector;
 import com.google.inject.Module;
 
 /**
@@ -127,10 +138,47 @@ public class MainApp {
       }
       // example of injecting a ssh implementation
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),
-            new EnterpriseConfigurationModule());
+            new EnterpriseConfigurationModule(), new ConfigureMinecraftDaemon());
 
-      return new ComputeServiceContextFactory().createContext(provider, identity, credential, modules, properties)
-            .utils().injector().getInstance(MinecraftController.class);
+      Injector injector = new ComputeServiceContextFactory()
+            .createContext(provider, identity, credential, modules, properties).utils().injector();
+      injector.getInstance(EventBus.class).register(ScriptLogger.INSTANCE);
+      return injector.getInstance(MinecraftController.class);
    }
 
+   static enum ScriptLogger {
+      INSTANCE;
+
+      Logger logger = LoggerFactory.getLogger(MainApp.class);
+
+      @Subscribe
+      @AllowConcurrentEvents
+      public void onStart(StatementOnNodeSubmission event) {
+         logger.info(">> running {} on node({})", event.getStatement(), event.getNode().getId());
+         if (logger.isDebugEnabled()) {
+            logger.debug(">> script for {} on node({})\n{}", new Object[] { event.getStatement(), event.getNode().getId(),
+                  event.getStatement().render(OsFamily.UNIX) });
+         }
+      }
+
+      @Subscribe
+      @AllowConcurrentEvents
+      public void onFailure(StatementOnNodeFailure event) {
+         logger.error("<< error running {} on node({}): {}", new Object[] { event.getStatement(), event.getNode().getId(),
+               event.getCause().getMessage() }, event.getCause());
+      }
+
+      @Subscribe
+      @AllowConcurrentEvents
+      public void onSuccess(StatementOnNodeCompletion event) {
+         ExecResponse arg0 = event.getResponse();
+         if (arg0.getExitStatus() != 0) {
+            logger.error("<< error running {} on node({}): {}", new Object[] { event.getStatement(), event.getNode().getId(),
+                  arg0 });
+         } else {
+            logger.info("<< success executing {} on node({}): {}", new Object[] { event.getStatement(),
+                  event.getNode().getId(), arg0 });
+         }
+      }
+   }
 }

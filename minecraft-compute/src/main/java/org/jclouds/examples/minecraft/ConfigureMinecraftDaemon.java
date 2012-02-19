@@ -25,24 +25,31 @@ import static org.jclouds.scriptbuilder.domain.Statements.saveHttpResponseTo;
 
 import java.net.URI;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jclouds.scriptbuilder.InitBuilder;
+import org.jclouds.scriptbuilder.InitScript;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 
 /**
  * 
  * @author Adrian Cole
  */
-public class MinecraftDaemon extends InitBuilder {
-
-   @Inject
-   MinecraftDaemon(@Named("minecraft.url") String url, @Named("minecraft.ms") int minHeap,
-         @Named("minecraft.mx") int maxHeap) {
-      super("minecraft",// name of the instance
-            saveHttpResponseTo(URI.create(url), "${INSTANCE_HOME}", "minecraft_server.jar"),// init
-            exec(format("java -Xms%sm -Xmx%sm -jar minecraft_server.jar", minHeap, maxHeap))// run
-      );
+public class ConfigureMinecraftDaemon extends AbstractModule {
+   
+   @Override
+   protected void configure() {
+      
    }
+
+   @Provides
+   InitScript configureMinecraftDaemon(@Named("minecraft.url") String url, @Named("minecraft.ms") int minHeap,
+         @Named("minecraft.mx") int maxHeap) {
+      return InitScript.builder().name("minecraft")
+            .init(saveHttpResponseTo(URI.create(url), "${INSTANCE_HOME}", "minecraft_server.jar"))
+            .run(exec(format("java -Xms%sm -Xmx%sm -jar minecraft_server.jar", minHeap, maxHeap))).build();
+   }
+
 
 }

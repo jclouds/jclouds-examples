@@ -47,7 +47,7 @@ import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.logging.Logger;
-import org.jclouds.scriptbuilder.InitBuilder;
+import org.jclouds.scriptbuilder.InitScript;
 import org.jclouds.scriptbuilder.domain.Statement;
 import org.jclouds.scriptbuilder.statements.java.InstallJDK;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
@@ -80,7 +80,7 @@ public class NodeManager {
       }
    }
 
-   public ExecResponse startDaemonOnNode(InitBuilder daemon, String nodeId) {
+   public ExecResponse startDaemonOnNode(InitScript daemon, String nodeId) {
       return compute.runScriptOnNode(nodeId, daemon, asCurrentUser().blockOnComplete(false));
    }
 

@@ -38,6 +38,7 @@ import javax.inject.Singleton;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.lifecycle.Closer;
 import org.jclouds.logging.Logger;
+import org.jclouds.scriptbuilder.InitScript;
 
 import com.google.common.net.HostAndPort;
 
@@ -52,13 +53,13 @@ public class MinecraftController implements Closeable {
 
    private final Closer closer;
    private final NodeManager nodeManager;
-   private final Provider<MinecraftDaemon> daemonFactory;
+   private final Provider<InitScript> daemonFactory;
    private final int port;
    private final String group;
    private final int maxHeap;
 
    @Inject
-   MinecraftController(Closer closer, NodeManager nodeManager, Provider<MinecraftDaemon> daemonFactory,
+   MinecraftController(Closer closer, NodeManager nodeManager, Provider<InitScript> daemonFactory,
          @Named("minecraft.port") int port, @Named("minecraft.group") String group,  @Named("minecraft.mx") int maxHeap) {
       this.closer = closer;
       this.nodeManager = nodeManager;
@@ -89,7 +90,7 @@ public class MinecraftController implements Closeable {
    }
 
    public Map<HostAndPort, String> tail() {
-      return mapHostAndPortToStdoutForCommand("./minecraft tail");
+      return mapHostAndPortToStdoutForCommand("/tmp/init-minecraft tail");
    }
 
    public Map<HostAndPort, String> mapHostAndPortToStdoutForCommand(String cmd) {
@@ -97,7 +98,7 @@ public class MinecraftController implements Closeable {
    }
 
    public Map<HostAndPort, String> pids() {
-      return mapHostAndPortToStdoutForCommand("./minecraft status");
+      return mapHostAndPortToStdoutForCommand("/tmp/init-minecraft status");
    }
 
    public Iterable<HostAndPort> destroy() {

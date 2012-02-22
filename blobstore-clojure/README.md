@@ -16,7 +16,7 @@ Ensure you have [Leiningen](http://github.com/technomancy/leiningen) installed, 
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2012 jclouds, Inc.
 
 Licensed under the Apache License, Version 2.0 
 

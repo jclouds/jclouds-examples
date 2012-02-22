@@ -30,6 +30,6 @@ java -jar target/compute-basics-jar-with-dependencies.jar aws-ec2 accesskey secr
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2012 jclouds, Inc.
 
 Licensed under the Apache License, Version 2.0 

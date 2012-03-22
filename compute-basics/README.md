@@ -20,9 +20,9 @@ java -jar target/compute-basics-jar-with-dependencies.jar provider identity cred
 
 java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup destroy
 
-Ex. for GoGrid
+Ex. for OpenStack Nova
 
-java -jar target/compute-basics-jar-with-dependencies.jar gogrid apikey sharedsecret mygroup add
+java -Dopenstack-nova.endpoint=https://keystone:35357 -jar target/compute-basics-jar-with-dependencies.jar openstack-nova tenantId:accesskey secretKey mygroup add
 
 Ex. for Amazon EC2
 

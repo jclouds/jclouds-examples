@@ -1,4 +1,4 @@
-e?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     Licensed to jclouds, Inc. (jclouds) under one or more
@@ -28,16 +28,41 @@ e?xml version="1.0" encoding="UTF-8"?>
    <name>compute-basics</name>
    <description>jclouds compute example that adds a node to a group, then executes "echo hello" on all nodes</description>
 
+ <repositories>
+    <repository>
+        <id>jclouds-snapshots</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <snapshots>
+             <enabled>true</enabled>
+        </snapshots>
+    </repository>
+  </repositories>
+
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-compute</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jclouds.labs</groupId>
+        <artifactId>glesys</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jclouds.labs</groupId>
+        <artifactId>openstack-nova</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jclouds.labs</groupId>
+        <artifactId>hpcloud-compute</artifactId>
+        <version>1.5.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-allcompute</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
       </dependency>
       <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
@@ -46,7 +71,7 @@ e?xml version="1.0" encoding="UTF-8"?>
       <dependency>
         <groupId>org.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
       </dependency>
       -->
       <dependency>
@@ -58,7 +83,7 @@ e?xml version="1.0" encoding="UTF-8"?>
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-bouncycastle</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
         <exclusions>
            <!-- bouncy castle is a provider, so
               it must be signed and used as-is.
@@ -74,12 +99,12 @@ e?xml version="1.0" encoding="UTF-8"?>
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-sshj</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-enterprise</artifactId>
-        <version>1.4.0-rc.2</version>
+        <version>1.5.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>

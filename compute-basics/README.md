@@ -20,13 +20,23 @@ java -jar target/compute-basics-jar-with-dependencies.jar provider identity cred
 
 java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup destroy
 
-Ex. for OpenStack Nova
-
-java -Dopenstack-nova.endpoint=https://keystone:35357 -jar target/compute-basics-jar-with-dependencies.jar openstack-nova tenantId:accesskey secretKey mygroup add
-
 Ex. for Amazon EC2
 
 java -jar target/compute-basics-jar-with-dependencies.jar aws-ec2 accesskey secretkey mygroup add
+
+Ex. for HP Cloud
+
+java -jar target/compute-basics-jar-with-dependencies.jar hpcloud-compute tenantId:accesskey secretkey mygroup add
+
+Ex. for TryStack.org
+
+java -jar target/compute-basics-jar-with-dependencies.jar trystack-nova tenantId:user password mygroup add
+
+Ex. for your own OpenStack Nova
+
+java -Dopenstack-nova.image-id=RegionOne/15 -Dopenstack-nova.login-user=ubuntu -Djclouds.trust-all-certs=true -Djclouds.keystone.credential-type=passwordCredentials -Dopenstack-nova.endpoint=https://keystone:35357 -jar target/compute-basics-jar-with-dependencies.jar openstack-nova tenantId:accesskey secretKey mygroup add
+
+Ex. for OpenStack Nova
 
 ## License
 

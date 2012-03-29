@@ -7,15 +7,16 @@ If the clouds provider gives a possitive response it sends an email to the user 
 # Setup
 The following properties need to be added the maven profile or to the project pom:
 
-jclouds.aws.identity
-jclouds.aws.credential
-jclouds.aws.region
+jclouds.provider (ex. aws-ec2, hpcloud-compute, bluelock-vcloud-zone01)
+jclouds.identity (ex. accesskey, tenant:accesskey, user@org)
+jclouds.credential (ex. secretkey, password)
 
-smtp.user
+smtp.username
 smtp.password
 smtp.server
 
-Finally, you will need to modify camel-context.xml to set the form/to email addresses.
+email.from (your email address)
+email.to (who this is being sent to)
 
 # Running the sample
 

@@ -42,10 +42,10 @@
             <from uri="quartz://cloud%3FTimer?trigger.repeatInterval=3600000&amp;trigger.repeatCount=-1"/>
             <to uri="jclouds:compute:{{jclouds.provider}}?operation=CamelJcloudsListNodes&amp;nodeState=RUNNING"/>
             <setHeader headerName="To">
-                <constant>target@gmail.com</constant>
+                <simple>${email.to}</simple>
             </setHeader>
             <setHeader headerName="From">
-                <constant>camel@apache.org</constant>
+                <simple>${email.from}</simple>
             </setHeader>
             <setHeader headerName="Subject">
                 <constant>Running nodes in the cloud</constant>
@@ -85,7 +85,7 @@
         </constructor-arg>
         <constructor-arg name="overrides">
             <props>
-                <prop key="jclouds.regions">${jclouds.aws.region}</prop>
+                <!-- TODO: add endpoint, but only if present -->
             </props>
         </constructor-arg>
     </bean>

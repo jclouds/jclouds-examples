@@ -55,7 +55,7 @@
                 <setBody>
                     <groovy>request.body.collect { it.id  }</groovy>
                 </setBody>
-                <to uri="smtps://{{smtp.username}}@{{smtp.server}}?password={{smtp.password}}"/>
+                <to uri="smtps://{{smtp.server}}?username={{smtp.username}}&amp;password={{smtp.password}}"/>
             </filter>
         </route>
 
@@ -80,7 +80,7 @@
         <constructor-arg name="credential" value="${jclouds.credential}"/>
         <constructor-arg name="modules">
             <list>
-                <bean class="org.jclouds.logging.log4j.config.Log4JLoggingModule"/>
+                <bean class="org.jclouds.logging.slf4j.config.SLF4JLoggingModule"/>
             </list>
         </constructor-arg>
         <constructor-arg name="overrides">

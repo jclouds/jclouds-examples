@@ -36,7 +36,8 @@ Ex. for your own OpenStack Nova
 
 java -Dopenstack-nova.image-id=RegionOne/15 -Dopenstack-nova.login-user=ubuntu -Djclouds.trust-all-certs=true -Djclouds.keystone.credential-type=passwordCredentials -Dopenstack-nova.endpoint=https://keystone:35357 -jar target/compute-basics-jar-with-dependencies.jar openstack-nova tenantId:user password mygroup add
 
-Ex. for OpenStack Nova
+Ex. for Virtualbox
+java -jar target/compute-basics-jar-with-dependencies.jar virtualbox vboxwebsrv-username vboxwebsrv-password mygroup add
 
 ## License
 

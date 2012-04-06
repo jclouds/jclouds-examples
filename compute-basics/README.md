@@ -39,6 +39,10 @@ java -Dopenstack-nova.image-id=RegionOne/15 -Dopenstack-nova.login-user=ubuntu -
 Ex. for Virtualbox
 java -jar target/compute-basics-jar-with-dependencies.jar virtualbox vboxwebsrv-username vboxwebsrv-password mygroup add
 
+Ex. for your own OpenStack Nova emulating EC2
+
+java -Dopenstack-nova-ec2.image-id=nova/ami-00000009 -Dopenstack-nova-ec2.login-user=ubuntu -Djclouds.trust-all-certs=true -Dopenstack-nova-ec2.endpoint=https://novahost/services/Cloud -jar target/compute-basics-jar-with-dependencies.jar openstack-nova-ec2 tenantId:accesskey secretkey mygroup add
+
 ## License
 
 Copyright (C) 2009-2012 jclouds, Inc.

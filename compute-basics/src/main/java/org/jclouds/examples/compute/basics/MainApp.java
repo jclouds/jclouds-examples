@@ -18,19 +18,19 @@
  */
 
 package org.jclouds.examples.compute.basics;
-
 import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Predicates.not;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.contains;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
+import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginCredentials;
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
-import static org.jclouds.compute.reference.ComputeServiceConstants.PROPERTY_TIMEOUT_SCRIPT_COMPLETE;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.File;
@@ -40,17 +40,21 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.jclouds.ContextBuilder;
+import org.jclouds.apis.ApiMetadata;
+import org.jclouds.apis.Apis;
 import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContextFactory;
+import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.RunScriptOnNodesException;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
-import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.domain.LoginCredentials;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jclouds.providers.ProviderMetadata;
+import org.jclouds.providers.Providers;
 import org.jclouds.scriptbuilder.domain.Statement;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
 import org.jclouds.sshj.config.SshjSshClientModule;
@@ -58,6 +62,8 @@ import org.jclouds.sshj.config.SshjSshClientModule;
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Module;
 
@@ -76,7 +82,15 @@ public class MainApp {
    public static enum Action {
       ADD, RUN, EXEC, DESTROY;
    }
-
+   
+   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.contextWrappableAs(ComputeServiceContext.class),
+        Apis.idFunction());
+   
+   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.contextWrappableAs(ComputeServiceContext.class),
+        Providers.idFunction());
+   
+   public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(), allApis.keySet()));
+   
    public static int PARAMETERS = 5;
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: provider identity credential groupName (add|exec|run|destroy)";
 
@@ -105,15 +119,11 @@ public class MainApp {
       String minRam = System.getProperty("minRam");
       
       // note that you can check if a provider is present ahead of time
-      if (!contains(ComputeServiceUtils.getSupportedProviders(), provider))
-         throw new IllegalArgumentException("provider " + provider + " not in supported list: "
-               + ComputeServiceUtils.getSupportedProviders());
+      checkArgument(contains(allKeys, provider), "provider %s not in supported list: %s", provider, allKeys);
 
       LoginCredentials login = (action != Action.DESTROY) ? getLoginForCommandExecution(action) : null;
 
       ComputeService compute = initComputeService(provider, identity, credential);
-
-      System.out.printf(">> initialized provider %s%n", compute.getContext().getProviderSpecificContext());
 
       try {
          switch (action) {
@@ -206,13 +216,14 @@ public class MainApp {
    static int error = 0;
 
    private static ComputeService initComputeService(String provider, String identity, String credential) {
+
       // example of specific properties, in this case optimizing image list to
       // only amazon supplied
       Properties properties = new Properties();
       properties.setProperty(PROPERTY_EC2_AMI_QUERY, "owner-id=137112412989;state=available;image-type=machine");
       properties.setProperty(PROPERTY_EC2_CC_AMI_QUERY, "");
       long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
-      properties.setProperty(PROPERTY_TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
+      properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
 
       // example of injecting a ssh implementation
       Iterable<Module> modules = ImmutableSet.<Module> of(
@@ -220,8 +231,14 @@ public class MainApp {
             new SLF4JLoggingModule(),
             new EnterpriseConfigurationModule());
 
-      return new ComputeServiceContextFactory().createContext(provider, identity, credential, modules, properties)
-            .getComputeService();
+      ContextBuilder builder = ContextBuilder.newBuilder(provider)
+                                             .credentials(identity, credential)
+                                             .modules(modules)
+                                             .overrides(properties);
+                                             
+      System.out.printf(">> initializing %s%n", builder.getApiMetadata());
+
+      return builder.build(ComputeServiceContext.class).getComputeService();
    }
 
    private static LoginCredentials getLoginForCommandExecution(Action action) {

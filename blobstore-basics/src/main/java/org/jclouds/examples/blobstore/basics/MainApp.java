@@ -19,28 +19,37 @@
 
 package org.jclouds.examples.blobstore.basics;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Iterables.contains;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Set;
 
+import org.jclouds.ContextBuilder;
+import org.jclouds.apis.ApiMetadata;
+import org.jclouds.apis.Apis;
 import org.jclouds.atmos.AtmosAsyncClient;
 import org.jclouds.atmos.AtmosClient;
 import org.jclouds.azureblob.AzureBlobAsyncClient;
 import org.jclouds.azureblob.AzureBlobClient;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.domain.StorageType;
-import org.jclouds.blobstore.util.BlobStoreUtils;
 import org.jclouds.openstack.swift.SwiftAsyncClient;
 import org.jclouds.openstack.swift.SwiftClient;
+import org.jclouds.providers.ProviderMetadata;
+import org.jclouds.providers.Providers;
 import org.jclouds.rest.RestContext;
 import org.jclouds.s3.S3AsyncClient;
 import org.jclouds.s3.S3Client;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Demonstrates the use of {@link BlobStore}.
@@ -51,7 +60,15 @@ import com.google.common.collect.Iterables;
  * @author Adrian Cole
  */
 public class MainApp {
-
+   
+   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.contextWrappableAs(BlobStoreContext.class),
+        Apis.idFunction());
+   
+   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.contextWrappableAs(BlobStoreContext.class),
+        Providers.idFunction());
+   
+   public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(), allApis.keySet()));
+   
    public static int PARAMETERS = 4;
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: \"provider\" \"identity\" \"credential\" \"containerName\" ";
 
@@ -63,15 +80,18 @@ public class MainApp {
       // Args
 
       String provider = args[0];
-      if (!Iterables.contains(BlobStoreUtils.getSupportedProviders(), provider))
-         throw new IllegalArgumentException("provider " + provider + " not in supported list: "
-                  + BlobStoreUtils.getSupportedProviders());
+
+      // note that you can check if a provider is present ahead of time
+      checkArgument(contains(allKeys, provider), "provider %s not in supported list: %s", provider, allKeys);
+
       String identity = args[1];
       String credential = args[2];
       String containerName = args[3];
 
       // Init
-      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, identity, credential);
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+                                               .credentials(identity, credential)
+                                               .build(BlobStoreContext.class);
 
       try {
 
@@ -93,19 +113,23 @@ public class MainApp {
          }
 
          // Use Provider API
-         if (context.getProviderSpecificContext().getApi() instanceof S3Client) {
-            RestContext<S3Client, S3AsyncClient> providerContext = context.getProviderSpecificContext();
-            providerContext.getApi().getBucketLogging(containerName);
-         } else if (context.getProviderSpecificContext().getApi() instanceof SwiftClient) {
-            RestContext<SwiftClient, SwiftAsyncClient> providerContext = context.getProviderSpecificContext();
-            providerContext.getApi().getObjectInfo(containerName, "test");
-         } else if (context.getProviderSpecificContext().getApi() instanceof AzureBlobClient) {
-            RestContext<AzureBlobClient, AzureBlobAsyncClient> providerContext = context.getProviderSpecificContext();
-            providerContext.getApi().getBlobProperties(containerName, "test");
-         } else if (context.getProviderSpecificContext().getApi() instanceof AtmosClient) {
-            RestContext<AtmosClient, AtmosAsyncClient> providerContext = context.getProviderSpecificContext();
-            providerContext.getApi().getSystemMetadata(containerName + "/test");
+         if (context.getWrappedType().getRawType().equals(RestContext.class)) {
+            RestContext<?, ?> rest = context.unwrap(RestContext.class);
+            if (rest.getApi() instanceof S3Client) {
+               RestContext<S3Client, S3AsyncClient> providerContext = context.unwrap();
+               providerContext.getApi().getBucketLogging(containerName);
+            } else if (rest.getApi() instanceof SwiftClient) {
+               RestContext<SwiftClient, SwiftAsyncClient> providerContext = context.unwrap();
+               providerContext.getApi().getObjectInfo(containerName, "test");
+            } else if (rest.getApi() instanceof AzureBlobClient) {
+               RestContext<AzureBlobClient, AzureBlobAsyncClient> providerContext = context.unwrap();
+               providerContext.getApi().getBlobProperties(containerName, "test");
+            } else if (rest.getApi() instanceof AtmosClient) {
+               RestContext<AtmosClient, AtmosAsyncClient> providerContext = context.unwrap();
+               providerContext.getApi().getSystemMetadata(containerName + "/test");
+            }
          }
+         
       } finally {
          // Close connecton
          context.close();

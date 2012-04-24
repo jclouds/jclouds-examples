@@ -61,10 +61,10 @@ import com.google.common.collect.Maps;
  */
 public class MainApp {
    
-   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.contextWrappableAs(BlobStoreContext.class),
+   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(BlobStoreContext.class),
         Apis.idFunction());
    
-   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.contextWrappableAs(BlobStoreContext.class),
+   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.viewableAs(BlobStoreContext.class),
         Providers.idFunction());
    
    public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(), allApis.keySet()));
@@ -91,7 +91,7 @@ public class MainApp {
       // Init
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
                                                .credentials(identity, credential)
-                                               .build(BlobStoreContext.class);
+                                               .buildView(BlobStoreContext.class);
 
       try {
 
@@ -113,7 +113,7 @@ public class MainApp {
          }
 
          // Use Provider API
-         if (context.getWrappedType().getRawType().equals(RestContext.class)) {
+         if (context.getBackendType().getRawType().equals(RestContext.class)) {
             RestContext<?, ?> rest = context.unwrap(RestContext.class);
             if (rest.getApi() instanceof S3Client) {
                RestContext<S3Client, S3AsyncClient> providerContext = context.unwrap();

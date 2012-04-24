@@ -27,39 +27,27 @@
    <version>1.0-SNAPSHOT</version>
    <name>compute-basics</name>
    <description>jclouds compute example that adds a node to a group, then executes "echo hello" on all nodes</description>
-    <repositories>
-        <repository>
-            <id>jclouds-staging</id>
-            <url>https://oss.sonatype.org/content/repositories/orgjclouds-745</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-compute</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-allcompute</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds.labs</groupId>
         <artifactId>glesys</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds.labs</groupId>
         <artifactId>virtualbox</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>      
       <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
@@ -68,7 +56,7 @@
       <dependency>
         <groupId>org.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       -->
       <dependency>
@@ -80,7 +68,7 @@
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-bouncycastle</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
         <exclusions>
            <!-- bouncy castle is a provider, so
               it must be signed and used as-is.
@@ -96,12 +84,12 @@
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-sshj</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       <dependency>
         <groupId>org.jclouds.driver</groupId>
         <artifactId>jclouds-enterprise</artifactId>
-        <version>1.5.0-alpha.4</version>
+        <version>1.5.0-alpha.5</version>
       </dependency>
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -133,27 +121,28 @@
         </plugin>
         <plugin>
            <artifactId>maven-assembly-plugin</artifactId>
+           <version>2.2.1</version>
            <configuration>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
-              <archive>
+             <descriptors>
+               <descriptor>src/main/assembly/jar-with-dependencies.xml</descriptor>
+             </descriptors>
+             <archive>
                 <manifest>
                    <mainClass>org.jclouds.examples.compute.basics.MainApp</mainClass>
                 </manifest>
                 <manifestEntries>
                    <Class-Path>bcprov-jdk16.jar</Class-Path>
                 </manifestEntries>
-              </archive>
+             </archive>
            </configuration>
            <executions>
-              <execution>
-                <id>make-assembly</id>
-                <phase>package</phase>
-                <goals>
-                   <goal>single</goal>
-                </goals>
-              </execution>
+             <execution>
+               <id>make-assembly</id>
+               <phase>package</phase>
+               <goals>
+                 <goal>single</goal>
+               </goals>
+             </execution>
            </executions>
         </plugin>
         <plugin>

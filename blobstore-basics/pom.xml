@@ -29,29 +29,16 @@
     <name>blobstore-basics</name>
     <description>jclouds blobstore example that creates a container, then displays the size of each container</description>
 
-    <repositories>
-        <repository>
-            <id>jclouds-staging</id>
-            <url>https://oss.sonatype.org/content/repositories/orgjclouds-745</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.5.0-alpha.4</version>
+            <version>1.5.0-alpha.5</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.5.0-alpha.4</version>
+            <version>1.5.0-alpha.5</version>
         </dependency>
         <!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -60,7 +47,7 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>googlestorage</artifactId>
-            <version>1.5.0-alpha.4</version>
+            <version>1.5.0-alpha.5</version>
         </dependency>
         -->
     </dependencies>

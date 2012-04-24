@@ -83,10 +83,10 @@ public class MainApp {
       ADD, RUN, EXEC, DESTROY;
    }
    
-   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.contextWrappableAs(ComputeServiceContext.class),
+   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(ComputeServiceContext.class),
         Apis.idFunction());
    
-   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.contextWrappableAs(ComputeServiceContext.class),
+   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.viewableAs(ComputeServiceContext.class),
         Providers.idFunction());
    
    public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(), allApis.keySet()));

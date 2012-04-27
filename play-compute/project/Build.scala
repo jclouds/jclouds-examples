@@ -14,7 +14,7 @@ object ApplicationBuild extends Build {
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
-      resolvers += "Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository",
+      resolvers += "Cloudsoft Artifactory Repository" at "http://ccweb.cloudsoftcorp.com/maven/cloudsoft-snapshot",
       resolvers += "Maven central" at "http://repo1.maven.org/maven2/",
       resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
     )

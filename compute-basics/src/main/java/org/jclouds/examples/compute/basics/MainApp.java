@@ -238,7 +238,7 @@ public class MainApp {
                                              
       System.out.printf(">> initializing %s%n", builder.getApiMetadata());
 
-      return builder.build(ComputeServiceContext.class).getComputeService();
+      return builder.buildView(ComputeServiceContext.class).getComputeService();
    }
 
    private static LoginCredentials getLoginForCommandExecution(Action action) {

@@ -19,27 +19,34 @@
 
 package org.jclouds.examples.minecraft;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.contains;
 import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGIONS;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import org.jclouds.ContextBuilder;
+import org.jclouds.apis.ApiMetadata;
+import org.jclouds.apis.Apis;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.ComputeServiceContextFactory;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.events.StatementOnNodeCompletion;
 import org.jclouds.compute.events.StatementOnNodeFailure;
 import org.jclouds.compute.events.StatementOnNodeSubmission;
-import org.jclouds.compute.util.ComputeServiceUtils;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jclouds.providers.ProviderMetadata;
+import org.jclouds.providers.Providers;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.net.HostAndPort;
@@ -54,6 +61,14 @@ import com.google.inject.Module;
  * @author Adrian Cole
  */
 public class MainApp {
+   public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(
+         Apis.viewableAs(ComputeServiceContext.class), Apis.idFunction());
+
+   public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(
+         Providers.viewableAs(ComputeServiceContext.class), Providers.idFunction());
+
+   public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(),
+         allApis.keySet()));
 
    public static enum Action {
       ADD, LIST, TAIL, PIDS, DESTROY;
@@ -73,9 +88,7 @@ public class MainApp {
       Action action = Action.valueOf(args[4].toUpperCase());
 
       // note that you can check if a provider is present ahead of time
-      if (!contains(ComputeServiceUtils.getSupportedProviders(), provider))
-         throw new IllegalArgumentException("provider " + provider + " not in supported list: "
-               + ComputeServiceUtils.getSupportedProviders());
+      checkArgument(contains(allKeys, provider), "provider %s not in supported list: %s", provider, allKeys);
 
       MinecraftController controller = initController(provider, identity, credential, groupName);
 
@@ -124,8 +137,8 @@ public class MainApp {
       Properties properties = new Properties();
       properties.setProperty("minecraft.port", "25565");
       properties.setProperty("minecraft.group", group);
-      properties.setProperty("minecraft.ms", "512");
-      properties.setProperty("minecraft.mx", "512");
+      properties.setProperty("minecraft.ms", "1024");
+      properties.setProperty("minecraft.mx", "1024");
       properties.setProperty("minecraft.url",
             "https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar");
       if ("aws-ec2".equals(provider)) {
@@ -135,12 +148,23 @@ public class MainApp {
          properties.setProperty("jclouds.ec2.ami-query", "owner-id=137112412989;state=available;image-type=machine");
          properties.setProperty("jclouds.ec2.cc-ami-query", "");
       }
-      // example of injecting a ssh implementation
-      Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),
-            new EnterpriseConfigurationModule(), new ConfigureMinecraftDaemon());
 
-      ComputeServiceContext context = new ComputeServiceContextFactory()
-            .createContext(provider, identity, credential, modules, properties);
+      // example of injecting a ssh implementation
+      Iterable<Module> modules = ImmutableSet.<Module> of(
+            new SshjSshClientModule(),
+            new SLF4JLoggingModule(),
+            new EnterpriseConfigurationModule(),
+            // This is extended stuff you might inject!!
+            new ConfigureMinecraftDaemon());
+
+      ContextBuilder builder = ContextBuilder.newBuilder(provider)
+                                             .credentials(identity, credential)
+                                             .modules(modules)
+                                             .overrides(properties);
+                                             
+      System.out.printf(">> initializing %s%n", builder.getApiMetadata());
+      ComputeServiceContext context = builder.buildView(ComputeServiceContext.class);
+      
       context.utils().eventBus().register(ScriptLogger.INSTANCE);
       return context.utils().injector().getInstance(MinecraftController.class);
    }

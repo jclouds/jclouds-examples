@@ -6,6 +6,7 @@ test-output/
 .classpath
 .project
 .idea/
+atlassian-ide-plugin.xml
 *.iml
 *.ipr
 *.iws

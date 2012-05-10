@@ -3,7 +3,7 @@
     [org.jclouds.compute2]
     [clojure.java.io])
   (:import
-    [org.jclouds.domain Credentials]
+    [org.jclouds.domain LoginCredentials]
     [org.jclouds.scriptbuilder InitBuilder]
     [org.jclouds.compute.options TemplateOptions$Builder]
     [org.jclouds.scriptbuilder.domain Statement Statements]
@@ -14,12 +14,12 @@
     (map #(println (format "<< node %s private ips:%s public-ips:%s%n" (.getId %) (private-ips %) (public-ips %))) nodes)))
 
 (defn get-credentials []
-  (Credentials.
-    (System/getProperty "user.name")
-    (slurp (str (System/getProperty "user.home") "/.ssh/id_rsa") :encoding "utf-8")))
+  (-> (LoginCredentials/builder)
+    (.user (System/getProperty "user.name"))
+    (.privateKey (slurp (str (System/getProperty "user.home") "/.ssh/id_rsa") :encoding "utf-8"))))
 
 (defn options [login]
-  (-> (TemplateOptions$Builder/overrideCredentialsWith login)
+  (-> (TemplateOptions$Builder/overrideLoginCredentials login)
     (.runAsRoot false)
     (.wrapInInitScript false)))
 
@@ -39,7 +39,7 @@
 (defn exec [compute command group login]
   "Execute command for the given group, using login"
   (do
-    (println (format ">> running [%s] on group %s as %s%n" command group (.identity login)))
+    (println (format ">> running [%s] on group %s as %s%n" command group (.getUser login)))
     (let [responses (run-script-on-nodes-matching compute (in-group? group) (Statements/exec command) (options login))]
       (map print-exec-response responses)
       responses)))

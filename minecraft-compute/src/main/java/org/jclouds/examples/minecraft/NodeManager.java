@@ -106,7 +106,7 @@ public class NodeManager {
       Template minecraft = compute.templateBuilder().fromTemplate(defaultTemplate).minRam(minRam).build();
       
       // setup the template to customize the node with jdk, etc. also opening ports.
-      Statement bootstrap = newStatementList(AdminAccess.standard(), InstallJDK.fromURL());
+      Statement bootstrap = newStatementList(AdminAccess.standard(), InstallJDK.fromOpenJDK());
       minecraft.getOptions().inboundPorts(22, port).userMetadata(userMetadata).runScript(bootstrap);
 
       logger.info(">> creating node type(%s) in group %s, opening ports 22, %s with admin user and jdk", minecraft
@@ -126,8 +126,7 @@ public class NodeManager {
 
    @Override
    public String toString() {
-      return String.format("connection(%s@%s)", compute.getContext().getProviderSpecificContext().getIdentity(),
-            compute.getContext().getProviderSpecificContext().getEndpoint().toASCIIString());
+      return String.format("connection(%s)", compute.getContext().unwrap());
    }
 
 }

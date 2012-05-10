@@ -92,7 +92,7 @@ public class BlobStoreServiceImpl implements BlobStoreService {
         context = new BlobStoreContextFactory().createContext(provider, accessKeyId, secretKey);
         if (context != null) {
             BlobStore blobStore = context.getBlobStore();
-            Blob blob = blobStore.newBlob(blobName);
+            Blob blob = blobStore.blobBuilder(blobName).build();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = null;

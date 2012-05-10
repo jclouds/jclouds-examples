@@ -6,6 +6,10 @@ This repository contains various examples of using
 <table>
   <thead><tr><th>project</th><th>description</th></tr></thead>
   <tbody>
+      <tr>
+      <td><a href="jclouds-examples/tree/master/cloudwatch-basics/">Cloudwatch Basics (Java)</a></td>
+      <td>Example code to get the total metrics stored for each of your instances the past 24 hours and shows avg/max/min CPU utilization for each instance when possible.</td>
+    </tr>
     <tr>
       <td><a href="jclouds-examples/tree/master/compute-basics/">Compute Basics (Java)</a></td>
       <td>Example code to add nodes to a group and execute commands on them using the portable <a href="http://code.google.com/p/jclouds/wiki/ComputeGuide">ComputeService API</a></td>

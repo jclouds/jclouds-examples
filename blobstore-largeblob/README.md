@@ -20,6 +20,6 @@ The inputfile size has to be at least 32Mbytes size to be used multipart upload.
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2012 jclouds, Inc.
 
-Licensed under the Apache License, Version 2.0 
+Licensed under the Apache License, Version 2.0

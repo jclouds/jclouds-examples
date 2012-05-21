@@ -148,7 +148,8 @@ public class MainApp {
          // Create Container
          AsyncBlobStore blobStore = context.getAsyncBlobStore(); // it can be changed to sync
          // BlobStore
-         blobStore.createContainerInLocation(null, containerName);
+         ListenableFuture<Boolean> future = blobStore.createContainerInLocation(null, containerName);
+         future.get();
 
          File input = new File(fileName);
          long length = input.length();

@@ -19,6 +19,9 @@
 package org.jclouds.examples.cloudwatch.basics;
 
 import com.google.common.collect.Iterators;
+import org.jclouds.ContextBuilder;
+import org.jclouds.aws.cloudwatch.AWSCloudWatchProviderMetadata;
+import org.jclouds.aws.ec2.AWSEC2ProviderMetadata;
 import org.jclouds.cloudwatch.CloudWatch;
 import org.jclouds.cloudwatch.CloudWatchAsyncClient;
 import org.jclouds.cloudwatch.CloudWatchClient;
@@ -33,12 +36,10 @@ import org.jclouds.cloudwatch.domain.Unit;
 import org.jclouds.cloudwatch.features.MetricClient;
 import org.jclouds.cloudwatch.options.ListMetricsOptions;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.ComputeServiceContextFactory;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.domain.Location;
 import org.jclouds.domain.LocationScope;
 import org.jclouds.rest.RestContext;
-import org.jclouds.rest.RestContextFactory;
 
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -69,8 +70,12 @@ public class MainApp {
       RestContext<CloudWatchClient, CloudWatchAsyncClient> cloudWatchContext = null;
 
       try {
-         awsEC2Context = new ComputeServiceContextFactory().createContext("aws-ec2", accessKeyId, secretKey);
-         cloudWatchContext = new RestContextFactory().createContext("aws-cloudwatch", accessKeyId, secretKey);
+         cloudWatchContext = ContextBuilder.newBuilder(new AWSCloudWatchProviderMetadata())
+                                           .credentials(accessKeyId, secretKey)
+                                           .build();
+         awsEC2Context = ContextBuilder.newBuilder(new AWSEC2ProviderMetadata())
+                                       .credentials(accessKeyId, secretKey)
+                                       .build(ComputeServiceContext.class);
 
          // Get all nodes
          Set<? extends ComputeMetadata> allNodes = awsEC2Context.getComputeService().listNodes();

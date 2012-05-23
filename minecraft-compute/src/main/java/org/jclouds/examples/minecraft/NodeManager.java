@@ -40,6 +40,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.RunScriptOnNodesException;
@@ -108,6 +109,10 @@ public class NodeManager {
       // setup the template to customize the node with jdk, etc. also opening ports.
       Statement bootstrap = newStatementList(AdminAccess.standard(), InstallJDK.fromOpenJDK());
       minecraft.getOptions().inboundPorts(22, port).userMetadata(userMetadata).runScript(bootstrap);
+      
+      // example of using a cloud-specific hook
+      if (minecraft.getOptions() instanceof AWSEC2TemplateOptions)
+         minecraft.getOptions().as(AWSEC2TemplateOptions.class).enableMonitoring();
 
       logger.info(">> creating node type(%s) in group %s, opening ports 22, %s with admin user and jdk", minecraft
             .getHardware().getId(), group, port);

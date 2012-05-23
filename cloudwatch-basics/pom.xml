@@ -28,16 +28,27 @@
    <name>cloudwatch-basics</name>
    <description>jclouds cloudwatch example</description>
 
+   <!-- until maven central syncs up -->
+   <repositories>
+     <repository>
+        <id>sonatype-releases</id>
+        <url>https://oss.sonatype.org/content/repositories/releases</url>
+        <snapshots>
+             <enabled>false</enabled>
+        </snapshots>
+     </repository>
+   </repositories>
+
    <dependencies>
      <dependency>
        <groupId>org.jclouds.provider</groupId>
        <artifactId>aws-ec2</artifactId>
-       <version>1.5.0-alpha.6</version>
+       <version>1.5.0-beta.1</version>
      </dependency>
      <dependency>
        <groupId>org.jclouds.provider</groupId>
        <artifactId>aws-cloudwatch</artifactId>
-       <version>1.5.0-alpha.6</version>
+       <version>1.5.0-beta.1</version>
      </dependency>
    </dependencies>
 

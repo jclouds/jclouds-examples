@@ -28,6 +28,17 @@ Ex. for Amazon EC2
 
 java -jar target/minecraft-compute-jar-with-dependencies.jar aws-ec2 accesskey secretkey mygroup add
 
+## Playing
+
+Open Minecraft, go to Multiplayer, Direct Connect, and enter the ip address of your cloud node.
+
+## Notes
+
+If you have a firewall blocking the remote ip:25565, you will need to port forward your local 25565 (probably over ssh)
+
+Ex. if my cloud servers' ip is 15.185.168.16
+ssh 15.185.168.16 -L 25565:15.185.168.16:22
+
 ## License
 
 Copyright (C) 2009-2012 jclouds, Inc.

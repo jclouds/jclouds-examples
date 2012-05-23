@@ -29,17 +29,6 @@
    <name>minecraft-compute</name>
    <description>starts a minecraft server using the ComputeService api</description>
 
-   <!-- until maven central syncs up -->
-   <repositories>
-     <repository>
-        <id>sonatype-releases</id>
-        <url>https://oss.sonatype.org/content/repositories/releases</url>
-        <snapshots>
-             <enabled>false</enabled>
-        </snapshots>
-     </repository>
-   </repositories>
-   
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>

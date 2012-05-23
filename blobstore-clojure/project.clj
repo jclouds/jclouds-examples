@@ -4,6 +4,4 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.2.3"]
                  [org.clojure/core.incubator "0.1.0"]
-                 [org.jclouds/jclouds-allblobstore "1.5.0-beta.1"]]
-  ;; until maven central syncs up
-  :repositories { "sonatype-releases" "https://oss.sonatype.org/content/repositories/releases"})
+                 [org.jclouds/jclouds-allblobstore "1.5.0-beta.1"]])

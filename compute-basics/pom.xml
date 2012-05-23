@@ -28,17 +28,6 @@
    <name>compute-basics</name>
    <description>jclouds compute example that adds a node to a group, then executes "echo hello" on all nodes</description>
 
-   <!-- until maven central syncs up -->
-   <repositories>
-     <repository>
-        <id>sonatype-releases</id>
-        <url>https://oss.sonatype.org/content/repositories/releases</url>
-        <snapshots>
-             <enabled>false</enabled>
-        </snapshots>
-     </repository>
-   </repositories>
-
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>

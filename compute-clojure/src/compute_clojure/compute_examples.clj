@@ -16,7 +16,8 @@
 (defn get-credentials []
   (-> (LoginCredentials/builder)
     (.user (System/getProperty "user.name"))
-    (.privateKey (slurp (str (System/getProperty "user.home") "/.ssh/id_rsa") :encoding "utf-8"))))
+    (.privateKey (slurp (str (System/getProperty "user.home") "/.ssh/id_rsa") :encoding "utf-8"))
+    (.build)))
 
 (defn options [login]
   (-> (TemplateOptions$Builder/overrideLoginCredentials login)

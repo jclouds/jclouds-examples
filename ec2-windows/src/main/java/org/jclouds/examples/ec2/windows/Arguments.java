@@ -16,6 +16,8 @@ public class Arguments {
    private String imageNamePattern = IMAGE_NAME_PATTERN_DEFAULT;
    private static final String INSTANCE_TYPE_DEFAULT = InstanceType.M1_SMALL;
    private String instanceType = INSTANCE_TYPE_DEFAULT;
+   private static final String AMI_OWNER_DEFAULT = "801119661308";
+   private String amiOwner = AMI_OWNER_DEFAULT;
 
    public String getIdentity() {
       return identity;
@@ -35,6 +37,10 @@ public class Arguments {
 
    public String getInstanceType() {
       return instanceType;
+   }
+
+   public String getAmiOwner() {
+      return amiOwner;
    }
 
    @Option(name = "--identity", aliases = "-i", required = true, usage = "your AWS access key ID")
@@ -60,5 +66,10 @@ public class Arguments {
    @Option(name = "--instance-type", aliases = "-t", usage = "instance type; default=" + INSTANCE_TYPE_DEFAULT)
    public void setInstanceType(String instanceType) {
       this.instanceType = instanceType;
+   }
+
+   @Option(name = "--ami-owner", aliases = "-o", usage = "AMI owner account ID; default=" + AMI_OWNER_DEFAULT)
+   public void setAmiOwner(String amiOwner) {
+      this.amiOwner = amiOwner;
    }
 }

@@ -72,7 +72,7 @@ public class MainApp {
 
    private void run() throws Exception {
       Properties overrides = new Properties();
-      overrides.put(AWSEC2Constants.PROPERTY_EC2_AMI_QUERY, "owner-id=801119661308;state=available;image-type=machine");
+      overrides.put(AWSEC2Constants.PROPERTY_EC2_AMI_QUERY, "owner-id=" + arguments.getAmiOwner() + ";state=available;image-type=machine");
 
       ImmutableSet<Module> modules = ImmutableSet.<Module>of(
          new SLF4JLoggingModule(), // OverThere uses SLF4J so we will as well

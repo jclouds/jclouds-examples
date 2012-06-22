@@ -4,4 +4,4 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.2.3"]
                  [org.clojure/core.incubator "0.1.0"]
-                 [org.jclouds/jclouds-allblobstore "1.5.0-beta.3"]])
+                 [org.jclouds/jclouds-allblobstore "1.5.0-beta.4"]])

@@ -33,17 +33,17 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.5.0-beta.4</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.5.0-beta.4</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds.labs</groupId>
             <artifactId>greenqloud-storage</artifactId>
-            <version>1.5.0-beta.4</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         <!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -52,18 +52,18 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>hpcloud-objectstorage</artifactId>
-            <version>1.5.0-beta.4</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         -->
         <dependency>
             <groupId>org.jclouds.driver</groupId>
             <artifactId>jclouds-enterprise</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds.driver</groupId>
             <artifactId>jclouds-slf4j</artifactId>
-            <version>1.5.0-SNAPSHOT</version>
+            <version>1.5.0-beta.6</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>

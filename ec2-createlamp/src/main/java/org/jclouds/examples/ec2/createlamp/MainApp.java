@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.jclouds.compute.ComputeServiceContextFactory;
+import org.jclouds.ContextBuilder;
 import org.jclouds.ec2.EC2AsyncClient;
 import org.jclouds.ec2.EC2Client;
 import org.jclouds.ec2.domain.InstanceState;
@@ -37,7 +37,6 @@ import org.jclouds.ec2.domain.KeyPair;
 import org.jclouds.ec2.domain.Reservation;
 import org.jclouds.ec2.domain.RunningInstance;
 import org.jclouds.ec2.predicates.InstanceStateRunning;
-import org.jclouds.net.IPSocket;
 import org.jclouds.predicates.InetSocketAddressConnect;
 import org.jclouds.predicates.RetryablePredicate;
 import org.jclouds.rest.RestContext;
@@ -47,6 +46,7 @@ import org.jclouds.scriptbuilder.domain.OsFamily;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.google.common.net.HostAndPort;
 
 /**
  * This the Main class of an Application that demonstrates the use of the EC2Client by creating a
@@ -73,8 +73,9 @@ public class MainApp {
       String name = args[3];
 
       // Init
-      RestContext<EC2Client, EC2AsyncClient> context = new ComputeServiceContextFactory().createContext("aws-ec2",
-               accesskeyid, secretkey).getProviderSpecificContext();
+      RestContext<EC2Client, EC2AsyncClient> context = ContextBuilder
+				.newBuilder("aws-ec2").credentials(accesskeyid, secretkey)
+				.build();
 
       // Get a synchronous client
       EC2Client client = context.getApi();
@@ -189,16 +190,16 @@ public class MainApp {
 
       instance = findInstanceById(client, instance.getId());
 
-      RetryablePredicate<IPSocket> socketTester = new RetryablePredicate<IPSocket>(new InetSocketAddressConnect(), 300,
+      RetryablePredicate<HostAndPort> socketTester = new RetryablePredicate<HostAndPort>(new InetSocketAddressConnect(), 300,
                1, TimeUnit.SECONDS);
       System.out.printf("%d: %s awaiting ssh service to start%n", System.currentTimeMillis(), instance.getIpAddress());
-      if (!socketTester.apply(new IPSocket(instance.getIpAddress(), 22)))
+      if (!socketTester.apply(HostAndPort.fromParts(instance.getIpAddress(), 22)))
          throw new TimeoutException("timeout waiting for ssh to start: " + instance.getIpAddress());
 
       System.out.printf("%d: %s ssh service started%n", System.currentTimeMillis(), instance.getIpAddress());
 
       System.out.printf("%d: %s awaiting http service to start%n", System.currentTimeMillis(), instance.getIpAddress());
-      if (!socketTester.apply(new IPSocket(instance.getIpAddress(), 80)))
+      if (!socketTester.apply(HostAndPort.fromParts(instance.getIpAddress(), 80)))
          throw new TimeoutException("timeout waiting for http to start: " + instance.getIpAddress());
 
       System.out.printf("%d: %s http service started%n", System.currentTimeMillis(), instance.getIpAddress());

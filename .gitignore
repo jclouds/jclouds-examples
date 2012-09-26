@@ -10,4 +10,8 @@ atlassian-ide-plugin.xml
 *.iml
 *.ipr
 *.iws
-
+*.class
+rackspace/lib/
+lein
+project.clj
+.lein-deps-sum

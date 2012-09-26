@@ -54,6 +54,10 @@ This repository contains various examples of using
       <td><a href="jclouds-examples/tree/master/camel-notifications/">Camel notifications</a></td>
       <td>Example code that uses jclouds from inside Apache Camel routes. The examples provides routes that poll the compute provider for running nodes and sends notifications via email. </td>
     </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/rackspace/">Rackspace (Java)</a></td>
+      <td>Example code that uses jclouds to perform common tasks on the Rackspace open cloud.</td>
+    </tr>
   </tbody>
 </table>
 

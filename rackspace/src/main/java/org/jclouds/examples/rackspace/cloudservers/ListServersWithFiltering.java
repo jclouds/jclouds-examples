@@ -18,19 +18,17 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.base.Predicates.and;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Sets.filter;
-import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
-import static org.jclouds.compute.predicates.NodePredicates.all;
-import static org.jclouds.compute.predicates.NodePredicates.inGroup;
-
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.predicates.NodePredicates;
+import org.jclouds.util.Preconditions2;
+
+import com.google.common.base.Predicate;
 
 /**
  * This example lists servers filtered by Predicates. Run the CreateServer example before this to get some results.
@@ -38,7 +36,7 @@ import org.jclouds.compute.domain.NodeMetadata;
  * @author Everett Toews
  */
 public class ListServersWithFiltering {
-	private static final String GROUP_NAME = "jclouds-example";
+	private static final String ZONE = "DFW";
 	
 	private ComputeService compute;
 
@@ -53,7 +51,8 @@ public class ListServersWithFiltering {
 		
 		try {
 			listServersWithFiltering.init(args);
-			listServersWithFiltering.listServers();
+			listServersWithFiltering.listServersByParentLocationId();
+			listServersWithFiltering.listServersByNameStartsWith();
 		} 
 		finally {
 			listServersWithFiltering.close();
@@ -76,10 +75,22 @@ public class ListServersWithFiltering {
 	/**
 	 * List the servers filtered by the Predicates inGroup("jclouds") and not(TERMINATED).
 	 */
-	private void listServers() {
+	private void listServersByParentLocationId() {
 		System.out.println("List Servers");
+		
 		Set<? extends NodeMetadata> servers = 
-			 filter(compute.listNodesDetailsMatching(all()), and(inGroup(GROUP_NAME), not(TERMINATED)));
+			 compute.listNodesDetailsMatching(NodePredicates.parentLocationId(ZONE));
+		
+		for (NodeMetadata nodeMetadata: servers) {
+			System.out.println("  " + nodeMetadata);
+		}
+	}
+
+	private void listServersByNameStartsWith() {
+		System.out.println("List Servers");
+		
+		Set<? extends NodeMetadata> servers = 
+			 compute.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));
 		
 		for (NodeMetadata nodeMetadata: servers) {
 			System.out.println("  " + nodeMetadata);
@@ -93,5 +104,21 @@ public class ListServersWithFiltering {
 		if (compute != null) {
 			compute.getContext().close();
 		}
+	}
+	
+	public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
+		Preconditions2.checkNotEmpty(prefix, "prefix must be defined");
+
+		return new Predicate<ComputeMetadata>() {
+			@Override
+			public boolean apply(ComputeMetadata computeMetadata) {
+				return computeMetadata.getName().startsWith(prefix);
+			}
+		
+			@Override
+			public String toString() {
+				return "nameStartsWith(" + prefix + ")";
+			}
+		};
 	}
 }

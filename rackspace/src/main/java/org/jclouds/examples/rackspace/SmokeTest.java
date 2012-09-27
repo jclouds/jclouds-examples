@@ -18,11 +18,13 @@
  */
 package org.jclouds.examples.rackspace;
 
+import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
 import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
 import org.jclouds.examples.rackspace.cloudfiles.CreateObjects;
 import org.jclouds.examples.rackspace.cloudfiles.DeleteObjectsAndContainer;
 import org.jclouds.examples.rackspace.cloudfiles.ListContainers;
 import org.jclouds.examples.rackspace.cloudfiles.ListObjects;
+import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
 import org.jclouds.examples.rackspace.cloudservers.CreateServer;
 import org.jclouds.examples.rackspace.cloudservers.DeleteServer;
 import org.jclouds.examples.rackspace.cloudservers.ListServersWithFiltering;
@@ -50,11 +52,13 @@ public class SmokeTest {
 		Authentication.main(args);
 		Logging.main(args);
 		
+		CloudServersPublish.main(args);
 		CreateServer.main(args);
 		ListServersWithFiltering.main(args);
 		ServerMetadata.main(args);
 		DeleteServer.main(args);
 		
+		CloudFilesPublish.main(args);
 		CreateContainer.main(args);
 		ListContainers.main(args);
 		CreateObjects.main(args);

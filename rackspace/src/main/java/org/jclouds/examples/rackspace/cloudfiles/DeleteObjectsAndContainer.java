@@ -25,7 +25,9 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
 import org.jclouds.openstack.swift.CommonSwiftClient;
+import org.jclouds.openstack.swift.domain.ContainerMetadata;
 import org.jclouds.openstack.swift.domain.ObjectInfo;
+import org.jclouds.openstack.swift.options.ListContainerOptions;
 import org.jclouds.rest.RestContext;
 
 /**
@@ -51,8 +53,7 @@ public class DeleteObjectsAndContainer {
 		
 		try {
 			deleteObjectsAndContainer.init(args);
-			deleteObjectsAndContainer.deleteObjects();
-			deleteObjectsAndContainer.deleteContainer();
+			deleteObjectsAndContainer.deleteObjectsAndContainer();
 		} 
 		finally {
 			deleteObjectsAndContainer.close();
@@ -73,23 +74,27 @@ public class DeleteObjectsAndContainer {
 		swift = context.unwrap();
 	}
 
-	private void deleteObjects() {
-		System.out.println("Delete Objects");
-		
-		Set<ObjectInfo> objects = swift.getApi().listObjects(CONTAINER);
-		
-		for (ObjectInfo object: objects) {
-			System.out.println("  " + object.getName());
-			swift.getApi().removeObject(CONTAINER, object.getName());
-		}
-	}
-
-	private void deleteContainer() {
+	/**
+	 * This will delete all containers that start with {@link CONTAINER} and the objects within those containers.
+	 */
+	private void deleteObjectsAndContainer() {
 		System.out.println("Delete Container");
 		
-		swift.getApi().deleteContainerIfEmpty(CONTAINER);
+		Set<ContainerMetadata> containers = swift.getApi().listContainers(ListContainerOptions.Builder.withPrefix(CONTAINER));
+		
+		for (ContainerMetadata container: containers) {
+			System.out.println("  " + container.getName());
+			
+			Set<ObjectInfo> objects = swift.getApi().listObjects(container.getName());
+			
+			for (ObjectInfo object: objects) {
+				System.out.println("    " + object.getName());
+				
+				swift.getApi().removeObject(container.getName(), object.getName());
+			}			
 
-		System.out.println("  " + CONTAINER);
+			swift.getApi().deleteContainerIfEmpty(container.getName());
+		}
 	}
 
 	/**

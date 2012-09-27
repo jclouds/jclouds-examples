@@ -22,49 +22,49 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.URI;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.cloudfiles.CloudFilesApiMetadata;
+import org.jclouds.cloudfiles.CloudFilesClient;
 import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
 import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.SwiftObject;
 import org.jclouds.rest.RestContext;
 
 /**
- * Create objects in the object storage container from the CreateContainer example.
- *  
- * @author Everett Toews
+ * This example will create a container, put a file in it, and publish it on the internet!
  */
-public class CreateObjects {
-	private static final String CONTAINER = "jclouds-example";
+public class CloudFilesPublish {
+	private static final String CONTAINER = "jclouds-example-publish";
+	private static final String FILENAME = "createObjectFromFile";
+	private static final String SUFFIX = ".html";
+		
 	
 	private BlobStore storage;
 	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+	private CloudFilesClient rackspace;
 
 	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
 	 * The first argument (args[0]) must be your username
 	 * The second argument (args[1]) must be your API key
 	 */
 	public static void main(String[] args) {
-		CreateObjects createContainer = new CreateObjects();
+		CloudFilesPublish cloudFilesPublish = new CloudFilesPublish();
 		
 		try {
-			createContainer.init(args);
-			createContainer.createObjectFromFile();
-			createContainer.createObjectFromString();
-			createContainer.createObjectFromStringWithMetadata();
+			cloudFilesPublish.init(args);
+			cloudFilesPublish.createContainer();
+			cloudFilesPublish.createObjectFromFile();
+			cloudFilesPublish.enableCdnContainer();
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
 		} 
 		finally {
-			createContainer.close();
+			cloudFilesPublish.close();
 		}
 	}
 
@@ -80,70 +80,49 @@ public class CreateObjects {
 			.buildView(BlobStoreContext.class);		
 		storage = context.getBlobStore();
 		swift = context.unwrap();
+		rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
 	}
 
 	/**
-	 * Create an object from a File using the Swift API. 
+	 * This method will create a container in Cloud Files where you can store and
+	 * retrieve any kind of digital asset.
+	 */
+	private void createContainer() {
+		System.out.println("Create Container");		
+		swift.getApi().createContainer(CONTAINER);
+		System.out.println("  " + CONTAINER);
+	}
+
+	/**
+	 * This method will put a plain text object into the container.
 	 */
 	private void createObjectFromFile() throws IOException {
 		System.out.println("Create Object From File");
 		
-		String filename = "createObjectFromFile";
-		String suffix = ".txt";
-		
-	    File tempFile = File.createTempFile(filename, suffix);
+	    File tempFile = File.createTempFile(FILENAME, SUFFIX);
 	    tempFile.deleteOnExit();
 
 	    BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-	    out.write("createObjectFromFile");
+	    out.write("Hello Cloud Files");
 	    out.close();
 
 		SwiftObject object = swift.getApi().newSwiftObject();
-		object.getInfo().setName(filename + suffix);
+		object.getInfo().setName(FILENAME + SUFFIX);
 		object.setPayload(tempFile);
 
 		swift.getApi().putObject(CONTAINER, object);
 		
-		System.out.println("  " + filename + suffix);
+		System.out.println("  " + FILENAME + SUFFIX);
 	}
 
 	/**
-	 * Create an object from a String using the Swift API. 
+	 * This method will put your container on a Content Distribution Network and
+	 * make it 100% publicly accessible over the Internet.
 	 */
-	private void createObjectFromString() {
-		System.out.println("Create Object From String");
-		
-		String filename = "createObjectFromString.txt";
-		
-		SwiftObject object = swift.getApi().newSwiftObject();
-		object.getInfo().setName(filename);
-		object.setPayload("createObjectFromString");
-
-		swift.getApi().putObject(CONTAINER, object);
-		
-		System.out.println("  " + filename);
-	}
-	
-	/**
-	 * Create an object from a String with metadata using the BlobStore API. 
-	 */
-	private void createObjectFromStringWithMetadata() {
-		System.out.println("Create Object From String With Metadata");
-
-		String filename = "createObjectFromStringWithMetadata.txt";
-		
-		Map<String, String> userMetadata = new HashMap<String, String>();
-		userMetadata.put("key1", "value1");
-		
-		Blob blob = storage
-			.blobBuilder(filename)
-			.payload("createObjectFromStringWithMetadata")
-			.userMetadata(userMetadata)
-			.build();
-		
-		storage.putBlob(CONTAINER, blob);
-		
-		System.out.println("  " + filename);
+	private void enableCdnContainer() {
+		System.out.println("Enable CDN Container");
+		URI cdnURI = rackspace.enableCDN(CONTAINER);
+		System.out.println("  Go to " + cdnURI + "/" + FILENAME + SUFFIX);
 	}
 
 	/**

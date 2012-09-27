@@ -18,14 +18,16 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static org.jclouds.compute.predicates.NodePredicates.inGroup;
-
-import java.util.Set;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.openstack.nova.v2_0.NovaApi;
+import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
+import org.jclouds.openstack.nova.v2_0.domain.Server;
+import org.jclouds.openstack.nova.v2_0.features.ServerApi;
+import org.jclouds.rest.RestContext;
+
+import com.google.common.collect.FluentIterable;
 
 /**
  * This example destroys the server created in the CreateServer example. 
@@ -33,8 +35,11 @@ import org.jclouds.compute.domain.NodeMetadata;
  * @author Everett Toews
  */
 public class DeleteServer {
-	private static final String GROUP_NAME = "jclouds-example";
+	private static final String SERVER_NAME = "jclouds-example";
+	private static final String ZONE = "DFW";
+	
 	private ComputeService compute;
+	private RestContext<NovaApi, NovaAsyncApi> nova;
 
 	/**
 	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -65,18 +70,23 @@ public class DeleteServer {
 			.credentials(username, apiKey)
 			.buildView(ComputeServiceContext.class);
 		compute = context.getComputeService();
+		nova = context.unwrap();
 	}
 	
+	/**
+	 * This will delete all servers that start with {@link SERVER_NAME}
+	 */
 	private void deleteServer() {
 		System.out.println("Delete Server");
+
+		ServerApi serverApi = nova.getApi().getServerApiForZone(ZONE);
+		FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 		
-		// This method will continue to poll for the server status and won't return until this server is DELETED
-		// If you want to know what's happening during the polling, enable logging. See
-		// /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-		Set<? extends NodeMetadata> servers = compute.destroyNodesMatching(inGroup(GROUP_NAME));		
-		
-		for (NodeMetadata nodeMetadata: servers) {
-			System.out.println("  " + nodeMetadata);
+		for (Server server: servers) {
+			if (server.getName().startsWith(SERVER_NAME)) {
+				serverApi.delete(server.getId());
+				System.out.println("  " + server);
+			}
 		}
 	}
 

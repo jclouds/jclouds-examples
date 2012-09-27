@@ -18,12 +18,16 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import static org.jclouds.scriptbuilder.domain.Statements.exec;
+
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Flavor;
@@ -35,18 +39,23 @@ import org.jclouds.openstack.nova.v2_0.features.FlavorApi;
 import org.jclouds.openstack.nova.v2_0.features.ImageApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
+import org.jclouds.scriptbuilder.ScriptBuilder;
+import org.jclouds.scriptbuilder.domain.OsFamily;
+import org.jclouds.sshj.config.SshjSshClientModule;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 
 /**
- * This example creates an Ubuntu 12.04 server with 512 MB of RAM on the Rackspace open cloud. 
- *  
- * @author Everett Toews
+ * This example will create a server, start a webserver on it, and publish a page on the internet!
  */
-public class CreateServer {
-	private static final String SERVER_NAME = "jclouds-example";
+public class CloudServersPublish {
+	private static final String SERVER_NAME = "jclouds-example-publish";
 	private static final String ZONE = "DFW";
+	private static final String USER = "root";
 	
 	private ComputeService compute;
 	private RestContext<NovaApi, NovaAsyncApi> nova;
@@ -58,17 +67,18 @@ public class CreateServer {
 	 * The second argument (args[1]) must be your API key
 	 */
 	public static void main(String[] args) {
-		CreateServer createServer = new CreateServer();
+		CloudServersPublish cloudServersPublish = new CloudServersPublish();
 		
 		try {
-			createServer.init(args);
-			createServer.createServer();
+			cloudServersPublish.init(args);
+			Map<String, String> serverInfo = cloudServersPublish.createServer();
+			cloudServersPublish.configureAndStartWebserver(serverInfo);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 		finally {
-			createServer.close();
+			cloudServersPublish.close();
 		}
 	}
 
@@ -78,15 +88,19 @@ public class CreateServer {
 		
 		String username = args[0];
 		String apiKey = args[1];
-		
+
+		Iterable<Module> modules = ImmutableSet.<Module> of(
+				new SshjSshClientModule());
+
 		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
 			.credentials(username, apiKey)
+			.modules(modules)
 			.buildView(ComputeServiceContext.class);
 		compute = context.getComputeService();
 		nova = context.unwrap();
 	}
 	
-	private void createServer() throws RunNodesException, TimeoutException {
+	private Map<String, String> createServer() throws RunNodesException, TimeoutException {
 		String imageId = getImageId();
 		String flavorId = getFlavorId();
 		
@@ -98,10 +112,42 @@ public class CreateServer {
 		blockUntilServerInState(serverCreated.getId(), Server.Status.ACTIVE, 600, 5, serverApi);
 		Server server = serverApi.get(serverCreated.getId());
 
-		System.out.println("  " + serverCreated);
-		System.out.println("  Login IP: " + server.getAccessIPv4() +" Username: root Password: " + serverCreated.getAdminPass());
+		System.out.println("  " + server);
+		
+		return ImmutableMap.<String, String> of(
+			"serverId", server.getId(), 
+			"ip", server.getAccessIPv4(), 
+			"password", serverCreated.getAdminPass());
 	}
 
+	private void configureAndStartWebserver(Map<String, String> serverInfo) {
+		System.out.println("Configure And Start Webserver");
+
+		// Give ssh 20 seconds to start
+		try {
+			Thread.sleep(20 * 1000);
+		} 
+		catch (InterruptedException e) {
+			throw Throwables.propagate(e);
+		}
+		
+		String script = new ScriptBuilder()
+			.addStatement(exec("yum -y install httpd"))
+			.addStatement(exec("/usr/sbin/apachectl start"))
+			.addStatement(exec("iptables -I INPUT -p tcp --dport 80 -j ACCEPT"))
+			.addStatement(exec("echo 'Hello Cloud Servers' > /var/www/html/index.html"))
+			.render(OsFamily.UNIX);
+		
+		RunScriptOptions options = RunScriptOptions.Builder
+			.overrideLoginUser(USER)
+			.overrideLoginPassword(serverInfo.get("password"))
+			.blockOnComplete(true);
+		compute.runScriptOnNode(ZONE + "/" + serverInfo.get("serverId"), script, options);
+		
+		System.out.println("  Login IP: " + serverInfo.get("ip") + " Username: " + USER + " Password: " + serverInfo.get("password"));
+		System.out.println("  Go to http://" + serverInfo.get("ip"));
+	}
+	
 	/** 
 	 * Will block until the server is in the correct state.
 	 * 
@@ -149,7 +195,7 @@ public class CreateServer {
 	 * @return The Flavor Id with 512 MB of RAM
 	 */
 	private String getFlavorId() {
-		System.out.println("Flavors");
+		System.out.println("Hardware Profiles (Flavors)");
 		
 		FlavorApi flavorApi = nova.getApi().getFlavorApiForZone(ZONE);
 		FluentIterable<? extends Flavor> flavors = flavorApi.listInDetail().concat();		
@@ -186,13 +232,13 @@ public class CreateServer {
 		for (Image image: images) {
 			System.out.println("  " + image);
 			
-			if ("Ubuntu 12.04 LTS (Precise Pangolin)".equals(image.getName())) {
+			if ("CentOS 6.3".equals(image.getName())) {
 				result = image.getId();
 			}
 		}
 		
 		if (result == null) {
-			System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.");
+			System.err.println("Image with CentOS 6.3 operating system not found. Using first image found.");
 			result = images.first().get().getId();
 		}
 		

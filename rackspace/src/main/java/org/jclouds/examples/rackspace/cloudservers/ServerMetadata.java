@@ -18,39 +18,32 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.base.Predicates.and;
-import static com.google.common.base.Predicates.not;
-import static com.google.common.collect.Sets.filter;
-import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
-import static org.jclouds.compute.predicates.NodePredicates.all;
-import static org.jclouds.compute.predicates.NodePredicates.inGroup;
-
 import java.util.Map;
-import java.util.Set;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
+import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * This example sets, gets, updates, and deletes metadata from a server. It also serves as an example of when it's
- * necessary to use the more specific OpenStack NovaApi (as opposed to using the generic jclouds ComputeService) to 
- * do what you need to. Manipulaing server metadata in this case.  
+ * This example sets, gets, updates, and deletes metadata from a server.
  *  
  * @author Everett Toews
  */
 public class ServerMetadata {
-	private static final String GROUP_NAME = "jclouds-example";
+	private static final String SERVER_NAME = "jclouds-example";
+	private static final String ZONE = "DFW";
 	
 	private ComputeService compute;
 	private RestContext<NovaApi, NovaAsyncApi> nova;
+	private ServerApi serverApi;
 
 	/**
 	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -64,11 +57,11 @@ public class ServerMetadata {
 		try {
 			serverMetadata.init(args);
 			
-			NodeMetadata nodeMetadata = serverMetadata.getServer();
-			serverMetadata.setMetadata(nodeMetadata);
-			serverMetadata.updateMetadata(nodeMetadata);
-			serverMetadata.deleteMetadata(nodeMetadata);
-			serverMetadata.getMetadata(nodeMetadata);
+			Server server = serverMetadata.getServer();
+			serverMetadata.setMetadata(server);
+			serverMetadata.updateMetadata(server);
+			serverMetadata.deleteMetadata(server);
+			serverMetadata.getMetadata(server);
 		} 
 		finally {
 			serverMetadata.close();
@@ -87,50 +80,52 @@ public class ServerMetadata {
 			.buildView(ComputeServiceContext.class);
 		compute = context.getComputeService();
 		nova = context.unwrap();
+		serverApi = nova.getApi().getServerApiForZone(ZONE);
 	}
 
 	/**
-	 * @return The NodeMetadata of the server created in the CreateServer example
+	 * @return The Server created in the CreateServer example
 	 */
-	private NodeMetadata getServer() {
-		Set<? extends NodeMetadata> servers = 
-			 filter(compute.listNodesDetailsMatching(all()), and(inGroup(GROUP_NAME), not(TERMINATED)));
+	private Server getServer() {
+		FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 		
-		return servers.iterator().next();
+		for (Server server: servers) {
+			if (SERVER_NAME.equals(server.getName())) {
+				return server;
+			}
+		}
+		
+		throw new RuntimeException(SERVER_NAME + " not found.");
 	}
 	
-	private void setMetadata(NodeMetadata nodeMetadata) {
+	private void setMetadata(Server server) {
 		System.out.println("Set Metadata");
 		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(nodeMetadata.getLocation().getParent().getId());
 		ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of("key1", "value1", "key2", "value2", "key3", "value3");  
-		Map<String, String> responseMetadata = serverApi.setMetadata(nodeMetadata.getProviderId(), metadata);
+		Map<String, String> responseMetadata = serverApi.setMetadata(server.getId(), metadata);
 		
 		System.out.println("  " + responseMetadata);
 	}
 
-	private void updateMetadata(NodeMetadata nodeMetadata) {
+	private void updateMetadata(Server server) {
 		System.out.println("Udpate Metadata");
 		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(nodeMetadata.getLocation().getParent().getId());
 		ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of("key2", "new-value2");  
-		Map<String, String> responseMetadata = serverApi.updateMetadata(nodeMetadata.getProviderId(), metadata);
+		Map<String, String> responseMetadata = serverApi.updateMetadata(server.getId(), metadata);
 		
 		System.out.println("  " + responseMetadata);
 	}
 
-	private void deleteMetadata(NodeMetadata nodeMetadata) {
+	private void deleteMetadata(Server server) {
 		System.out.println("Delete Metadata");
 		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(nodeMetadata.getLocation().getParent().getId());
-		serverApi.deleteMetadata(nodeMetadata.getProviderId(), "key3");
+		serverApi.deleteMetadata(server.getId(), "key3");
 	}
 
-	private void getMetadata(NodeMetadata nodeMetadata) {
+	private void getMetadata(Server server) {
 		System.out.println("Get Metadata");
 		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(nodeMetadata.getLocation().getParent().getId());
-		Map<String, String> metadata = serverApi.getMetadata(nodeMetadata.getProviderId());
+		Map<String, String> metadata = serverApi.getMetadata(server.getId());
 		
 		System.out.println("  " + metadata);
 	}

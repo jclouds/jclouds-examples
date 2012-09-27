@@ -23,7 +23,7 @@ $ pwd
 $ ls
 README.md    images/    lein    lib/    project.clj    src/
 ```
-If you want to run the Logging example (which is strongly encouraged!) then you'll need the Logback JAR files. [Download](http://logback.qos.ch/download.html) the zip or tar.gz file, extract, and drop the JARs into the lib directory.
+If you want to run the [Logging example](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java) (which is strongly encouraged!) then you'll need the Logback JAR files. [Download](http://logback.qos.ch/download.html) the zip or tar.gz file, extract, and drop the JARs into the lib directory.
 
 If you don't, you'll see this error when you try to run the Logging example but the example will still work.
 
@@ -78,9 +78,17 @@ Click Run and watch the Console for the output!
 Some suggestions.
 
 1. Change the examples to do different things that you want to do
-2. After running some examples, compare the output with what you see in the [Cloud Control Panel](https://mycloud.rackspace.com/)
-3. Browse the [documentation](http://www.jclouds.org/documentation/)
-3. Return to the [Installation Guide](http://www.jclouds.org/documentation/userguide/installation-guide/) and have a look at the different ways to integrate jclouds with your project
-4. Join the [jclouds mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds) or maybe even the [jclouds developer mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds-dev)
+1. After running some examples, compare the output with what you see in the [Cloud Control Panel](https://mycloud.rackspace.com/)
+1. Browse the [documentation](http://www.jclouds.org/documentation/) and have a look at the [Javadoc](http://www.jclouds.org/documentation/releasenotes/) (choose the Javadoc for the current version)
+1. Return to the [Installation Guide](http://www.jclouds.org/documentation/userguide/installation-guide/) and have a look at the different ways to integrate jclouds with your project
+1. Join the [jclouds mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds) or maybe even the [jclouds developer mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds-dev)
 
 Welcome to the jclouds [community](http://www.jclouds.org/documentation/community/)!
+
+## Support and Feedback
+
+Your feedback is appreciated! If you have specific issues with Rackspace support in jclouds, we'd prefer that you file an issue via [Github](https://github.com/jclouds/jclouds/issues).
+
+For general feedback and support requests, send an email to:
+
+[sdk-support@rackspace.com](mailto:sdk-support@rackspace.com)

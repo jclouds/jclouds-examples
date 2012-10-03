@@ -60,7 +60,8 @@ public class ListObjects {
 	}
 
 	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud
+		// The provider configures jclouds to use the Rackspace open cloud (US)
+		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
 		String provider = "cloudfiles-us";
 		
 		String username = args[0];

@@ -73,7 +73,8 @@ public class CreateServer {
 	}
 
 	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud
+		// The provider configures jclouds to use the Rackspace open cloud (US)
+		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
 		String provider = "rackspace-cloudservers-us";
 		
 		String username = args[0];

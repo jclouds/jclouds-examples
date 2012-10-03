@@ -83,7 +83,8 @@ public class CloudServersPublish {
 	}
 
 	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud
+		// The provider configures jclouds to use the Rackspace open cloud (US)
+		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
 		String provider = "rackspace-cloudservers-us";
 		
 		String username = args[0];
@@ -195,7 +196,7 @@ public class CloudServersPublish {
 	 * @return The Flavor Id with 512 MB of RAM
 	 */
 	private String getFlavorId() {
-		System.out.println("Hardware Profiles (Flavors)");
+		System.out.println("Flavors");
 		
 		FlavorApi flavorApi = nova.getApi().getFlavorApiForZone(ZONE);
 		FluentIterable<? extends Flavor> flavors = flavorApi.listInDetail().concat();		

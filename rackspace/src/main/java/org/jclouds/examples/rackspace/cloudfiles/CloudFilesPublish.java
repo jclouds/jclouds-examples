@@ -48,6 +48,8 @@ public class CloudFilesPublish {
 	private CloudFilesClient rackspace;
 
 	/**
+	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+	 * 
 	 * The first argument (args[0]) must be your username
 	 * The second argument (args[1]) must be your API key
 	 */
@@ -69,7 +71,8 @@ public class CloudFilesPublish {
 	}
 
 	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud
+		// The provider configures jclouds to use the Rackspace open cloud (US)
+		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
 		String provider = "cloudfiles-us";
 		
 		String username = args[0];

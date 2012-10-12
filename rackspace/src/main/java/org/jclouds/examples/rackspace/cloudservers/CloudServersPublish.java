@@ -20,45 +20,37 @@ package org.jclouds.examples.rackspace.cloudservers;
 
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
-import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.config.ComputeServiceProperties;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.options.RunScriptOptions;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.openstack.nova.v2_0.domain.Flavor;
-import org.jclouds.openstack.nova.v2_0.domain.Image;
-import org.jclouds.openstack.nova.v2_0.domain.Server;
-import org.jclouds.openstack.nova.v2_0.domain.Server.Status;
-import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
-import org.jclouds.openstack.nova.v2_0.features.FlavorApi;
-import org.jclouds.openstack.nova.v2_0.features.ImageApi;
-import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
+import org.jclouds.predicates.InetSocketAddressConnect;
+import org.jclouds.predicates.RetryablePredicate;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HostAndPort;
 import com.google.inject.Module;
 
 /**
  * This example will create a server, start a webserver on it, and publish a page on the internet!
  */
 public class CloudServersPublish {
-	private static final String SERVER_NAME = "jclouds-example-publish";
-	private static final String ZONE = "DFW";
-	private static final String USER = "root";
+	private static final String GROUP_NAME = "jclouds-example";
+	private static final String LOCATION = "DFW";
 	
 	private ComputeService compute;
-	private RestContext<NovaApi, NovaAsyncApi> nova;
 
 	/**
 	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -71,8 +63,8 @@ public class CloudServersPublish {
 		
 		try {
 			cloudServersPublish.init(args);
-			Map<String, String> serverInfo = cloudServersPublish.createServer();
-			cloudServersPublish.configureAndStartWebserver(serverInfo);
+			NodeMetadata node = cloudServersPublish.createServer();
+			cloudServersPublish.configureAndStartWebserver(node);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -93,45 +85,46 @@ public class CloudServersPublish {
 		Iterable<Module> modules = ImmutableSet.<Module> of(
 				new SshjSshClientModule());
 
+		// These properties control how often jclouds polls for a status udpate
+	    Properties overrides = new Properties();
+	    overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
+	    overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+
 		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
 			.credentials(username, apiKey)
 			.modules(modules)
 			.buildView(ComputeServiceContext.class);
 		compute = context.getComputeService();
-		nova = context.unwrap();
 	}
 	
-	private Map<String, String> createServer() throws RunNodesException, TimeoutException {
-		String imageId = getImageId();
-		String flavorId = getFlavorId();
-		
-		System.out.println("Create Server");
-		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(ZONE);
-				
-		ServerCreated serverCreated = serverApi.create(SERVER_NAME, imageId, flavorId);
-		blockUntilServerInState(serverCreated.getId(), Server.Status.ACTIVE, 600, 5, serverApi);
-		Server server = serverApi.get(serverCreated.getId());
+	private NodeMetadata createServer() throws RunNodesException, TimeoutException {
+		Template template = compute.templateBuilder()
+			.locationId(LOCATION)
+			.osDescriptionMatches(".*CentOS 6.2.*")
+			.minRam(512)
+			.build();
 
-		System.out.println("  " + server);
+		System.out.println("Create Server");
+
+		// This method will continue to poll for the server status and won't return until this server is ACTIVE
+		// If you want to know what's happening during the polling, enable logging. See
+		// /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+		Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(GROUP_NAME, 1, template);
+
+		NodeMetadata nodeMetadata = nodes.iterator().next();
+
+		System.out.println("  " + nodeMetadata);
 		
-		return ImmutableMap.<String, String> of(
-			"serverId", server.getId(), 
-			"ip", server.getAccessIPv4(), 
-			"password", serverCreated.getAdminPass());
+		return nodeMetadata;
 	}
 
-	private void configureAndStartWebserver(Map<String, String> serverInfo) {
+	private void configureAndStartWebserver(NodeMetadata node) throws TimeoutException {
+		String publicAddress = node.getPublicAddresses().iterator().next();
+
 		System.out.println("Configure And Start Webserver");
 
-		// Give ssh 20 seconds to start
-		try {
-			Thread.sleep(20 * 1000);
-		} 
-		catch (InterruptedException e) {
-			throw Throwables.propagate(e);
-		}
-		
+        waitForSsh(publicAddress);
+        
 		String script = new ScriptBuilder()
 			.addStatement(exec("yum -y install httpd"))
 			.addStatement(exec("/usr/sbin/apachectl start"))
@@ -140,110 +133,21 @@ public class CloudServersPublish {
 			.render(OsFamily.UNIX);
 		
 		RunScriptOptions options = RunScriptOptions.Builder
-			.overrideLoginUser(USER)
-			.overrideLoginPassword(serverInfo.get("password"))
 			.blockOnComplete(true);
-		compute.runScriptOnNode(ZONE + "/" + serverInfo.get("serverId"), script, options);
+
+		compute.runScriptOnNode(node.getId(), script, options);
 		
-		System.out.println("  Login IP: " + serverInfo.get("ip") + " Username: " + USER + " Password: " + serverInfo.get("password"));
-		System.out.println("  Go to http://" + serverInfo.get("ip"));
+        System.out.println("  Login: ssh " + node.getCredentials().getUser() + "@" + publicAddress);
+        System.out.println("  Password: " + node.getCredentials().getPassword());
+		System.out.println("  Go to http://" + publicAddress);
 	}
 	
-	/** 
-	 * Will block until the server is in the correct state.
-	 * 
-	 * @param serverId The id of the server to block on
-	 * @param status The status the server needs to reach before the method stops blocking
-	 * @param timeoutSeconds The maximum amount of time to block before throwing a TimeoutException
-	 * @param delaySeconds The amout of time between server status checks
-	 * @param serverApi The ServerApi used to do the checking
-	 * 
-	 * @throws TimeoutException If the server does not reach the status by timeoutSeconds 
-	 */
-	protected void blockUntilServerInState(String serverId, Status status, 
-			int timeoutSeconds, int delaySeconds, ServerApi serverApi) throws TimeoutException {
-		int totalSeconds = 0;
-		
-		while (totalSeconds < timeoutSeconds) {
-			System.out.print(".");
-			
-			Server server = serverApi.get(serverId);
-			
-			if (server.getStatus().equals(status)) {
-				System.out.println();
-				return;
-			}
-			
-			try {
-				Thread.sleep(delaySeconds * 1000);
-			} 
-			catch (InterruptedException e) {
-				throw Throwables.propagate(e);
-			}
-			
-			totalSeconds += delaySeconds;
-		}
-		
-		String message = String.format("Timed out at %d seconds waiting for server %s to reach status %s.", 
-			timeoutSeconds, serverId, status);
-		
-		throw new TimeoutException(message);
-	}
-
-	/**
-	 * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
-	 * 
-	 * @return The Flavor Id with 512 MB of RAM
-	 */
-	private String getFlavorId() {
-		System.out.println("Flavors");
-		
-		FlavorApi flavorApi = nova.getApi().getFlavorApiForZone(ZONE);
-		FluentIterable<? extends Flavor> flavors = flavorApi.listInDetail().concat();		
-		String result = null;
-		
-		for (Flavor flavor: flavors) {
-			System.out.println("  " + flavor);
-			
-			if (flavor.getRam() == 512) {
-				result = flavor.getId();
-			}
-		}
-		
-		if (result == null) {
-			System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.");
-			result = flavors.first().get().getId();
-		}
-		
-		return result;
-	}
-
-	/**
-	 * This method uses the generic ComputeService.listImages() to find the image.
-	 * 
-	 * @return An Ubuntu 12.04 Image 
-	 */
-	private String getImageId() {
-		System.out.println("Images");
-		
-		ImageApi imageApi = nova.getApi().getImageApiForZone(ZONE);
-		FluentIterable<? extends Image> images = imageApi.listInDetail().concat();
-		String result = null;
-		
-		for (Image image: images) {
-			System.out.println("  " + image);
-			
-			if ("CentOS 6.3".equals(image.getName())) {
-				result = image.getId();
-			}
-		}
-		
-		if (result == null) {
-			System.err.println("Image with CentOS 6.3 operating system not found. Using first image found.");
-			result = images.first().get().getId();
-		}
-		
-		return result;
+	private void waitForSsh(String ip) throws TimeoutException {
+		RetryablePredicate<HostAndPort> blockUntilSSHReady = new RetryablePredicate<HostAndPort>(
+			new InetSocketAddressConnect(), 300, 5, 5, TimeUnit.SECONDS);
+	
+		if (!blockUntilSSHReady.apply(HostAndPort.fromParts(ip, 22)))
+			throw new TimeoutException("Timeout on ssh: " + ip);
 	}
 
 	/**

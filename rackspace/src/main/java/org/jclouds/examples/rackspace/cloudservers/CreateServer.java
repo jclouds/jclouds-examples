@@ -18,26 +18,20 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.openstack.nova.v2_0.domain.Flavor;
-import org.jclouds.openstack.nova.v2_0.domain.Image;
-import org.jclouds.openstack.nova.v2_0.domain.Server;
-import org.jclouds.openstack.nova.v2_0.domain.Server.Status;
-import org.jclouds.openstack.nova.v2_0.domain.ServerCreated;
-import org.jclouds.openstack.nova.v2_0.features.FlavorApi;
-import org.jclouds.openstack.nova.v2_0.features.ImageApi;
-import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
-
-import com.google.common.base.Throwables;
-import com.google.common.collect.FluentIterable;
+import org.jclouds.compute.config.ComputeServiceProperties;
+import org.jclouds.compute.domain.Hardware;
+import org.jclouds.compute.domain.Image;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
+import org.jclouds.domain.Location;
 
 /**
  * This example creates an Ubuntu 12.04 server with 512 MB of RAM on the Rackspace open cloud. 
@@ -45,11 +39,9 @@ import com.google.common.collect.FluentIterable;
  * @author Everett Toews
  */
 public class CreateServer {
-	private static final String SERVER_NAME = "jclouds-example";
-	private static final String ZONE = "DFW";
+	private static final String GROUP_NAME = "jclouds-example";
 	
 	private ComputeService compute;
-	private RestContext<NovaApi, NovaAsyncApi> nova;
 
 	/**
 	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -80,95 +72,89 @@ public class CreateServer {
 		String username = args[0];
 		String apiKey = args[1];
 		
-		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+		// These properties control how often jclouds polls for a status udpate
+	    Properties overrides = new Properties();
+	    overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
+	    overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+
+	    ComputeServiceContext context = ContextBuilder.newBuilder(provider)
 			.credentials(username, apiKey)
+			.overrides(overrides)
 			.buildView(ComputeServiceContext.class);
 		compute = context.getComputeService();
-		nova = context.unwrap();
 	}
 	
+	/**
+	 * Create a server based on a Template. This method uses Template.fromHardware() and Template.fromImage() to
+	 * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
+	 * using the following Template.
+	 * 
+	 * Template template = compute.templateBuilder()
+	 *     .locationId(getLocationId())
+	 *     .osFamily(OsFamily.UBUNTU)
+	 *     .osVersionMatches("12.04")
+	 *     .minRam(512)
+	 *     .build();
+ 	 */
 	private void createServer() throws RunNodesException, TimeoutException {
-		String imageId = getImageId();
-		String flavorId = getFlavorId();
-		
-		System.out.println("Create Server");
-		
-		ServerApi serverApi = nova.getApi().getServerApiForZone(ZONE);
-				
-		ServerCreated serverCreated = serverApi.create(SERVER_NAME, imageId, flavorId);
-		blockUntilServerInState(serverCreated.getId(), Server.Status.ACTIVE, 600, 5, serverApi);
-		Server server = serverApi.get(serverCreated.getId());
+		Template template = compute.templateBuilder()
+			.locationId(getLocationId())
+			.fromHardware(getHardware())
+			.fromImage(getImage())
+			.build();
 
-		System.out.println("  " + serverCreated);
-		System.out.println("  Login IP: " + server.getAccessIPv4() +" Username: root Password: " + serverCreated.getAdminPass());
+		System.out.println("Create Server");
+
+		// This method will continue to poll for the server status and won't return until this server is ACTIVE
+		// If you want to know what's happening during the polling, enable logging. See
+		// /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+		Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(GROUP_NAME, 1, template);
+
+		NodeMetadata nodeMetadata = nodes.iterator().next();
+
+		System.out.println("  " + nodeMetadata);
 	}
 
-	/** 
-	 * Will block until the server is in the correct state.
+	/**
+	 * This method uses the generic ComputeService.listAssignableLocations() to find the location.
 	 * 
-	 * @param serverId The id of the server to block on
-	 * @param status The status the server needs to reach before the method stops blocking
-	 * @param timeoutSeconds The maximum amount of time to block before throwing a TimeoutException
-	 * @param delaySeconds The amout of time between server status checks
-	 * @param serverApi The ServerApi used to do the checking
-	 * 
-	 * @throws TimeoutException If the server does not reach the status by timeoutSeconds 
+	 * @return The first available Location
 	 */
-	protected void blockUntilServerInState(String serverId, Status status, 
-			int timeoutSeconds, int delaySeconds, ServerApi serverApi) throws TimeoutException {
-		int totalSeconds = 0;
-		
-		while (totalSeconds < timeoutSeconds) {
-			System.out.print(".");
-			
-			Server server = serverApi.get(serverId);
-			
-			if (server.getStatus().equals(status)) {
-				System.out.println();
-				return;
-			}
-			
-			try {
-				Thread.sleep(delaySeconds * 1000);
-			} 
-			catch (InterruptedException e) {
-				throw Throwables.propagate(e);
-			}
-			
-			totalSeconds += delaySeconds;
+	private String getLocationId() {
+		System.out.println("Locations");
+
+		Set<? extends Location> locations = compute.listAssignableLocations();
+
+		for (Location location: locations) {
+			System.out.println("  " + location);
 		}
-		
-		String message = String.format("Timed out at %d seconds waiting for server %s to reach status %s.", 
-			timeoutSeconds, serverId, status);
-		
-		throw new TimeoutException(message);
+
+		return locations.iterator().next().getId();
 	}
 
 	/**
 	 * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
 	 * 
-	 * @return The Flavor Id with 512 MB of RAM
+	 * @return The Hardware with 512 MB of RAM
 	 */
-	private String getFlavorId() {
-		System.out.println("Flavors");
-		
-		FlavorApi flavorApi = nova.getApi().getFlavorApiForZone(ZONE);
-		FluentIterable<? extends Flavor> flavors = flavorApi.listInDetail().concat();		
-		String result = null;
-		
-		for (Flavor flavor: flavors) {
-			System.out.println("  " + flavor);
-			
-			if (flavor.getRam() == 512) {
-				result = flavor.getId();
+	private Hardware getHardware() {
+		System.out.println("Hardware Profiles (Flavors)");
+
+		Set<? extends Hardware> profiles = compute.listHardwareProfiles();
+		Hardware result = null;
+
+		for (Hardware profile: profiles) {
+			System.out.println("  " + profile);
+			if (profile.getRam() == 512) {
+				result = profile;
 			}
 		}
-		
+
 		if (result == null) {
 			System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.");
-			result = flavors.first().get().getId();
+			result = profiles.iterator().next();
 		}
-		
+
 		return result;
 	}
 
@@ -177,26 +163,24 @@ public class CreateServer {
 	 * 
 	 * @return An Ubuntu 12.04 Image 
 	 */
-	private String getImageId() {
+	private Image getImage() {
 		System.out.println("Images");
-		
-		ImageApi imageApi = nova.getApi().getImageApiForZone(ZONE);
-		FluentIterable<? extends Image> images = imageApi.listInDetail().concat();
-		String result = null;
-		
+
+		Set<? extends Image> images = compute.listImages();
+		Image result = null;
+
 		for (Image image: images) {
 			System.out.println("  " + image);
-			
-			if ("Ubuntu 12.04 LTS (Precise Pangolin)".equals(image.getName())) {
-				result = image.getId();
+			if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
+				result = image;
 			}
 		}
-		
+
 		if (result == null) {
 			System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.");
-			result = images.first().get().getId();
+			result = images.iterator().next();
 		}
-		
+
 		return result;
 	}
 

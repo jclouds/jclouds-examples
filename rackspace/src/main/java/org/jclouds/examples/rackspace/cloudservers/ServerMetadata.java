@@ -91,7 +91,7 @@ public class ServerMetadata {
 		FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 		
 		for (Server server: servers) {
-			if (SERVER_NAME.equals(server.getName())) {
+			if (server.getName().startsWith(SERVER_NAME)) {
 				return server;
 			}
 		}

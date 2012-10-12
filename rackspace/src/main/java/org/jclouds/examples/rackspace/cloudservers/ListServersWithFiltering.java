@@ -77,7 +77,7 @@ public class ListServersWithFiltering {
 	 * List the servers filtered by the Predicates inGroup("jclouds") and not(TERMINATED).
 	 */
 	private void listServersByParentLocationId() {
-		System.out.println("List Servers");
+		System.out.println("List Servers By Parent Location Id");
 		
 		Set<? extends NodeMetadata> servers = 
 			 compute.listNodesDetailsMatching(NodePredicates.parentLocationId(ZONE));
@@ -88,7 +88,7 @@ public class ListServersWithFiltering {
 	}
 
 	private void listServersByNameStartsWith() {
-		System.out.println("List Servers");
+		System.out.println("List Servers By Name Starts With");
 		
 		Set<? extends NodeMetadata> servers = 
 			 compute.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));

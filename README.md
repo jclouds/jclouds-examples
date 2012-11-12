@@ -58,6 +58,10 @@ This repository contains various examples of using
       <td><a href="jclouds-examples/tree/master/rackspace/">Rackspace (Java)</a></td>
       <td>Example code that uses jclouds to perform common tasks on the Rackspace open cloud.</td>
     </tr>
+    <tr>
+      <td><a href="jclouds-examples/tree/master/chef-basics/">Chef Basics (Java)</a></td>
+      <td>Example code to add nodes to a group and execute Chef cookbooks on them using Chef Solo or a standard or Hosted Chef Server.</td>
+    </tr>
   </tbody>
 </table>
 

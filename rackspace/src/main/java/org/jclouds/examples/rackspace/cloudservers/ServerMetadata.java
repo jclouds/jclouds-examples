@@ -96,7 +96,7 @@ public class ServerMetadata {
 			}
 		}
 		
-		throw new RuntimeException(SERVER_NAME + " not found.");
+		throw new RuntimeException(SERVER_NAME + " not found. Run the CreateServer example first.");
 	}
 	
 	private void setMetadata(Server server) {

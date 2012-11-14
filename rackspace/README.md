@@ -49,7 +49,12 @@ The [cloudfiles package](https://github.com/jclouds/jclouds-examples/tree/master
 The [cloudservers package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudservers) demonstrates how to accomplish common tasks for working with servers in the cloud.  
 
   * [CloudServersPublish](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudservers/CloudServersPublish.java) - An end to end example of publishing a web page on the internet with Cloud Servers.
-  * Other examples of creating, manipulating, listing and deleting servers.
+  * Other examples of creating, manipulating, listing, and deleting servers.
+
+The [cloudblockstorage package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudblockstorage) demonstrates how to accomplish common tasks for working with block storage (aka volumes) in the cloud.  
+
+  * [CreateVolumeAndAttach.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudblockstorage/CreateVolumeAndAttach.java) - An end to end example of creating a volume, attaching it to a server, putting a filesystem on it, and mounting it for use to store persistent data.
+  * Other examples of creating, manipulating, listing, and deleting volumes and snapshots.
 
 
 ## Command Line

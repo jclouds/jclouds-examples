@@ -18,6 +18,15 @@
  */
 package org.jclouds.examples.rackspace;
 
+import org.jclouds.examples.rackspace.cloudblockstorage.CreateSnapshot;
+import org.jclouds.examples.rackspace.cloudblockstorage.CreateVolumeAndAttach;
+import org.jclouds.examples.rackspace.cloudblockstorage.DeleteSnapshot;
+import org.jclouds.examples.rackspace.cloudblockstorage.DeleteVolume;
+import org.jclouds.examples.rackspace.cloudblockstorage.DetachVolume;
+import org.jclouds.examples.rackspace.cloudblockstorage.ListSnapshots;
+import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeAttachments;
+import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeTypes;
+import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumes;
 import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
 import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
 import org.jclouds.examples.rackspace.cloudfiles.CreateObjects;
@@ -32,37 +41,49 @@ import org.jclouds.examples.rackspace.cloudservers.ServerMetadata;
 
 /**
  * This example smoke tests all of the other examples in these packages.
- *  
+ * 
  * @author Everett Toews
  */
 public class SmokeTest {
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		SmokeTest smokeTest = new SmokeTest();
-		smokeTest.smokeTest(args);
-	}
+   /**
+    * To get a username and API key see
+    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username The second argument
+    * (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      SmokeTest smokeTest = new SmokeTest();
+      smokeTest.smokeTest(args);
+   }
 
-	private void smokeTest(String[] args) {
-		Authentication.main(args);
-		Logging.main(args);
-		
-		CloudServersPublish.main(args);
-		CreateServer.main(args);
-		ListServersWithFiltering.main(args);
-		ServerMetadata.main(args);
-		DeleteServer.main(args);
-		
-		CloudFilesPublish.main(args);
-		CreateContainer.main(args);
-		ListContainers.main(args);
-		CreateObjects.main(args);
-		ListObjects.main(args);
-		DeleteObjectsAndContainer.main(args);
-	}
+   private void smokeTest(String[] args) {
+      Authentication.main(args);
+      Logging.main(args);
+
+      CloudServersPublish.main(args);
+      CreateServer.main(args);
+      ListServersWithFiltering.main(args);
+      ServerMetadata.main(args);
+      DeleteServer.main(args);
+
+      CloudFilesPublish.main(args);
+      CreateContainer.main(args);
+      ListContainers.main(args);
+      CreateObjects.main(args);
+      ListObjects.main(args);
+      DeleteObjectsAndContainer.main(args);
+
+      CreateVolumeAndAttach.main(args);
+      ListVolumes.main(args);
+      ListVolumeAttachments.main(args);
+      ListVolumeTypes.main(args);
+      DetachVolume.main(args);
+      CreateSnapshot.main(args);
+      ListSnapshots.main(args);
+      DeleteSnapshot.main(args);
+      DeleteVolume.main(args);
+      DeleteServer.main(args);
+   }
 }

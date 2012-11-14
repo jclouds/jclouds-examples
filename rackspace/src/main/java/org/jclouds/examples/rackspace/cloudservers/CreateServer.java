@@ -111,8 +111,11 @@ public class CreateServer {
 		Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(GROUP_NAME, 1, template);
 
 		NodeMetadata nodeMetadata = nodes.iterator().next();
+      String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
 		System.out.println("  " + nodeMetadata);
+      System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
+      System.out.println("  Password: " + nodeMetadata.getCredentials().getPassword());
 	}
 
 	/**

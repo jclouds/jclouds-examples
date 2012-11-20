@@ -54,85 +54,85 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
 
 /**
- * This example creates a volume, attaches it to a server, putting a filesystem on it, and mounts it for use. 
- *  
+ * This example creates a volume, attaches it to a server, putting a filesystem on it, and mounts it for use.
+ * 
  * @author Everett Toews
  */
 public class CreateVolumeAndAttach {
-	private static final String NAME = "jclouds-example";
+   private static final String NAME = "jclouds-example";
    private static final String ZONE = "DFW";
    private static final String DEVICE = "/dev/xvdd";
-	
-	private ComputeService compute;
+
+   private ComputeService compute;
    private RestContext<NovaApi, NovaAsyncApi> nova;
    private VolumeAttachmentApi volumeAttachmentApi;
 
    private RestContext<CinderApi, CinderAsyncApi> cinder;
    private VolumeApi volumeApi;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		CreateVolumeAndAttach createVolumeAndAttach = new CreateVolumeAndAttach();
-		
-		try {
-			createVolumeAndAttach.init(args);
-         NodeMetadata node = createVolumeAndAttach.createServer();
-			Volume volume = createVolumeAndAttach.createVolume();
-			createVolumeAndAttach.attachVolume(volume, node);
-			createVolumeAndAttach.mountVolume(node);
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			createVolumeAndAttach.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      CreateVolumeAndAttach createVolumeAndAttach = new CreateVolumeAndAttach();
 
-   private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		// These properties control how often jclouds polls for a status udpate
-	    Properties overrides = new Properties();
-	    overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-	    overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+      try {
+         createVolumeAndAttach.init(args);
+         NodeMetadata node = createVolumeAndAttach.createServer();
+         Volume volume = createVolumeAndAttach.createVolume();
+         createVolumeAndAttach.attachVolume(volume, node);
+         createVolumeAndAttach.mountVolume(node);
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+      finally {
+         createVolumeAndAttach.close();
+      }
+   }
+
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
+
+      String username = args[0];
+      String apiKey = args[1];
+
+      // These properties control how often jclouds polls for a status udpate
+      Properties overrides = new Properties();
+      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
+      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
-	    ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-         .modules(modules)
-			.overrides(overrides)
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .modules(modules)
+            .overrides(overrides)
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
       nova = context.unwrap();
       volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
-		
+
       provider = "rackspace-cloudblockstorage-us";
-      
+
       cinder = ContextBuilder.newBuilder(provider)
-         .credentials(username, apiKey)
-         .modules(modules)
-         .build(CinderApiMetadata.CONTEXT_TOKEN);
+            .credentials(username, apiKey)
+            .modules(modules)
+            .build(CinderApiMetadata.CONTEXT_TOKEN);
       volumeApi = cinder.getApi().getVolumeApiForZone(ZONE);
-	}
-	
+   }
+
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
       Template template = compute.templateBuilder()
-         .locationId(ZONE)
-         .osDescriptionMatches(".*CentOS 6.2.*")
-         .minRam(512)
-         .build();
+            .locationId(ZONE)
+            .osDescriptionMatches(".*CentOS 6.2.*")
+            .minRam(512)
+            .build();
 
       System.out.println("Create Server");
 
@@ -143,7 +143,7 @@ public class CreateVolumeAndAttach {
       System.out.println("  " + nodeMetadata);
       System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
       System.out.println("  Password: " + nodeMetadata.getCredentials().getPassword());
-      
+
       return nodeMetadata;
    }
 
@@ -151,9 +151,9 @@ public class CreateVolumeAndAttach {
       CreateVolumeOptions options = CreateVolumeOptions.Builder
             .name(NAME)
             .metadata(ImmutableMap.<String, String> of("key1", "value1"));
-         
+
       System.out.println("Create Volume");
-      
+
       // 100 GB is the minimum volume size on the Rackspace open cloud
       Volume volume = volumeApi.create(100, options);
 
@@ -161,11 +161,11 @@ public class CreateVolumeAndAttach {
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!VolumePredicates.awaitAvailable(volumeApi).apply(volume)) {
-         throw new TimeoutException("Timeout on volume: " + volume);     
+         throw new TimeoutException("Timeout on volume: " + volume);
       }
-      
+
       System.out.println("  " + volume);
-      
+
       return volume;
    }
 
@@ -174,12 +174,12 @@ public class CreateVolumeAndAttach {
 
       // Note the use of NodeMetadata.getProviderId()
       // This is necessary as NodeMetadata.getId() will return a Location/Id combination
-      VolumeAttachment volumeAttachment = volumeAttachmentApi.attachVolumeToServerAsDevice(
-            volume.getId(), node.getProviderId(), DEVICE);
+      VolumeAttachment volumeAttachment = volumeAttachmentApi
+            .attachVolumeToServerAsDevice(volume.getId(), node.getProviderId(), DEVICE);
 
       // Wait for the volume to become Attached (aka In Use) before moving on
       if (!VolumePredicates.awaitInUse(volumeApi).apply(volume)) {
-         throw new TimeoutException("Timeout on volume: " + volume);     
+         throw new TimeoutException("Timeout on volume: " + volume);
       }
 
       System.out.println("  " + volumeAttachment);
@@ -205,16 +205,16 @@ public class CreateVolumeAndAttach {
       }
    }
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-		
-		if (cinder != null) {
-		   cinder.close();
-		}
-	}
+   /**
+    * Always close your service when you're done with it.
+    */
+   private void close() {
+      if (compute != null) {
+         compute.getContext().close();
+      }
+
+      if (cinder != null) {
+         cinder.close();
+      }
+   }
 }

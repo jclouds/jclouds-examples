@@ -60,6 +60,7 @@ import com.google.inject.Module;
  */
 public class CreateVolumeAndAttach {
    private static final String NAME = "jclouds-example";
+   private static final String PASSWORD = "sbmFPqaw5d43";
    private static final String ZONE = "DFW";
    private static final String DEVICE = "/dev/xvdd";
 
@@ -139,10 +140,13 @@ public class CreateVolumeAndAttach {
       Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(NAME, 1, template);
       NodeMetadata nodeMetadata = nodes.iterator().next();
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
+      
+      // We set the password to something we know so we can login in the DetachVolume example
+      nova.getApi().getServerApiForZone(ZONE).changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
 
       System.out.println("  " + nodeMetadata);
       System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
-      System.out.println("  Password: " + nodeMetadata.getCredentials().getPassword());
+      System.out.println("  Password: " + PASSWORD);
 
       return nodeMetadata;
    }
@@ -193,7 +197,9 @@ public class CreateVolumeAndAttach {
             .addStatement(exec("mount /dev/xvdd /mnt"))
             .render(OsFamily.UNIX);
 
-      RunScriptOptions options = RunScriptOptions.Builder.blockOnComplete(true);
+      RunScriptOptions options = RunScriptOptions.Builder
+            .blockOnComplete(true)
+            .overrideLoginPassword(PASSWORD);
 
       ExecResponse response = compute.runScriptOnNode(node.getId(), script, options);
 

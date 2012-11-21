@@ -18,6 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static org.jclouds.scriptbuilder.domain.Statements.exec;
+
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
@@ -25,6 +27,8 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.config.ComputeServiceProperties;
+import org.jclouds.compute.domain.ExecResponse;
+import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.cinder.v1.CinderApi;
 import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
 import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
@@ -35,11 +39,17 @@ import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
+import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
+import org.jclouds.scriptbuilder.ScriptBuilder;
+import org.jclouds.scriptbuilder.domain.OsFamily;
+import org.jclouds.sshj.config.SshjSshClientModule;
 
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 
 /**
  * This example detaches the volume created in the CreateVolumeAndAttach example.
@@ -48,6 +58,8 @@ import com.google.common.collect.FluentIterable;
  */
 public class DetachVolume {
    private static final String NAME = "jclouds-example";
+   private static final String ROOT = "root";
+   private static final String PASSWORD = "sbmFPqaw5d43";
    private static final String ZONE = "DFW";
 
    private ComputeService compute;
@@ -71,6 +83,7 @@ public class DetachVolume {
       try {
          detachVolume.init(args);
          VolumeAttachment volumeAttachment = detachVolume.getVolumeAttachment();
+         detachVolume.unmountVolume(volumeAttachment);
          detachVolume.detachVolume(volumeAttachment);
       } 
       catch (Exception e) {
@@ -94,8 +107,11 @@ public class DetachVolume {
       overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
       overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
 
+      Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
+
       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
+            .modules(modules)
             .overrides(overrides)
             .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
@@ -126,6 +142,32 @@ public class DetachVolume {
       }
 
       throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
+   }
+
+   /**
+    * Make sure you've unmounted the volume first. Failure to do so could result in failure or data loss.
+    */
+   private void unmountVolume(VolumeAttachment volumeAttachment) {
+      System.out.println("Unmount Volume");
+
+      String script = new ScriptBuilder()
+            .addStatement(exec("umount /mnt"))
+            .render(OsFamily.UNIX);
+
+      RunScriptOptions options = RunScriptOptions.Builder
+            .overrideLoginUser(ROOT)
+            .overrideLoginPassword(PASSWORD)
+            .blockOnComplete(true);
+      
+      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, volumeAttachment.getServerId());
+      ExecResponse response = compute.runScriptOnNode(zoneAndId.slashEncode(), script, options);
+
+      if (response.getExitStatus() == 0) {
+         System.out.println("  Exit Status: " + response.getExitStatus());
+      }
+      else {
+         System.out.println("  Error: " + response.getOutput());
+      }
    }
 
    private void detachVolume(VolumeAttachment volumeAttachment) throws TimeoutException {

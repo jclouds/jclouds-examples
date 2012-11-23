@@ -32,6 +32,16 @@
        <jclouds.version>1.6.0-SNAPSHOT</jclouds.version>    
    </properties>
 
+    <repositories>
+        <repository>
+            <id>jclouds-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
    <dependencies>
       <dependency>
         <groupId>org.jclouds</groupId>
@@ -58,11 +68,6 @@
         <artifactId>virtualbox</artifactId>
         <version>${jclouds.version}</version>
       </dependency>      
-      <dependency>
-        <groupId>org.jclouds.labs</groupId>
-        <artifactId>abiquo</artifactId>
-        <version>${jclouds.version}</version>
-      </dependency>
       <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
          like below -->
@@ -70,6 +75,15 @@
       <dependency>
         <groupId>org.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
+        <version>${jclouds.version}</version>
+      </dependency>
+      -->
+      <!-- if you want to use abiquo, you will need to include
+           the abiquo maven repository to get its dependencies.
+           See jclouds/labs/abiquo/pom.xml
+      <dependency>
+        <groupId>org.jclouds.labs</groupId>
+        <artifactId>abiquo</artifactId>
         <version>${jclouds.version}</version>
       </dependency>
       -->

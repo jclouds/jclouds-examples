@@ -24,31 +24,22 @@ $ pwd
 $ ls
 build.xml    maven-ant-tasks.jar    README.md    images/    lib/    src/
 ```
-If you chose an installation method other than Ant and you want to run the [Logging example](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java) (which is strongly encouraged!) then you'll need to manually download the Logback JAR files. [Download](http://logback.qos.ch/download.html) the zip or tar.gz file, extract, and drop the JARs into the lib directory.
-
-If you don't, you'll see this error when you try to run the Logging example but the example will still work.
-
-```
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-```
 
 ## The Examples
 
 Start with the [rackspace package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace). There you will find general purpose examples of things that are useful across all services.
 
-  * [Logging](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java) - How to enable and configure logging.
-  * [Authentication](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Authentication.java) - How you can use your credentials to authenticate with the Rackspace open cloud.
+  * [Logging.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java) - How to enable and configure logging.
+  * [Authentication.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Authentication.java) - How you can use your credentials to authenticate with the Rackspace open cloud.
 
 The [cloudfiles package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles) demonstrates how to accomplish common tasks for putting files in and getting files from the cloud.
 
-  * [CloudFilesPublish](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles/CloudFilesPublish.java) - An end to end example of publishing a file on the internet with Cloud Files.
+  * [CloudFilesPublish.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles/CloudFilesPublish.java) - An end to end example of publishing a file on the internet with Cloud Files.
   * Other examples of creating, updating, listing, and deleting containers/objects.
 
 The [cloudservers package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudservers) demonstrates how to accomplish common tasks for working with servers in the cloud.  
 
-  * [CloudServersPublish](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudservers/CloudServersPublish.java) - An end to end example of publishing a web page on the internet with Cloud Servers.
+  * [CloudServersPublish.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudservers/CloudServersPublish.java) - An end to end example of publishing a web page on the internet with Cloud Servers.
   * Other examples of creating, manipulating, listing, and deleting servers.
 
 The [cloudblockstorage package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudblockstorage) demonstrates how to accomplish common tasks for working with block storage (aka volumes) in the cloud.  
@@ -73,6 +64,8 @@ Try out an example.
 java -classpath ".:../../../lib/*:../resources/" org.jclouds.examples.rackspace.cloudservers.CreateServer myUsername myApiKey
 ```
 Watch the terminal for output!
+
+Note: If you're on Windows, the only change you need to make is to use a ';' instead of a ':' in the paths.
 
 ## Eclipse
 To run these examples from Eclipse follow these instructions.

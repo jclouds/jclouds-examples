@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
@@ -37,10 +40,7 @@ import org.jclouds.rest.RestContext;
  * 
  * @author Everett Toews
  */
-public class CreateSnapshot {
-   private static final String NAME = "jclouds-example";
-   private static final String ZONE = "DFW";
-
+public class CreateSnapshot implements Closeable {
    private RestContext<CinderApi, CinderAsyncApi> cinder;
    private VolumeApi volumeApi;
    private SnapshotApi snapshotApi;
@@ -59,10 +59,10 @@ public class CreateSnapshot {
          createSnapshot.init(args);
          Volume volume = createSnapshot.getVolume();
          createSnapshot.createSnapshot(volume);
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          createSnapshot.close();
       }
@@ -70,7 +70,7 @@ public class CreateSnapshot {
 
    private void init(String[] args) {
       // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
       String provider = "rackspace-cloudblockstorage-us";
 
       String username = args[0];
@@ -79,48 +79,46 @@ public class CreateSnapshot {
       cinder = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(ZONE);
-      snapshotApi = cinder.getApi().getSnapshotApiForZone(ZONE);
+      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
+      snapshotApi = cinder.getApi().getSnapshotApiForZone(Constants.ZONE);
    }
 
    /**
     * @return Volume The Volume created in the CreateVolumeAndAttach example
     */
    private Volume getVolume() {
-      for (Volume volume : volumeApi.list()) {
-         if (volume.getName().startsWith(NAME)) {
+      for (Volume volume: volumeApi.list()) {
+         if (volume.getName().startsWith(Constants.NAME)) {
             return volume;
          }
       }
 
-      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    private void createSnapshot(Volume volume) throws TimeoutException {
       System.out.println("Create Snapshot");
-      
+
       CreateSnapshotOptions options = CreateSnapshotOptions.Builder
-            .name(NAME)
+            .name(Constants.NAME)
             .description("Snapshot of " + volume.getId());
-      
+
       Snapshot snapshot = snapshotApi.create(volume.getId(), options);
-      
+
       // Wait for the snapshot to become Available before moving on
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!SnapshotPredicates.awaitAvailable(snapshotApi).apply(snapshot)) {
-         throw new TimeoutException("Timeout on volume: " + volume);     
+         throw new TimeoutException("Timeout on volume: " + volume);
       }
-      
+
       System.out.println("  " + snapshot);
    }
 
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (cinder != null) {
-         cinder.close();
-      }
+   public void close() {
+      closeQuietly(cinder);
    }
 }

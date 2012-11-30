@@ -18,12 +18,13 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import java.util.Properties;
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.config.ComputeServiceProperties;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
@@ -39,10 +40,7 @@ import com.google.common.collect.FluentIterable;
  * 
  * @author Everett Toews
  */
-public class ListVolumeAttachments {
-   private static final String NAME = "jclouds-example";
-   private static final String ZONE = "DFW";
-
+public class ListVolumeAttachments implements Closeable {
    private ComputeService compute;
    private RestContext<NovaApi, NovaAsyncApi> nova;
    private ServerApi serverApi;
@@ -62,10 +60,10 @@ public class ListVolumeAttachments {
          listVolumeAttachments.init(args);
          Server server = listVolumeAttachments.getServer();
          listVolumeAttachments.listVolumeAttachments(server);
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          listVolumeAttachments.close();
       }
@@ -73,26 +71,19 @@ public class ListVolumeAttachments {
 
    private void init(String[] args) {
       // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to
-      // "rackspace-cloudservers-uk"
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];
       String apiKey = args[1];
 
-      // These properties control how often jclouds polls for a status udpate
-      Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
-
       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
-            .overrides(overrides)
             .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
       nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(Constants.ZONE).get();
+      serverApi = nova.getApi().getServerApiForZone(Constants.ZONE);
    }
 
    /**
@@ -101,13 +92,13 @@ public class ListVolumeAttachments {
    private Server getServer() {
       FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 
-      for (Server server : servers) {
-         if (server.getName().startsWith(NAME)) {
+      for (Server server: servers) {
+         if (server.getName().startsWith(Constants.NAME)) {
             return server;
          }
       }
 
-      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    private void listVolumeAttachments(Server server) {
@@ -121,9 +112,7 @@ public class ListVolumeAttachments {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (compute != null) {
-         compute.getContext().close();
-      }
+   public void close() {
+      closeQuietly(compute.getContext());
    }
 }

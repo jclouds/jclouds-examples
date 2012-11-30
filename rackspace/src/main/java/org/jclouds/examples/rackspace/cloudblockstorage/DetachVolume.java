@@ -18,15 +18,15 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
-import java.util.Properties;
+import java.io.Closeable;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.config.ComputeServiceProperties;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.cinder.v1.CinderApi;
@@ -56,12 +56,7 @@ import com.google.inject.Module;
  * 
  * @author Everett Toews
  */
-public class DetachVolume {
-   private static final String NAME = "jclouds-example";
-   private static final String ROOT = "root";
-   private static final String PASSWORD = "sbmFPqaw5d43";
-   private static final String ZONE = "DFW";
-
+public class DetachVolume implements Closeable {
    private ComputeService compute;
    private RestContext<NovaApi, NovaAsyncApi> nova;
    private ServerApi serverApi;
@@ -85,10 +80,10 @@ public class DetachVolume {
          VolumeAttachment volumeAttachment = detachVolume.getVolumeAttachment();
          detachVolume.unmountVolume(volumeAttachment);
          detachVolume.detachVolume(volumeAttachment);
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          detachVolume.close();
       }
@@ -102,29 +97,21 @@ public class DetachVolume {
       String username = args[0];
       String apiKey = args[1];
 
-      // These properties control how often jclouds polls for a status udpate
-      Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
-
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .modules(modules)
-            .overrides(overrides)
             .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
       nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(Constants.ZONE).get();
+      serverApi = nova.getApi().getServerApiForZone(Constants.ZONE);
 
       provider = "rackspace-cloudblockstorage-us";
 
-      cinder = ContextBuilder.newBuilder(provider)
-            .credentials(username, apiKey)
-            .build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(ZONE);
+      cinder = ContextBuilder.newBuilder(provider).credentials(username, apiKey).build(CinderApiMetadata.CONTEXT_TOKEN);
+      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
    }
 
    /**
@@ -133,15 +120,16 @@ public class DetachVolume {
    private VolumeAttachment getVolumeAttachment() {
       FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 
-      for (Server server : servers) {
-         if (server.getName().startsWith(NAME)) {
-            FluentIterable<? extends VolumeAttachment> attachments = volumeAttachmentApi.listAttachmentsOnServer(server.getId());
-            
+      for (Server server: servers) {
+         if (server.getName().startsWith(Constants.NAME)) {
+            FluentIterable<? extends VolumeAttachment> attachments = volumeAttachmentApi
+                  .listAttachmentsOnServer(server.getId());
+
             return attachments.iterator().next();
          }
       }
 
-      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    /**
@@ -150,16 +138,14 @@ public class DetachVolume {
    private void unmountVolume(VolumeAttachment volumeAttachment) {
       System.out.println("Unmount Volume");
 
-      String script = new ScriptBuilder()
-            .addStatement(exec("umount /mnt"))
-            .render(OsFamily.UNIX);
+      String script = new ScriptBuilder().addStatement(exec("umount /mnt")).render(OsFamily.UNIX);
 
       RunScriptOptions options = RunScriptOptions.Builder
-            .overrideLoginUser(ROOT)
-            .overrideLoginPassword(PASSWORD)
+            .overrideLoginUser(Constants.ROOT)
+            .overrideLoginPassword(Constants.PASSWORD)
             .blockOnComplete(true);
-      
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, volumeAttachment.getServerId());
+
+      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(Constants.ZONE, volumeAttachment.getServerId());
       ExecResponse response = compute.runScriptOnNode(zoneAndId.slashEncode(), script, options);
 
       if (response.getExitStatus() == 0) {
@@ -173,7 +159,8 @@ public class DetachVolume {
    private void detachVolume(VolumeAttachment volumeAttachment) throws TimeoutException {
       System.out.println("Detach Volume");
 
-      boolean result = volumeAttachmentApi.detachVolumeFromServer(volumeAttachment.getVolumeId(), volumeAttachment.getServerId());
+      boolean result = volumeAttachmentApi
+            .detachVolumeFromServer(volumeAttachment.getVolumeId(), volumeAttachment.getServerId());
 
       // Wait for the volume to become Attached (aka In Use) before moving on
       // If you want to know what's happening during the polling, enable
@@ -188,13 +175,8 @@ public class DetachVolume {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (compute != null) {
-         compute.getContext().close();
-      }
-
-      if (cinder != null) {
-         cinder.close();
-      }
+   public void close() {
+      closeQuietly(cinder);
+      closeQuietly(compute.getContext());
    }
 }

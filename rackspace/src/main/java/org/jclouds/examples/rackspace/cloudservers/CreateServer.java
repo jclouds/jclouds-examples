@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -38,161 +41,157 @@ import org.jclouds.domain.Location;
  *  
  * @author Everett Toews
  */
-public class CreateServer {
-	private static final String GROUP_NAME = "jclouds-example";
-	
-	private ComputeService compute;
+public class CreateServer implements Closeable {
+   private ComputeService compute;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		CreateServer createServer = new CreateServer();
-		
-		try {
-			createServer.init(args);
-			createServer.createServer();
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			createServer.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      CreateServer createServer = new CreateServer();
 
-	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		// These properties control how often jclouds polls for a status udpate
-	    Properties overrides = new Properties();
-	    overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-	    overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+      try {
+         createServer.init(args);
+         createServer.createServer();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+      finally {
+         createServer.close();
+      }
+   }
 
-	    ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.overrides(overrides)
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
-	}
-	
-	/**
-	 * Create a server based on a Template. This method uses Template.fromHardware() and Template.fromImage() to
-	 * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
-	 * using the following Template.
-	 * 
-	 * Template template = compute.templateBuilder()
-	 *     .locationId(getLocationId())
-	 *     .osFamily(OsFamily.UBUNTU)
-	 *     .osVersionMatches("12.04")
-	 *     .minRam(512)
-	 *     .build();
- 	 */
-	private void createServer() throws RunNodesException, TimeoutException {
-		Template template = compute.templateBuilder()
-			.locationId(getLocationId())
-			.fromHardware(getHardware())
-			.fromImage(getImage())
-			.build();
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
 
-		System.out.println("Create Server");
+      String username = args[0];
+      String apiKey = args[1];
 
-		// This method will continue to poll for the server status and won't return until this server is ACTIVE
-		// If you want to know what's happening during the polling, enable logging. See
-		// /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-		Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(GROUP_NAME, 1, template);
+      // These properties control how often jclouds polls for a status udpate
+      Properties overrides = new Properties();
+      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
 
-		NodeMetadata nodeMetadata = nodes.iterator().next();
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .overrides(overrides)
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
+   }
+
+   /**
+    * Create a server based on a Template. This method uses Template.fromHardware() and Template.fromImage() to
+    * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
+    * using the following Template.
+    * 
+    * Template template = compute.templateBuilder()
+    *     .locationId(getLocationId())
+    *     .osFamily(OsFamily.UBUNTU)
+    *     .osVersionMatches("12.04")
+    *     .minRam(512)
+    *     .build();
+    */
+   private void createServer() throws RunNodesException, TimeoutException {
+      Template template = compute.templateBuilder()
+            .locationId(getLocationId())
+            .fromHardware(getHardware())
+            .fromImage(getImage())
+            .build();
+
+      System.out.println("Create Server");
+
+      // This method will continue to poll for the server status and won't return until this server is ACTIVE
+      // If you want to know what's happening during the polling, enable logging. See
+      // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(Constants.NAME, 1, template);
+
+      NodeMetadata nodeMetadata = nodes.iterator().next();
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
-		System.out.println("  " + nodeMetadata);
+      System.out.println("  " + nodeMetadata);
       System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
       System.out.println("  Password: " + nodeMetadata.getCredentials().getPassword());
-	}
+   }
 
-	/**
-	 * This method uses the generic ComputeService.listAssignableLocations() to find the location.
-	 * 
-	 * @return The first available Location
-	 */
-	private String getLocationId() {
-		System.out.println("Locations");
+   /**
+    * This method uses the generic ComputeService.listAssignableLocations() to find the location.
+    * 
+    * @return The first available Location
+    */
+   private String getLocationId() {
+      System.out.println("Locations");
 
-		Set<? extends Location> locations = compute.listAssignableLocations();
+      Set<? extends Location> locations = compute.listAssignableLocations();
 
-		for (Location location: locations) {
-			System.out.println("  " + location);
-		}
+      for (Location location: locations) {
+         System.out.println("  " + location);
+      }
 
-		return locations.iterator().next().getId();
-	}
+      return locations.iterator().next().getId();
+   }
 
-	/**
-	 * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
-	 * 
-	 * @return The Hardware with 512 MB of RAM
-	 */
-	private Hardware getHardware() {
-		System.out.println("Hardware Profiles (Flavors)");
+   /**
+    * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
+    * 
+    * @return The Hardware with 512 MB of RAM
+    */
+   private Hardware getHardware() {
+      System.out.println("Hardware Profiles (Flavors)");
 
-		Set<? extends Hardware> profiles = compute.listHardwareProfiles();
-		Hardware result = null;
+      Set<? extends Hardware> profiles = compute.listHardwareProfiles();
+      Hardware result = null;
 
-		for (Hardware profile: profiles) {
-			System.out.println("  " + profile);
-			if (profile.getRam() == 512) {
-				result = profile;
-			}
-		}
+      for (Hardware profile: profiles) {
+         System.out.println("  " + profile);
+         if (profile.getRam() == 512) {
+            result = profile;
+         }
+      }
 
-		if (result == null) {
-			System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.");
-			result = profiles.iterator().next();
-		}
+      if (result == null) {
+         System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.");
+         result = profiles.iterator().next();
+      }
 
-		return result;
-	}
+      return result;
+   }
 
-	/**
-	 * This method uses the generic ComputeService.listImages() to find the image.
-	 * 
-	 * @return An Ubuntu 12.04 Image 
-	 */
-	private Image getImage() {
-		System.out.println("Images");
+   /**
+    * This method uses the generic ComputeService.listImages() to find the image.
+    * 
+    * @return An Ubuntu 12.04 Image 
+    */
+   private Image getImage() {
+      System.out.println("Images");
 
-		Set<? extends Image> images = compute.listImages();
-		Image result = null;
+      Set<? extends Image> images = compute.listImages();
+      Image result = null;
 
-		for (Image image: images) {
-			System.out.println("  " + image);
-			if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
-				result = image;
-			}
-		}
+      for (Image image: images) {
+         System.out.println("  " + image);
+         if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
+            result = image;
+         }
+      }
 
-		if (result == null) {
-			System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.");
-			result = images.iterator().next();
-		}
+      if (result == null) {
+         System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.");
+         result = images.iterator().next();
+      }
 
-		return result;
-	}
+      return result;
+   }
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-	}
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(compute.getContext());
+   }
 }

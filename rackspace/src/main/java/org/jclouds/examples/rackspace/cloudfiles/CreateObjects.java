@@ -18,7 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,120 +42,115 @@ import org.jclouds.rest.RestContext;
  *  
  * @author Everett Toews
  */
-public class CreateObjects {
-	private static final String CONTAINER = "jclouds-example";
-	
-	private BlobStore storage;
-	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+public class CreateObjects implements Closeable {
+   private BlobStore storage;
+   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		CreateObjects createContainer = new CreateObjects();
-		
-		try {
-			createContainer.init(args);
-			createContainer.createObjectFromFile();
-			createContainer.createObjectFromString();
-			createContainer.createObjectFromStringWithMetadata();
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
-		} 
-		finally {
-			createContainer.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      CreateObjects createContainer = new CreateObjects();
 
-	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
-		String provider = "cloudfiles-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(BlobStoreContext.class);		
-		storage = context.getBlobStore();
-		swift = context.unwrap();
-	}
+      try {
+         createContainer.init(args);
+         createContainer.createObjectFromFile();
+         createContainer.createObjectFromString();
+         createContainer.createObjectFromStringWithMetadata();
+      }
+      catch (IOException e) {
+         e.printStackTrace();
+      }
+      finally {
+         createContainer.close();
+      }
+   }
 
-	/**
-	 * Create an object from a File using the Swift API. 
-	 */
-	private void createObjectFromFile() throws IOException {
-		System.out.println("Create Object From File");
-		
-		String filename = "createObjectFromFile";
-		String suffix = ".txt";
-		
-	    File tempFile = File.createTempFile(filename, suffix);
-	    tempFile.deleteOnExit();
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      String provider = "cloudfiles-us";
 
-	    BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-	    out.write("createObjectFromFile");
-	    out.close();
+      String username = args[0];
+      String apiKey = args[1];
 
-		SwiftObject object = swift.getApi().newSwiftObject();
-		object.getInfo().setName(filename + suffix);
-		object.setPayload(tempFile);
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(BlobStoreContext.class);
+      storage = context.getBlobStore();
+      swift = context.unwrap();
+   }
 
-		swift.getApi().putObject(CONTAINER, object);
-		
-		System.out.println("  " + filename + suffix);
-	}
+   /**
+    * Create an object from a File using the Swift API. 
+    */
+   private void createObjectFromFile() throws IOException {
+      System.out.println("Create Object From File");
 
-	/**
-	 * Create an object from a String using the Swift API. 
-	 */
-	private void createObjectFromString() {
-		System.out.println("Create Object From String");
-		
-		String filename = "createObjectFromString.txt";
-		
-		SwiftObject object = swift.getApi().newSwiftObject();
-		object.getInfo().setName(filename);
-		object.setPayload("createObjectFromString");
+      String filename = "createObjectFromFile";
+      String suffix = ".txt";
 
-		swift.getApi().putObject(CONTAINER, object);
-		
-		System.out.println("  " + filename);
-	}
-	
-	/**
-	 * Create an object from a String with metadata using the BlobStore API. 
-	 */
-	private void createObjectFromStringWithMetadata() {
-		System.out.println("Create Object From String With Metadata");
+      File tempFile = File.createTempFile(filename, suffix);
+      tempFile.deleteOnExit();
 
-		String filename = "createObjectFromStringWithMetadata.txt";
-		
-		Map<String, String> userMetadata = new HashMap<String, String>();
-		userMetadata.put("key1", "value1");
-		
-		Blob blob = storage
-			.blobBuilder(filename)
-			.payload("createObjectFromStringWithMetadata")
-			.userMetadata(userMetadata)
-			.build();
-		
-		storage.putBlob(CONTAINER, blob);
-		
-		System.out.println("  " + filename);
-	}
+      BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
+      out.write("createObjectFromFile");
+      out.close();
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (storage != null) {
-			storage.getContext().close();
-		}
-	}
+      SwiftObject object = swift.getApi().newSwiftObject();
+      object.getInfo().setName(filename + suffix);
+      object.setPayload(tempFile);
+
+      swift.getApi().putObject(Constants.CONTAINER, object);
+
+      System.out.println("  " + filename + suffix);
+   }
+
+   /**
+    * Create an object from a String using the Swift API. 
+    */
+   private void createObjectFromString() {
+      System.out.println("Create Object From String");
+
+      String filename = "createObjectFromString.txt";
+
+      SwiftObject object = swift.getApi().newSwiftObject();
+      object.getInfo().setName(filename);
+      object.setPayload("createObjectFromString");
+
+      swift.getApi().putObject(Constants.CONTAINER, object);
+
+      System.out.println("  " + filename);
+   }
+
+   /**
+    * Create an object from a String with metadata using the BlobStore API. 
+    */
+   private void createObjectFromStringWithMetadata() {
+      System.out.println("Create Object From String With Metadata");
+
+      String filename = "createObjectFromStringWithMetadata.txt";
+
+      Map<String, String> userMetadata = new HashMap<String, String>();
+      userMetadata.put("key1", "value1");
+
+      Blob blob = storage.blobBuilder(filename)
+            .payload("createObjectFromStringWithMetadata")
+            .userMetadata(userMetadata)
+            .build();
+
+      storage.putBlob(Constants.CONTAINER, blob);
+
+      System.out.println("  " + filename);
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(storage.getContext());
+   }
 }

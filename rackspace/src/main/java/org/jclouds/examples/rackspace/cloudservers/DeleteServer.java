@@ -18,8 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 
+import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
 
@@ -34,70 +36,67 @@ import org.jclouds.compute.domain.NodeMetadata;
  *  
  * @author Everett Toews
  */
-public class DeleteServer {
-	private static final String GROUP_NAME = "jclouds-example";
-	private ComputeService compute;
-	
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		DeleteServer deleteServer = new DeleteServer();
-		
-		try {
-			deleteServer.init(args);
-			deleteServer.deleteServer();
-		} 
-		finally {
-			deleteServer.close();
-		}
-	}
+public class DeleteServer implements Closeable {
+   private ComputeService compute;
 
-	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      DeleteServer deleteServer = new DeleteServer();
 
-		// These properties control how often jclouds polls for a status udpate
-	    Properties overrides = new Properties();
-	    overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-	    overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+      try {
+         deleteServer.init(args);
+         deleteServer.deleteServer();
+      }
+      finally {
+         deleteServer.close();
+      }
+   }
 
-		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.overrides(overrides)
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
-	}
-	
-	/**
-	 * This will delete all servers in group {@link GROUP_NAME}
-	 */
-	private void deleteServer() {
-		System.out.println("Delete Server");
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
 
-		// This method will continue to poll for the server status and won't return until this server is DELETED
-		// If you want to know what's happening during the polling, enable logging. See
-		// /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-		Set<? extends NodeMetadata> servers = compute.destroyNodesMatching(inGroup(GROUP_NAME));		
+      String username = args[0];
+      String apiKey = args[1];
 
-		for (NodeMetadata nodeMetadata: servers) {
-			System.out.println("  " + nodeMetadata);
-		}
-	}
+      // These properties control how often jclouds polls for a status udpate
+      Properties overrides = new Properties();
+      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-	}
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .overrides(overrides)
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
+   }
+
+   /**
+    * This will delete all servers in group {@link Constants.NAME}
+    */
+   private void deleteServer() {
+      System.out.println("Delete Server");
+
+      // This method will continue to poll for the server status and won't return until this server is DELETED
+      // If you want to know what's happening during the polling, enable logging. See
+      // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      Set<? extends NodeMetadata> servers = compute.destroyNodesMatching(inGroup(Constants.NAME));
+
+      for (NodeMetadata nodeMetadata: servers) {
+         System.out.println("  " + nodeMetadata);
+      }
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(compute.getContext());
+   }
 }

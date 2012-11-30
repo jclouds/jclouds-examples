@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
@@ -34,10 +37,7 @@ import org.jclouds.rest.RestContext;
  * 
  * @author Everett Toews
  */
-public class DeleteSnapshot {
-   private static final String NAME = "jclouds-example";
-   private static final String ZONE = "DFW";
-
+public class DeleteSnapshot implements Closeable {
    private RestContext<CinderApi, CinderAsyncApi> cinder;
    private SnapshotApi snapshotApi;
 
@@ -66,7 +66,7 @@ public class DeleteSnapshot {
 
    private void init(String[] args) {
       // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
       String provider = "rackspace-cloudblockstorage-us";
 
       String username = args[0];
@@ -75,7 +75,7 @@ public class DeleteSnapshot {
       cinder = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .build(CinderApiMetadata.CONTEXT_TOKEN);
-      snapshotApi = cinder.getApi().getSnapshotApiForZone(ZONE);
+      snapshotApi = cinder.getApi().getSnapshotApiForZone(Constants.ZONE);
    }
 
    /**
@@ -83,12 +83,12 @@ public class DeleteSnapshot {
     */
    private Snapshot getSnapshot() {
       for (Snapshot snapshot : snapshotApi.list()) {
-         if (snapshot.getName().startsWith(NAME)) {
+         if (snapshot.getName().startsWith(Constants.NAME)) {
             return snapshot;
          }
       }
 
-      throw new RuntimeException(NAME + " not found. Run the CreateSnapshotAndAttach example first.");
+      throw new RuntimeException(Constants.NAME + " not found. Run the CreateSnapshot example first.");
    }
 
    private void deleteSnapshot(Snapshot snapshot) throws TimeoutException {
@@ -97,8 +97,8 @@ public class DeleteSnapshot {
       boolean result = snapshotApi.delete(snapshot.getId());
 
       // Wait for the snapshot to be deleted before moving on
-      // If you want to know what's happening during the polling, enable
-      // logging. See /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      // If you want to know what's happening during the polling, enable logging.
+      // See /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!SnapshotPredicates.awaitDeleted(snapshotApi).apply(snapshot)) {
          throw new TimeoutException("Timeout on snapshot: " + snapshot);
       }
@@ -109,9 +109,7 @@ public class DeleteSnapshot {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (cinder != null) {
-         cinder.close();
-      }
+   public void close() {
+      closeQuietly(cinder);
    }
 }

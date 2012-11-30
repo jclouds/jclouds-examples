@@ -18,8 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
+import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -47,10 +49,7 @@ import com.google.inject.Module;
  * This example will create a server, start a webserver on it, and publish a
  * page on the internet!
  */
-public class CloudServersPublish {
-   private static final String GROUP_NAME = "jclouds-example";
-   private static final String LOCATION = "DFW";
-
+public class CloudServersPublish implements Closeable {
    private ComputeService compute;
 
    /**
@@ -67,17 +66,18 @@ public class CloudServersPublish {
          cloudServersPublish.init(args);
          NodeMetadata node = cloudServersPublish.createServer();
          cloudServersPublish.configureAndStartWebserver(node);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
          e.printStackTrace();
-      } finally {
+      }
+      finally {
          cloudServersPublish.close();
       }
    }
 
    private void init(String[] args) {
       // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to
-      // "rackspace-cloudservers-uk"
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];
@@ -87,26 +87,29 @@ public class CloudServersPublish {
 
       // These properties control how often jclouds polls for a status udpate
       Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider).credentials(username, apiKey)
-            .modules(modules).buildView(ComputeServiceContext.class);
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .modules(modules)
+            .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
    }
 
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
-      Template template = compute.templateBuilder().locationId(LOCATION).osDescriptionMatches(".*CentOS 6.2.*")
-            .minRam(512).build();
+      Template template = compute.templateBuilder()
+            .locationId(Constants.ZONE)
+            .osDescriptionMatches(".*CentOS 6.2.*")
+            .minRam(512)
+            .build();
 
       System.out.println("Create Server");
 
-      // This method will continue to poll for the server status and won't
-      // return until this server is ACTIVE
-      // If you want to know what's happening during the polling, enable
-      // logging. See
-      // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(GROUP_NAME, 1, template);
+      // This method will continue to poll for the server status and won't return until this server is ACTIVE
+      // If you want to know what's happening during the polling, enable logging.
+      // See /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(Constants.NAME, 1, template);
 
       NodeMetadata nodeMetadata = nodes.iterator().next();
 
@@ -122,11 +125,11 @@ public class CloudServersPublish {
 
       waitForSsh(publicAddress);
 
-      String script = new ScriptBuilder()
-            .addStatement(exec("yum -y install httpd"))
+      String script = new ScriptBuilder().addStatement(exec("yum -y install httpd"))
             .addStatement(exec("/usr/sbin/apachectl start"))
             .addStatement(exec("iptables -I INPUT -p tcp --dport 80 -j ACCEPT"))
-            .addStatement(exec("echo 'Hello Cloud Servers' > /var/www/html/index.html")).render(OsFamily.UNIX);
+            .addStatement(exec("echo 'Hello Cloud Servers' > /var/www/html/index.html"))
+            .render(OsFamily.UNIX);
 
       RunScriptOptions options = RunScriptOptions.Builder.blockOnComplete(true);
 
@@ -148,9 +151,7 @@ public class CloudServersPublish {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (compute != null) {
-         compute.getContext().close();
-      }
+   public void close() {
+      closeQuietly(compute.getContext());
    }
 }

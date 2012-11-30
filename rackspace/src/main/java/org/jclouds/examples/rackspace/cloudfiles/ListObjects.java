@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
@@ -34,73 +37,69 @@ import org.jclouds.rest.RestContext;
  *  
  * @author Everett Toews
  */
-public class ListObjects {
-	private static final String CONTAINER = "jclouds-example";
-	
-	private BlobStore storage;
-	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+public class ListObjects implements Closeable {
+   private BlobStore storage;
+   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		ListObjects listContainers = new ListObjects();
-		
-		try {
-			listContainers.init(args);
-			listContainers.listObjects();
-			listContainers.listObjectsWithFiltering();
-		} 
-		finally {
-			listContainers.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      ListObjects listContainers = new ListObjects();
 
-	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
-		String provider = "cloudfiles-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(BlobStoreContext.class);		
-		storage = context.getBlobStore();
-		swift = context.unwrap();
-	}
+      try {
+         listContainers.init(args);
+         listContainers.listObjects();
+         listContainers.listObjectsWithFiltering();
+      }
+      finally {
+         listContainers.close();
+      }
+   }
 
-	private void listObjects() {
-		System.out.println("List Objects");
-		
-		Set<ObjectInfo> objects = swift.getApi().listObjects(CONTAINER);
-		
-		for (ObjectInfo objectInfo: objects) {
-			System.out.println("  " + objectInfo);
-		}
-	}
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      String provider = "cloudfiles-us";
 
-	private void listObjectsWithFiltering() {
-		System.out.println("List Objects With Filtering");
-		
-		ListContainerOptions filter = ListContainerOptions.Builder.withPrefix("createObjectFromString");
-		Set<ObjectInfo> objects = swift.getApi().listObjects(CONTAINER,  filter);
-		
-		for (ObjectInfo objectInfo: objects) {
-			System.out.println("  " + objectInfo);
-		}
-	}
+      String username = args[0];
+      String apiKey = args[1];
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (storage != null) {
-			storage.getContext().close();
-		}
-	}
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(BlobStoreContext.class);
+      storage = context.getBlobStore();
+      swift = context.unwrap();
+   }
+
+   private void listObjects() {
+      System.out.println("List Objects");
+
+      Set<ObjectInfo> objects = swift.getApi().listObjects(Constants.CONTAINER);
+
+      for (ObjectInfo objectInfo: objects) {
+         System.out.println("  " + objectInfo);
+      }
+   }
+
+   private void listObjectsWithFiltering() {
+      System.out.println("List Objects With Filtering");
+
+      ListContainerOptions filter = ListContainerOptions.Builder.withPrefix("createObjectFromString");
+      Set<ObjectInfo> objects = swift.getApi().listObjects(Constants.CONTAINER, filter);
+
+      for (ObjectInfo objectInfo: objects) {
+         System.out.println("  " + objectInfo);
+      }
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(storage.getContext());
+   }
 }

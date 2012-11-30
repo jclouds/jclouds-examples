@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
@@ -46,58 +49,55 @@ import com.google.inject.Module;
  * 
  * @author Everett Toews
  */
-public class Logging {
-	private ComputeService compute;
-	private RestContext<NovaApi, NovaAsyncApi> nova;
-	private Set<String> zones;
+public class Logging implements Closeable {
+   private ComputeService compute;
+   private RestContext<NovaApi, NovaAsyncApi> nova;
+   private Set<String> zones;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		Logging logging = new Logging();
-		
-		try {
-			logging.init(args);
-		}
-		finally {
-			logging.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      Logging logging = new Logging();
 
-	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
+      try {
+         logging.init(args);
+      }
+      finally {
+         logging.close();
+      }
+   }
 
-		// This module is responsible for enabling logging
-		Iterable<Module> modules = ImmutableSet.<Module> of(
-			new SLF4JLoggingModule());
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
 
-		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.modules(modules) // don't forget to add the modules to your context!
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
-		nova = context.unwrap();
+      String username = args[0];
+      String apiKey = args[1];
 
-		// Calling getConfiguredZones() talks to the cloud which gets logged
-		zones = nova.getApi().getConfiguredZones();
-		System.out.println("Zones: " + zones);
-	}
+      // This module is responsible for enabling logging
+      Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-	}
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .modules(modules) // don't forget to add the modules to your context!
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
+      nova = context.unwrap();
+
+      // Calling getConfiguredZones() talks to the cloud which gets logged
+      zones = nova.getApi().getConfiguredZones();
+      System.out.println("Zones: " + zones);
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(compute.getContext());
+   }
 }

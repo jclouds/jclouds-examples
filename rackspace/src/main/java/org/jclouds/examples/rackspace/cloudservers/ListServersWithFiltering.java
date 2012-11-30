@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
@@ -35,91 +38,83 @@ import com.google.common.base.Predicate;
  *  
  * @author Everett Toews
  */
-public class ListServersWithFiltering {
-	private static final String ZONE = "DFW";
-	
-	private ComputeService compute;
+public class ListServersWithFiltering implements Closeable {
+   private ComputeService compute;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		ListServersWithFiltering listServersWithFiltering = new ListServersWithFiltering();
-		
-		try {
-			listServersWithFiltering.init(args);
-			listServersWithFiltering.listServersByParentLocationId();
-			listServersWithFiltering.listServersByNameStartsWith();
-		} 
-		finally {
-			listServersWithFiltering.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      ListServersWithFiltering listServersWithFiltering = new ListServersWithFiltering();
 
-	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
-	}
-	
-	/**
-	 * List the servers filtered by the Predicates inGroup("jclouds") and not(TERMINATED).
-	 */
-	private void listServersByParentLocationId() {
-		System.out.println("List Servers By Parent Location Id");
-		
-		Set<? extends NodeMetadata> servers = 
-			 compute.listNodesDetailsMatching(NodePredicates.parentLocationId(ZONE));
-		
-		for (NodeMetadata nodeMetadata: servers) {
-			System.out.println("  " + nodeMetadata);
-		}
-	}
+      try {
+         listServersWithFiltering.init(args);
+         listServersWithFiltering.listServersByParentLocationId();
+         listServersWithFiltering.listServersByNameStartsWith();
+      }
+      finally {
+         listServersWithFiltering.close();
+      }
+   }
 
-	private void listServersByNameStartsWith() {
-		System.out.println("List Servers By Name Starts With");
-		
-		Set<? extends NodeMetadata> servers = 
-			 compute.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));
-		
-		for (NodeMetadata nodeMetadata: servers) {
-			System.out.println("  " + nodeMetadata);
-		}
-	}
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-	}
-	
-	public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
-		Preconditions2.checkNotEmpty(prefix, "prefix must be defined");
+      String username = args[0];
+      String apiKey = args[1];
 
-		return new Predicate<ComputeMetadata>() {
-			@Override
-			public boolean apply(ComputeMetadata computeMetadata) {
-				return computeMetadata.getName().startsWith(prefix);
-			}
-		
-			@Override
-			public String toString() {
-				return "nameStartsWith(" + prefix + ")";
-			}
-		};
-	}
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
+   }
+
+   private void listServersByParentLocationId() {
+      System.out.println("List Servers By Parent Location Id");
+
+      Set<? extends NodeMetadata> servers = compute.listNodesDetailsMatching(NodePredicates
+            .parentLocationId(Constants.ZONE));
+
+      for (NodeMetadata nodeMetadata: servers) {
+         System.out.println("  " + nodeMetadata);
+      }
+   }
+
+   private void listServersByNameStartsWith() {
+      System.out.println("List Servers By Name Starts With");
+
+      Set<? extends NodeMetadata> servers = compute.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));
+
+      for (NodeMetadata nodeMetadata: servers) {
+         System.out.println("  " + nodeMetadata);
+      }
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(compute.getContext());
+   }
+
+   public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
+      Preconditions2.checkNotEmpty(prefix, "prefix must be defined");
+
+      return new Predicate<ComputeMetadata>() {
+         @Override
+         public boolean apply(ComputeMetadata computeMetadata) {
+            return computeMetadata.getName().startsWith(prefix);
+         }
+
+         @Override
+         public String toString() {
+            return "nameStartsWith(" + prefix + ")";
+         }
+      };
+   }
 }

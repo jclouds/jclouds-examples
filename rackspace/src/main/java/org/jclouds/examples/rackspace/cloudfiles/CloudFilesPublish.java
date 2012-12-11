@@ -18,7 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,103 +40,96 @@ import org.jclouds.rest.RestContext;
 /**
  * This example will create a container, put a file in it, and publish it on the internet!
  */
-public class CloudFilesPublish {
-	private static final String CONTAINER = "jclouds-example-publish";
-	private static final String FILENAME = "createObjectFromFile";
-	private static final String SUFFIX = ".html";
-		
-	
-	private BlobStore storage;
-	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
-	private CloudFilesClient rackspace;
+public class CloudFilesPublish implements Closeable {
+   private BlobStore storage;
+   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private CloudFilesClient rackspace;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		CloudFilesPublish cloudFilesPublish = new CloudFilesPublish();
-		
-		try {
-			cloudFilesPublish.init(args);
-			cloudFilesPublish.createContainer();
-			cloudFilesPublish.createObjectFromFile();
-			cloudFilesPublish.enableCdnContainer();
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
-		} 
-		finally {
-			cloudFilesPublish.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      CloudFilesPublish cloudFilesPublish = new CloudFilesPublish();
 
-	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
-		String provider = "cloudfiles-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(BlobStoreContext.class);		
-		storage = context.getBlobStore();
-		swift = context.unwrap();
-		rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
-	}
+      try {
+         cloudFilesPublish.init(args);
+         cloudFilesPublish.createContainer();
+         cloudFilesPublish.createObjectFromFile();
+         cloudFilesPublish.enableCdnContainer();
+      }
+      catch (IOException e) {
+         e.printStackTrace();
+      }
+      finally {
+         cloudFilesPublish.close();
+      }
+   }
 
-	/**
-	 * This method will create a container in Cloud Files where you can store and
-	 * retrieve any kind of digital asset.
-	 */
-	private void createContainer() {
-		System.out.println("Create Container");		
-		swift.getApi().createContainer(CONTAINER);
-		System.out.println("  " + CONTAINER);
-	}
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      String provider = "cloudfiles-us";
 
-	/**
-	 * This method will put a plain text object into the container.
-	 */
-	private void createObjectFromFile() throws IOException {
-		System.out.println("Create Object From File");
-		
-	    File tempFile = File.createTempFile(FILENAME, SUFFIX);
-	    tempFile.deleteOnExit();
+      String username = args[0];
+      String apiKey = args[1];
 
-	    BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-	    out.write("Hello Cloud Files");
-	    out.close();
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(BlobStoreContext.class);
+      storage = context.getBlobStore();
+      swift = context.unwrap();
+      rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
+   }
 
-		SwiftObject object = swift.getApi().newSwiftObject();
-		object.getInfo().setName(FILENAME + SUFFIX);
-		object.setPayload(tempFile);
+   /**
+    * This method will create a container in Cloud Files where you can store and
+    * retrieve any kind of digital asset.
+    */
+   private void createContainer() {
+      System.out.println("Create Container");
+      swift.getApi().createContainer(Constants.CONTAINER_PUBLISH);
+      System.out.println("  " + Constants.CONTAINER_PUBLISH);
+   }
 
-		swift.getApi().putObject(CONTAINER, object);
-		
-		System.out.println("  " + FILENAME + SUFFIX);
-	}
+   /**
+    * This method will put a plain text object into the container.
+    */
+   private void createObjectFromFile() throws IOException {
+      System.out.println("Create Object From File");
 
-	/**
-	 * This method will put your container on a Content Distribution Network and
-	 * make it 100% publicly accessible over the Internet.
-	 */
-	private void enableCdnContainer() {
-		System.out.println("Enable CDN Container");
-		URI cdnURI = rackspace.enableCDN(CONTAINER);
-		System.out.println("  Go to " + cdnURI + "/" + FILENAME + SUFFIX);
-	}
+      File tempFile = File.createTempFile(Constants.FILENAME, Constants.SUFFIX);
+      tempFile.deleteOnExit();
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (storage != null) {
-			storage.getContext().close();
-		}
-	}
+      BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
+      out.write("Hello Cloud Files");
+      out.close();
+
+      SwiftObject object = swift.getApi().newSwiftObject();
+      object.getInfo().setName(Constants.FILENAME + Constants.SUFFIX);
+      object.setPayload(tempFile);
+
+      swift.getApi().putObject(Constants.CONTAINER_PUBLISH, object);
+
+      System.out.println("  " + Constants.FILENAME + Constants.SUFFIX);
+   }
+
+   /**
+    * This method will put your container on a Content Distribution Network and
+    * make it 100% publicly accessible over the Internet.
+    */
+   private void enableCdnContainer() {
+      System.out.println("Enable CDN Container");
+      URI cdnURI = rackspace.enableCDN(Constants.CONTAINER);
+      System.out.println("  Go to " + cdnURI + "/" + Constants.FILENAME + Constants.SUFFIX);
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(storage.getContext());
+   }
 }

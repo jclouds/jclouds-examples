@@ -18,6 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -33,64 +37,58 @@ import com.google.common.collect.ImmutableMap;
  *  
  * @author Everett Toews
  */
-public class CreateContainer {
-	private static final String CONTAINER = "jclouds-example";
-	
-	private BlobStore storage;
-	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+public class CreateContainer implements Closeable {
+   private BlobStore storage;
+   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		CreateContainer createContainer = new CreateContainer();
-		
-		try {
-			createContainer.init(args);
-			createContainer.createContainer();
-		} 
-		finally {
-			createContainer.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      CreateContainer createContainer = new CreateContainer();
 
-	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
-		String provider = "cloudfiles-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(BlobStoreContext.class);		
-		storage = context.getBlobStore();
-		swift = context.unwrap();
-	}
+      try {
+         createContainer.init(args);
+         createContainer.createContainer();
+      }
+      finally {
+         createContainer.close();
+      }
+   }
 
-	private void createContainer() {
-		System.out.println("Create Container");
-		
-		CreateContainerOptions options = CreateContainerOptions.Builder
-			.withMetadata(ImmutableMap.<String, String> of(
-				"key1", "value1",
-				"key2", "value2")); 
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      String provider = "cloudfiles-us";
 
-		swift.getApi().createContainer(CONTAINER, options);
+      String username = args[0];
+      String apiKey = args[1];
 
-		System.out.println("  " + CONTAINER);
-	}
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(BlobStoreContext.class);
+      storage = context.getBlobStore();
+      swift = context.unwrap();
+   }
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (storage != null) {
-			storage.getContext().close();
-		}
-	}
+   private void createContainer() {
+      System.out.println("Create Container");
+
+      CreateContainerOptions options = CreateContainerOptions.Builder
+            .withMetadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
+
+      swift.getApi().createContainer(Constants.CONTAINER, options);
+
+      System.out.println("  " + Constants.CONTAINER);
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(storage.getContext());
+   }
 }

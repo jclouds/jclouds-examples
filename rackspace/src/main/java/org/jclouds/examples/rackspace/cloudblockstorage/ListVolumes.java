@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
@@ -32,7 +35,7 @@ import org.jclouds.rest.RestContext;
  * 
  * @author Everett Toews
  */
-public class ListVolumes {
+public class ListVolumes implements Closeable {
    private RestContext<CinderApi, CinderAsyncApi> cinder;
    private Set<String> zones;
 
@@ -49,10 +52,10 @@ public class ListVolumes {
       try {
          listVolumes.init(args);
          listVolumes.listVolumes();
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          listVolumes.close();
       }
@@ -60,8 +63,7 @@ public class ListVolumes {
 
    private void init(String[] args) {
       // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to
-      // "rackspace-cloudservers-uk"
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
       String provider = "rackspace-cloudblockstorage-us";
 
       String username = args[0];
@@ -75,10 +77,10 @@ public class ListVolumes {
 
    private void listVolumes() {
       System.out.println("List Volumes");
-      
+
       for (String zone: zones) {
          System.out.println("  " + zone);
-         
+
          for (Volume volume: cinder.getApi().getVolumeApiForZone(zone).listInDetail()) {
             System.out.println("    " + volume);
          }
@@ -88,9 +90,7 @@ public class ListVolumes {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (cinder != null) {
-         cinder.close();
-      }
+   public void close() {
+      closeQuietly(cinder);
    }
 }

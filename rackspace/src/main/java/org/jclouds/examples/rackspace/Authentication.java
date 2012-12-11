@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Properties;
 
 import org.jclouds.ContextBuilder;
@@ -43,70 +46,68 @@ import org.jclouds.rest.RestContext;
  * 
  * @author Everett Toews
  */
-public class Authentication {
-	private ComputeService compute;
-	private RestContext<NovaApi, NovaAsyncApi> nova;
+public class Authentication implements Closeable {
+   private ComputeService compute;
+   private RestContext<NovaApi, NovaAsyncApi> nova;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key or password
-	 * [Optional] The third argument (args[2]) must be "password" if password authentication is used, 
-	 *            otherwise default to using API key.
-	 */
-	public static void main(String[] args) {
-		Authentication authentication = new Authentication();
-		
-		try {
-			authentication.init(args);
-			authentication.authenticateOnCall();
-		}
-		finally {
-			authentication.close();
-		}
-	}
-	
-	private void init(String[] args) {	
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
-		String provider = "rackspace-cloudservers-us";
-		
-		String username = args[0];
-		String credential = args[1];
-		
-		Properties overrides = new Properties();
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key or password
+    * [Optional] The third argument (args[2]) must be "password" if password authentication is used, 
+    *            otherwise default to using API key.
+    */
+   public static void main(String[] args) {
+      Authentication authentication = new Authentication();
 
-		if (args.length == 3 && "password".equals(args[2])) {
-			overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
-		}
+      try {
+         authentication.init(args);
+         authentication.authenticateOnCall();
+      }
+      finally {
+         authentication.close();
+      }
+   }
 
-		ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, credential)
-			.overrides(overrides)
-			.buildView(ComputeServiceContext.class);
-		compute = context.getComputeService();
-		nova = context.unwrap();
-	}
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      String provider = "rackspace-cloudservers-us";
 
-	/**
-	 * Calling getConfiguredZones() causes jclouds to authenticate. If authentication doesn't work, the call to
-	 * getConfiguredZones() will result in an org.jclouds.rest.AuthorizationException
-	 */
-	private void authenticateOnCall() {
-		System.out.println("Authenticate On Call");
-		
-		nova.getApi().getConfiguredZones();
-		
-		System.out.println("  Authenticated");
-	}
+      String username = args[0];
+      String credential = args[1];
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (compute != null) {
-			compute.getContext().close();
-		}
-	}
+      Properties overrides = new Properties();
+
+      if (args.length == 3 && "password".equals(args[2])) {
+         overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
+      }
+
+      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, credential)
+            .overrides(overrides)
+            .buildView(ComputeServiceContext.class);
+      compute = context.getComputeService();
+      nova = context.unwrap();
+   }
+
+   /**
+    * Calling getConfiguredZones() causes jclouds to authenticate. If authentication doesn't work, the call to
+    * getConfiguredZones() will result in an org.jclouds.rest.AuthorizationException
+    */
+   private void authenticateOnCall() {
+      System.out.println("Authenticate On Call");
+
+      nova.getApi().getConfiguredZones();
+
+      System.out.println("  Authenticated");
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(compute.getContext());
+   }
 }

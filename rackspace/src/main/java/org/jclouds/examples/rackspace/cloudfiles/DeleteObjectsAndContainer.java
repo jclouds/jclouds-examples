@@ -18,6 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static com.google.common.io.Closeables.closeQuietly;
+
+import java.io.Closeable;
 import java.util.Set;
 
 import org.jclouds.ContextBuilder;
@@ -36,74 +39,71 @@ import org.jclouds.rest.RestContext;
  *  
  * @author Everett Toews
  */
-public class DeleteObjectsAndContainer {
-	private static final String CONTAINER = "jclouds-example";
-	
-	private BlobStore storage;
-	private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+public class DeleteObjectsAndContainer implements Closeable {
+   private BlobStore storage;
+   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
-	/**
-	 * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-	 * 
-	 * The first argument (args[0]) must be your username
-	 * The second argument (args[1]) must be your API key
-	 */
-	public static void main(String[] args) {
-		DeleteObjectsAndContainer deleteObjectsAndContainer = new DeleteObjectsAndContainer();
-		
-		try {
-			deleteObjectsAndContainer.init(args);
-			deleteObjectsAndContainer.deleteObjectsAndContainer();
-		} 
-		finally {
-			deleteObjectsAndContainer.close();
-		}
-	}
+   /**
+    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * 
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
+    */
+   public static void main(String[] args) {
+      DeleteObjectsAndContainer deleteObjectsAndContainer = new DeleteObjectsAndContainer();
 
-	private void init(String[] args) {
-		// The provider configures jclouds to use the Rackspace open cloud (US)
-		// to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
-		String provider = "cloudfiles-us";
-		
-		String username = args[0];
-		String apiKey = args[1];
-		
-		BlobStoreContext context = ContextBuilder.newBuilder(provider)
-			.credentials(username, apiKey)
-			.buildView(BlobStoreContext.class);		
-		storage = context.getBlobStore();
-		swift = context.unwrap();
-	}
+      try {
+         deleteObjectsAndContainer.init(args);
+         deleteObjectsAndContainer.deleteObjectsAndContainer();
+      }
+      finally {
+         deleteObjectsAndContainer.close();
+      }
+   }
 
-	/**
-	 * This will delete all containers that start with {@link CONTAINER} and the objects within those containers.
-	 */
-	private void deleteObjectsAndContainer() {
-		System.out.println("Delete Container");
-		
-		Set<ContainerMetadata> containers = swift.getApi().listContainers(ListContainerOptions.Builder.withPrefix(CONTAINER));
-		
-		for (ContainerMetadata container: containers) {
-			System.out.println("  " + container.getName());
-			
-			Set<ObjectInfo> objects = swift.getApi().listObjects(container.getName());
-			
-			for (ObjectInfo object: objects) {
-				System.out.println("    " + object.getName());
-				
-				swift.getApi().removeObject(container.getName(), object.getName());
-			}			
+   private void init(String[] args) {
+      // The provider configures jclouds to use the Rackspace open cloud (US)
+      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      String provider = "cloudfiles-us";
 
-			swift.getApi().deleteContainerIfEmpty(container.getName());
-		}
-	}
+      String username = args[0];
+      String apiKey = args[1];
 
-	/**
-	 * Always close your service when you're done with it.
-	 */
-	private void close() {
-		if (storage != null) {
-			storage.getContext().close();
-		}
-	}
+      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+            .credentials(username, apiKey)
+            .buildView(BlobStoreContext.class);
+      storage = context.getBlobStore();
+      swift = context.unwrap();
+   }
+
+   /**
+    * This will delete all containers that start with {@link CONTAINER} and the objects within those containers.
+    */
+   private void deleteObjectsAndContainer() {
+      System.out.println("Delete Container");
+
+      Set<ContainerMetadata> containers = swift.getApi()
+            .listContainers(ListContainerOptions.Builder.withPrefix(Constants.CONTAINER));
+
+      for (ContainerMetadata container: containers) {
+         System.out.println("  " + container.getName());
+
+         Set<ObjectInfo> objects = swift.getApi().listObjects(container.getName());
+
+         for (ObjectInfo object: objects) {
+            System.out.println("    " + object.getName());
+
+            swift.getApi().removeObject(container.getName(), object.getName());
+         }
+
+         swift.getApi().deleteContainerIfEmpty(container.getName());
+      }
+   }
+
+   /**
+    * Always close your service when you're done with it.
+    */
+   public void close() {
+      closeQuietly(storage.getContext());
+   }
 }

@@ -18,8 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
+import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -58,12 +60,7 @@ import com.google.inject.Module;
  * 
  * @author Everett Toews
  */
-public class CreateVolumeAndAttach {
-   private static final String NAME = "jclouds-example";
-   private static final String PASSWORD = "sbmFPqaw5d43";
-   private static final String ZONE = "DFW";
-   private static final String DEVICE = "/dev/xvdd";
-
+public class CreateVolumeAndAttach implements Closeable {
    private ComputeService compute;
    private RestContext<NovaApi, NovaAsyncApi> nova;
    private VolumeAttachmentApi volumeAttachmentApi;
@@ -105,8 +102,8 @@ public class CreateVolumeAndAttach {
 
       // These properties control how often jclouds polls for a status udpate
       Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, "20000");
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, "20000");
+      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
@@ -117,7 +114,7 @@ public class CreateVolumeAndAttach {
             .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
       nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(Constants.ZONE).get();
 
       provider = "rackspace-cloudblockstorage-us";
 
@@ -125,35 +122,35 @@ public class CreateVolumeAndAttach {
             .credentials(username, apiKey)
             .modules(modules)
             .build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(ZONE);
+      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
    }
 
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
       Template template = compute.templateBuilder()
-            .locationId(ZONE)
+            .locationId(Constants.ZONE)
             .osDescriptionMatches(".*CentOS 6.2.*")
-            .minRam(512)
-            .build();
+            .minRam(512).build();
 
       System.out.println("Create Server");
 
-      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(NAME, 1, template);
+      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(Constants.NAME, 1, template);
       NodeMetadata nodeMetadata = nodes.iterator().next();
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
-      
+
       // We set the password to something we know so we can login in the DetachVolume example
-      nova.getApi().getServerApiForZone(ZONE).changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
+      nova.getApi().getServerApiForZone(Constants.ZONE)
+            .changeAdminPass(nodeMetadata.getProviderId(), Constants.PASSWORD);
 
       System.out.println("  " + nodeMetadata);
       System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
-      System.out.println("  Password: " + PASSWORD);
+      System.out.println("  Password: " + Constants.PASSWORD);
 
       return nodeMetadata;
    }
 
    private Volume createVolume() throws TimeoutException {
       CreateVolumeOptions options = CreateVolumeOptions.Builder
-            .name(NAME)
+            .name(Constants.NAME)
             .metadata(ImmutableMap.<String, String> of("key1", "value1"));
 
       System.out.println("Create Volume");
@@ -179,7 +176,7 @@ public class CreateVolumeAndAttach {
       // Note the use of NodeMetadata.getProviderId()
       // This is necessary as NodeMetadata.getId() will return a Location/Id combination
       VolumeAttachment volumeAttachment = volumeAttachmentApi
-            .attachVolumeToServerAsDevice(volume.getId(), node.getProviderId(), DEVICE);
+            .attachVolumeToServerAsDevice(volume.getId(), node.getProviderId(), Constants.DEVICE);
 
       // Wait for the volume to become Attached (aka In Use) before moving on
       if (!VolumePredicates.awaitInUse(volumeApi).apply(volume)) {
@@ -199,7 +196,7 @@ public class CreateVolumeAndAttach {
 
       RunScriptOptions options = RunScriptOptions.Builder
             .blockOnComplete(true)
-            .overrideLoginPassword(PASSWORD);
+            .overrideLoginPassword(Constants.PASSWORD);
 
       ExecResponse response = compute.runScriptOnNode(node.getId(), script, options);
 
@@ -214,13 +211,8 @@ public class CreateVolumeAndAttach {
    /**
     * Always close your service when you're done with it.
     */
-   private void close() {
-      if (compute != null) {
-         compute.getContext().close();
-      }
-
-      if (cinder != null) {
-         cinder.close();
-      }
+   public void close() {
+      closeQuietly(cinder);
+      closeQuietly(compute.getContext());
    }
 }

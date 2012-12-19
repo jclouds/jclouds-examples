@@ -65,8 +65,8 @@ public class DeleteSnapshot implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
       String provider = "rackspace-cloudblockstorage-us";
 
       String username = args[0];
@@ -98,7 +98,7 @@ public class DeleteSnapshot implements Closeable {
 
       // Wait for the snapshot to be deleted before moving on
       // If you want to know what's happening during the polling, enable logging.
-      // See /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      // See /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!SnapshotPredicates.awaitDeleted(snapshotApi).apply(snapshot)) {
          throw new TimeoutException("Timeout on snapshot: " + snapshot);
       }

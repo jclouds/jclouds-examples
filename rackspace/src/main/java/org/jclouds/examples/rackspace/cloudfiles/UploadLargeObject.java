@@ -19,40 +19,42 @@
 package org.jclouds.examples.rackspace.cloudfiles;
 
 import static com.google.common.io.Closeables.closeQuietly;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 import java.io.Closeable;
+import java.io.File;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.options.CreateContainerOptions;
-import org.jclouds.rest.RestContext;
-
-import com.google.common.collect.ImmutableMap;
+import org.jclouds.blobstore.domain.Blob;
 
 /**
- * Create an object storage container with some metadata associated with it.
+ * Upload a large object in the object storage container from the CreateContainer example.
  *  
  * @author Everett Toews
  */
-public class CreateContainer implements Closeable {
+public class UploadLargeObject implements Closeable {
    private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
+    * The third argument (args[2]) must be the absolute path to a large file
     */
    public static void main(String[] args) {
-      CreateContainer createContainer = new CreateContainer();
+      UploadLargeObject createContainer = new UploadLargeObject();
 
       try {
          createContainer.init(args);
-         createContainer.createContainer();
+         createContainer.uploadLargeObjectFromFile(new File(args[2]));
+      }
+      catch (Exception e) {
+         e.printStackTrace();
       }
       finally {
          createContainer.close();
@@ -67,22 +69,33 @@ public class CreateContainer implements Closeable {
       String username = args[0];
       String apiKey = args[1];
 
+      Properties overrides = new Properties();
+      // This property controls the number of parts being uploaded in parallel, the default is 4
+      overrides.setProperty("jclouds.mpu.parallel.degree", "5");
+      // This property controls the size (in bytes) of parts being uploaded in parallel, the default is 33554432 bytes = 32 MB 
+      overrides.setProperty("jclouds.mpu.parts.size", "67108864"); // 64 MB
+      
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
       storage = context.getBlobStore();
-      swift = context.unwrap();
    }
 
-   private void createContainer() {
-      System.out.println("Create Container");
+   /**
+    * Upload a large object from a File using the Swift API. 
+    * @throws ExecutionException 
+    * @throws InterruptedException 
+    */
+   private void uploadLargeObjectFromFile(File largeFile) throws InterruptedException, ExecutionException {
+      System.out.println("Upload Large Object From File");
 
-      CreateContainerOptions options = CreateContainerOptions.Builder
-            .withMetadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
+      Blob blob = storage.blobBuilder(largeFile.getName())
+            .payload(largeFile)
+            .build();
+      
+      String eTag = storage.putBlob(Constants.CONTAINER, blob, multipart());
 
-      swift.getApi().createContainer(Constants.CONTAINER, options);
-
-      System.out.println("  " + Constants.CONTAINER);
+      System.out.println("  Uploaded " + largeFile.getName() + " eTag=" + eTag);
    }
 
    /**

@@ -58,8 +58,8 @@ public class DeleteServer implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];
@@ -85,7 +85,7 @@ public class DeleteServer implements Closeable {
 
       // This method will continue to poll for the server status and won't return until this server is DELETED
       // If you want to know what's happening during the polling, enable logging. See
-      // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       Set<? extends NodeMetadata> servers = compute.destroyNodesMatching(inGroup(Constants.NAME));
 
       for (NodeMetadata nodeMetadata: servers) {

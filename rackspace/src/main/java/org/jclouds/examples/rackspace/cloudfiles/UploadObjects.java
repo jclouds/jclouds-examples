@@ -38,11 +38,11 @@ import org.jclouds.openstack.swift.domain.SwiftObject;
 import org.jclouds.rest.RestContext;
 
 /**
- * Create objects in the object storage container from the CreateContainer example.
+ * Upload objects in the object storage container from the CreateContainer example.
  *  
  * @author Everett Toews
  */
-public class CreateObjects implements Closeable {
+public class UploadObjects implements Closeable {
    private BlobStore storage;
    private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
@@ -53,25 +53,25 @@ public class CreateObjects implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateObjects createContainer = new CreateObjects();
+      UploadObjects uploadContainer = new UploadObjects();
 
       try {
-         createContainer.init(args);
-         createContainer.createObjectFromFile();
-         createContainer.createObjectFromString();
-         createContainer.createObjectFromStringWithMetadata();
+         uploadContainer.init(args);
+         uploadContainer.uploadObjectFromFile();
+         uploadContainer.uploadObjectFromString();
+         uploadContainer.uploadObjectFromStringWithMetadata();
       }
       catch (IOException e) {
          e.printStackTrace();
       }
       finally {
-         createContainer.close();
+         uploadContainer.close();
       }
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
       String provider = "cloudfiles-us";
 
       String username = args[0];
@@ -85,19 +85,19 @@ public class CreateObjects implements Closeable {
    }
 
    /**
-    * Create an object from a File using the Swift API. 
+    * Upload an object from a File using the Swift API. 
     */
-   private void createObjectFromFile() throws IOException {
-      System.out.println("Create Object From File");
+   private void uploadObjectFromFile() throws IOException {
+      System.out.println("Upload Object From File");
 
-      String filename = "createObjectFromFile";
+      String filename = "uploadObjectFromFile";
       String suffix = ".txt";
 
       File tempFile = File.createTempFile(filename, suffix);
       tempFile.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-      out.write("createObjectFromFile");
+      out.write("uploadObjectFromFile");
       out.close();
 
       SwiftObject object = swift.getApi().newSwiftObject();
@@ -110,16 +110,16 @@ public class CreateObjects implements Closeable {
    }
 
    /**
-    * Create an object from a String using the Swift API. 
+    * Upload an object from a String using the Swift API. 
     */
-   private void createObjectFromString() {
-      System.out.println("Create Object From String");
+   private void uploadObjectFromString() {
+      System.out.println("Upload Object From String");
 
-      String filename = "createObjectFromString.txt";
+      String filename = "uploadObjectFromString.txt";
 
       SwiftObject object = swift.getApi().newSwiftObject();
       object.getInfo().setName(filename);
-      object.setPayload("createObjectFromString");
+      object.setPayload("uploadObjectFromString");
 
       swift.getApi().putObject(Constants.CONTAINER, object);
 
@@ -127,18 +127,18 @@ public class CreateObjects implements Closeable {
    }
 
    /**
-    * Create an object from a String with metadata using the BlobStore API. 
+    * Upload an object from a String with metadata using the BlobStore API. 
     */
-   private void createObjectFromStringWithMetadata() {
-      System.out.println("Create Object From String With Metadata");
+   private void uploadObjectFromStringWithMetadata() {
+      System.out.println("Upload Object From String With Metadata");
 
-      String filename = "createObjectFromStringWithMetadata.txt";
+      String filename = "uploadObjectFromStringWithMetadata.txt";
 
       Map<String, String> userMetadata = new HashMap<String, String>();
       userMetadata.put("key1", "value1");
 
       Blob blob = storage.blobBuilder(filename)
-            .payload("createObjectFromStringWithMetadata")
+            .payload("uploadObjectFromStringWithMetadata")
             .userMetadata(userMetadata)
             .build();
 

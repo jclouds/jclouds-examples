@@ -16,30 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jclouds.examples.rackspace.cloudfiles;
+package org.jclouds.examples.rackspace.cloudloadbalancers;
 
 import static com.google.common.io.Closeables.closeQuietly;
 
-import java.io.Closeable;
-
 import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.options.CreateContainerOptions;
-import org.jclouds.rest.RestContext;
-
-import com.google.common.collect.ImmutableMap;
+import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
+import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
+import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 
 /**
- * Create an object storage container with some metadata associated with it.
+ * This example lists all Load Balancers. 
  *  
  * @author Everett Toews
  */
-public class CreateContainer implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+public class ListLoadBalancers {
+   private CloudLoadBalancersApi clb;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -48,47 +40,51 @@ public class CreateContainer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateContainer createContainer = new CreateContainer();
+      ListLoadBalancers listLoadBalancers = new ListLoadBalancers();
 
       try {
-         createContainer.init(args);
-         createContainer.createContainer();
+         listLoadBalancers.init(args);
+         listLoadBalancers.listLoadBalancers();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
       }
       finally {
-         createContainer.close();
+         listLoadBalancers.close();
       }
    }
 
    private void init(String[] args) {
       // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
+      String provider = "rackspace-cloudloadbalancers-us";
 
       String username = args[0];
       String apiKey = args[1];
 
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+      clb = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
-      swift = context.unwrap();
+            .buildApi(CloudLoadBalancersApi.class);
    }
 
-   private void createContainer() {
-      System.out.println("Create Container");
-
-      CreateContainerOptions options = CreateContainerOptions.Builder
-            .withMetadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
-
-      swift.getApi().createContainer(Constants.CONTAINER, options);
-
-      System.out.println("  " + Constants.CONTAINER);
+   private void listLoadBalancers() {
+      System.out.println("List Load Balancers");
+      
+      for (String zone: clb.getConfiguredZones()) {
+         System.out.println("  " + zone);
+         
+         LoadBalancerApi lbApi = clb.getLoadBalancerApiForZone(zone);
+         
+         for (LoadBalancer loadBalancer: lbApi.list().concat()) {
+            System.out.println("    " + loadBalancer);
+         }         
+      }
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(storage.getContext());
+      closeQuietly(clb);
    }
 }

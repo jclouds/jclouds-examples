@@ -28,6 +28,7 @@ import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUE
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
 import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginCredentials;
+import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginUser;
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
@@ -117,6 +118,7 @@ public class MainApp {
       }
       
       String minRam = System.getProperty("minRam");
+      String loginUser = System.getProperty("loginUser", "toor");
       
       // note that you can check if a provider is present ahead of time
       checkArgument(contains(allKeys, provider), "provider %s not in supported list: %s", provider, allKeys);
@@ -145,8 +147,11 @@ public class MainApp {
             Statement bootInstructions = AdminAccess.standard();
 
             // to run commands as root, we use the runScript option in the template.
-            templateBuilder.options(runScript(bootInstructions));
-
+            if(provider.equalsIgnoreCase("virtualbox"))
+               templateBuilder.options(overrideLoginUser(loginUser).runScript(bootInstructions));
+            else
+               templateBuilder.options(runScript(bootInstructions));
+            
             NodeMetadata node = getOnlyElement(compute.createNodesInGroup(groupName, 1, templateBuilder.build()));
             System.out.printf("<< node %s: %s%n", node.getId(),
                   concat(node.getPrivateAddresses(), node.getPublicAddresses()));

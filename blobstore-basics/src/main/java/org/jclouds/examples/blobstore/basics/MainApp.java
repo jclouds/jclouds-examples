@@ -39,8 +39,6 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.domain.StorageType;
-import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.swift.SwiftAsyncClient;
 import org.jclouds.openstack.swift.SwiftClient;
 import org.jclouds.providers.ProviderMetadata;
@@ -94,9 +92,6 @@ public class MainApp {
       // Init
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
                                                .credentials(identity, credential)
-                                               // default jclouds has few dependencies, and uses builtin logging, date, and encryption.
-                                               // we can add support for  libraries by adding driver modules like below
-                                               .modules(ImmutableSet.<Module>of(new EnterpriseConfigurationModule(), new SLF4JLoggingModule()))
                                                .buildView(BlobStoreContext.class);
 
       try {
@@ -120,7 +115,7 @@ public class MainApp {
 
          // Use Provider API
          if (context.getBackendType().getRawType().equals(RestContext.class)) {
-            RestContext<?, ?> rest = context.unwrap(RestContext.class);
+            RestContext<?, ?> rest = context.unwrap();
             if (rest.getApi() instanceof S3Client) {
                RestContext<S3Client, S3AsyncClient> providerContext = context.unwrap();
                providerContext.getApi().getBucketLogging(containerName);

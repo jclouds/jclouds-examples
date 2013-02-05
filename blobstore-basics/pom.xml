@@ -33,12 +33,12 @@
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-blobstore</artifactId>
-            <version>1.6.0-alpha.1</version>
+            <version>1.5.7</version>
         </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-allblobstore</artifactId>
-            <version>1.6.0-alpha.1</version>
+            <version>1.5.7</version>
         </dependency>
         <!-- note that if you want a smaller distribution
              remove the above dependency and place something 
@@ -47,7 +47,7 @@
         <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>hpcloud-objectstorage</artifactId>
-            <version>1.6.0-alpha.1</version>
+            <version>1.5.7</version>
         </dependency>
         -->
     </dependencies>

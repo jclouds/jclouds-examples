@@ -68,6 +68,8 @@ import org.jclouds.scriptbuilder.statements.chef.ChefSolo;
 import org.jclouds.scriptbuilder.statements.git.CloneGitRepo;
 import org.jclouds.scriptbuilder.statements.git.InstallGit;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
+import org.jclouds.scriptbuilder.statements.ruby.InstallRuby;
+import org.jclouds.scriptbuilder.statements.ruby.InstallRubyGems;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
 import com.google.common.base.Predicates;
@@ -176,6 +178,8 @@ public class MainApp {
                }
 
                // Configure Chef Solo to bootstrap the selected recipes
+               bootstrapBuilder.add(InstallRuby.builder().build());
+               bootstrapBuilder.add(InstallRubyGems.builder().build());
                bootstrapBuilder.add(ChefSolo.builder() //
                      .cookbookPath("/var/chef/cookbooks") //
                      .runlist(RunList.builder().recipes(recipeList).build()) //

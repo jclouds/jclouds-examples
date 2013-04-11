@@ -11,6 +11,8 @@ object ApplicationBuild extends Build {
       "com.google.guava" % "guava" % "12.0",
       "org.jclouds" % "jclouds-compute" % "1.5.0-alpha.6",
       "org.reflections" % "reflections" % "0.9.7.RC1"
+      //If using the securesocial module you may need to do the following to make jclouds run:
+      //"securesocial" %% "securesocial" % "2.0.12" excludeAll(ExclusionRule(organization="org.ow2.spec.ee"), ExclusionRule(organization="com.cedarsoft"))
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(

@@ -6,7 +6,7 @@ Example code that uses jclouds to perform common tasks on the Rackspace Cloud. T
 1. Username and API key for the Rackspace Cloud - See the [Getting Started guide](http://www.jclouds.org/documentation/quickstart/rackspace/).
 1. Java Development Kit (JDK) version 6 or later - [Download](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 1. Apache Ant - [Download](http://ant.apache.org/bindownload.cgi).
-1. Git - [Download](http://git-scm.com/downloads) or you can just [download this repository as a zip or tar.gz](https://github.com/jclouds/jclouds-examples/downloads).
+1. Git - [Download](http://git-scm.com/downloads).
 
 ## Environment
 To setup an environment to compile and run the examples use these commands:
@@ -52,6 +52,13 @@ The [cloudloadbalancers package](https://github.com/jclouds/jclouds-examples/tre
   * [CreateLoadBalancerWithExistingServers.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudloadbalancers/CreateLoadBalancerWithExistingServers.java) - An end to end example of creating a load balancer and adding existing servers (nodes) to it.
   * [CreateLoadBalancerWithNewServers.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudloadbalancers/CreateLoadBalancerWithNewServers.java) - An end to end example of creating a load balancer and adding new servers (nodes) to it.
   * Other examples of creating, manipulating, listing, and deleting load balancers and nodes.
+
+The [clouddns package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddns) demonstrates how to accomplish common tasks for working with DNS in the cloud.  
+
+  * [CreateDomains.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddns/CreateDomains.java) - An example of creating domains with subdomains and records.
+  * [CreateRecords.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddns/CreateRecords.java) - An example of creating records and adding them to a domain.
+  * [CRUDReverseDNSRecords.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddns/CRUDReverseDNSRecords.java) - An example of creating a Cloud Server and a reverse DNS record (PTR) to go along with it.
+  * Other examples of creating, manipulating, listing, and deleting domains and records.
 
 
 ## Command Line

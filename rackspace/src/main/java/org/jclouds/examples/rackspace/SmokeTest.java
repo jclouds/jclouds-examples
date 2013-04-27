@@ -27,6 +27,15 @@ import org.jclouds.examples.rackspace.cloudblockstorage.ListSnapshots;
 import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeAttachments;
 import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeTypes;
 import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumes;
+import org.jclouds.examples.rackspace.clouddns.CRUDReverseDNSRecords;
+import org.jclouds.examples.rackspace.clouddns.CreateDomains;
+import org.jclouds.examples.rackspace.clouddns.CreateRecords;
+import org.jclouds.examples.rackspace.clouddns.DeleteDomains;
+import org.jclouds.examples.rackspace.clouddns.DeleteRecords;
+import org.jclouds.examples.rackspace.clouddns.ListDomains;
+import org.jclouds.examples.rackspace.clouddns.ListRecords;
+import org.jclouds.examples.rackspace.clouddns.UpdateDomains;
+import org.jclouds.examples.rackspace.clouddns.UpdateRecords;
 import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
 import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
 import org.jclouds.examples.rackspace.cloudfiles.DeleteObjectsAndContainer;
@@ -103,5 +112,16 @@ public class SmokeTest {
       CreateLoadBalancerWithNewServers.main(args);
       DeleteServer.main(args);
       DeleteLoadBalancers.main(args);
+      
+      CreateDomains.main(args);
+      ListDomains.main(args);
+      UpdateDomains.main(args);
+      CreateRecords.main(args);
+      ListRecords.main(args);
+      UpdateRecords.main(args);
+      DeleteRecords.main(args);
+      CRUDReverseDNSRecords.main(args);
+      DeleteServer.main(args);
+      DeleteDomains.main(args);
    }
 }

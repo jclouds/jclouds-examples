@@ -93,8 +93,8 @@ public class CreateVolumeAndAttach implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];
@@ -155,12 +155,12 @@ public class CreateVolumeAndAttach implements Closeable {
 
       System.out.println("Create Volume");
 
-      // 100 GB is the minimum volume size on the Rackspace open cloud
+      // 100 GB is the minimum volume size on the Rackspace Cloud
       Volume volume = volumeApi.create(100, options);
 
       // Wait for the volume to become Available before moving on
       // If you want to know what's happening during the polling, enable logging. See
-      // /jclouds-exmaple/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
+      // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!VolumePredicates.awaitAvailable(volumeApi).apply(volume)) {
          throw new TimeoutException("Timeout on volume: " + volume);
       }

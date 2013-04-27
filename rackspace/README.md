@@ -1,9 +1,9 @@
 # Rackspace Examples
-Example code that uses jclouds to perform common tasks on the Rackspace open cloud. The class names are self explanatory and the code is well commented for you to follow along.
+Example code that uses jclouds to perform common tasks on the Rackspace Cloud. The class names are self explanatory and the code is well commented for you to follow along.
 
 ## Requirements
 
-1. Username and API key for the Rackspace open cloud - See the [Getting Started guide](http://www.jclouds.org/documentation/quickstart/rackspace/).
+1. Username and API key for the Rackspace Cloud - See the [Getting Started guide](http://www.jclouds.org/documentation/quickstart/rackspace/).
 1. Java Development Kit (JDK) version 6 or later - [Download](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 1. Apache Ant - [Download](http://ant.apache.org/bindownload.cgi).
 1. Git - [Download](http://git-scm.com/downloads) or you can just [download this repository as a zip or tar.gz](https://github.com/jclouds/jclouds-examples/downloads).
@@ -30,7 +30,7 @@ build.xml    maven-ant-tasks.jar    README.md    images/    lib/    src/
 Start with the [rackspace package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace). There you will find general purpose examples of things that are useful across all services.
 
   * [Logging.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java) - How to enable and configure logging.
-  * [Authentication.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Authentication.java) - How you can use your credentials to authenticate with the Rackspace open cloud.
+  * [Authentication.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/Authentication.java) - How you can use your credentials to authenticate with the Rackspace Cloud.
 
 The [cloudfiles package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudfiles) demonstrates how to accomplish common tasks for putting files in and getting files from the cloud.
 
@@ -46,6 +46,12 @@ The [cloudblockstorage package](https://github.com/jclouds/jclouds-examples/tree
 
   * [CreateVolumeAndAttach.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudblockstorage/CreateVolumeAndAttach.java) - An end to end example of creating a volume, attaching it to a server, putting a filesystem on it, and mounting it for use to store persistent data.
   * Other examples of creating, manipulating, listing, and deleting volumes and snapshots.
+
+The [cloudloadbalancers package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudloadbalancers) demonstrates how to accomplish common tasks for working with load balancers in the cloud.  
+
+  * [CreateLoadBalancerWithExistingServers.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudloadbalancers/CreateLoadBalancerWithExistingServers.java) - An end to end example of creating a load balancer and adding existing servers (nodes) to it.
+  * [CreateLoadBalancerWithNewServers.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudloadbalancers/CreateLoadBalancerWithNewServers.java) - An end to end example of creating a load balancer and adding new servers (nodes) to it.
+  * Other examples of creating, manipulating, listing, and deleting load balancers and nodes.
 
 
 ## Command Line

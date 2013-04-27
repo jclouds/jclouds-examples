@@ -69,8 +69,8 @@ public class CloudFilesPublish implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "cloudfiles-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
       String provider = "cloudfiles-us";
 
       String username = args[0];
@@ -122,7 +122,7 @@ public class CloudFilesPublish implements Closeable {
     */
    private void enableCdnContainer() {
       System.out.println("Enable CDN Container");
-      URI cdnURI = rackspace.enableCDN(Constants.CONTAINER);
+      URI cdnURI = rackspace.enableCDN(Constants.CONTAINER_PUBLISH);
       System.out.println("  Go to " + cdnURI + "/" + Constants.FILENAME + Constants.SUFFIX);
    }
 

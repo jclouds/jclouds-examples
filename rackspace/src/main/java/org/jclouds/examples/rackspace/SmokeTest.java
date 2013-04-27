@@ -29,10 +29,18 @@ import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeTypes;
 import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumes;
 import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
 import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
-import org.jclouds.examples.rackspace.cloudfiles.CreateObjects;
 import org.jclouds.examples.rackspace.cloudfiles.DeleteObjectsAndContainer;
 import org.jclouds.examples.rackspace.cloudfiles.ListContainers;
 import org.jclouds.examples.rackspace.cloudfiles.ListObjects;
+import org.jclouds.examples.rackspace.cloudfiles.UploadObjects;
+import org.jclouds.examples.rackspace.cloudloadbalancers.AddNodes;
+import org.jclouds.examples.rackspace.cloudloadbalancers.CreateLoadBalancerWithExistingServers;
+import org.jclouds.examples.rackspace.cloudloadbalancers.CreateLoadBalancerWithNewServers;
+import org.jclouds.examples.rackspace.cloudloadbalancers.DeleteLoadBalancers;
+import org.jclouds.examples.rackspace.cloudloadbalancers.ListLoadBalancers;
+import org.jclouds.examples.rackspace.cloudloadbalancers.RemoveNodes;
+import org.jclouds.examples.rackspace.cloudloadbalancers.UpdateLoadBalancers;
+import org.jclouds.examples.rackspace.cloudloadbalancers.UpdateNodes;
 import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
 import org.jclouds.examples.rackspace.cloudservers.CreateServer;
 import org.jclouds.examples.rackspace.cloudservers.DeleteServer;
@@ -71,7 +79,7 @@ public class SmokeTest {
       CloudFilesPublish.main(args);
       CreateContainer.main(args);
       ListContainers.main(args);
-      CreateObjects.main(args);
+      UploadObjects.main(args);
       ListObjects.main(args);
       DeleteObjectsAndContainer.main(args);
 
@@ -85,5 +93,15 @@ public class SmokeTest {
       DeleteSnapshot.main(args);
       DeleteVolume.main(args);
       DeleteServer.main(args);
+
+      CreateLoadBalancerWithExistingServers.main(args);
+      UpdateLoadBalancers.main(args);
+      ListLoadBalancers.main(args);
+      AddNodes.main(args);
+      UpdateNodes.main(args);
+      RemoveNodes.main(args);
+      CreateLoadBalancerWithNewServers.main(args);
+      DeleteServer.main(args);
+      DeleteLoadBalancers.main(args);
    }
 }

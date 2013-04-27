@@ -34,7 +34,7 @@ import org.jclouds.rest.RestContext;
 
 /**
  * To authenticate using jclouds you need to provide your credentials to a Context as in the init() method below. 
- * Authentication occurs on your first actual interaction with the Rackspace open cloud (i.e. the very first time 
+ * Authentication occurs on your first actual interaction with the Rackspace Cloud (i.e. the very first time 
  * you call a method that needs to talk to the cloud). Once you are authenticated you receive a token that is
  * cached and you won't reauthenticate for subsequent calls. If your token expires before the JVM quits, jclouds
  * will automatically handle reauthentication and get a new token for you.
@@ -71,8 +71,8 @@ public class Authentication implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];

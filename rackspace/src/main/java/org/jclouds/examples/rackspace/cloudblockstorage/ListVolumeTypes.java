@@ -62,8 +62,8 @@ public class ListVolumeTypes implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
       String provider = "rackspace-cloudblockstorage-us";
 
       String username = args[0];

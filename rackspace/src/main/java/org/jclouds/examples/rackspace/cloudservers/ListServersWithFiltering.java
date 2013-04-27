@@ -29,8 +29,8 @@ import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.predicates.NodePredicates;
-import org.jclouds.util.Preconditions2;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 
 /**
@@ -61,8 +61,8 @@ public class ListServersWithFiltering implements Closeable {
    }
 
    private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace open cloud (US)
-      // to use the Rackspace open cloud (UK) set the provider to "rackspace-cloudservers-uk"
+      // The provider configures jclouds To use the Rackspace Cloud (US)
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
       String provider = "rackspace-cloudservers-us";
 
       String username = args[0];
@@ -103,7 +103,7 @@ public class ListServersWithFiltering implements Closeable {
    }
 
    public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {
-      Preconditions2.checkNotEmpty(prefix, "prefix must be defined");
+      Preconditions.checkNotNull(prefix, "prefix must be defined");
 
       return new Predicate<ComputeMetadata>() {
          @Override

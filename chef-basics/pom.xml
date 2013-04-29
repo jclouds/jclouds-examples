@@ -29,7 +29,7 @@
    <description>jclouds chef example that adds a node to a group, then installs an Apache web server on all nodes</description>
    
    <properties>
-       <jclouds.version>1.6.0-SNAPSHOT</jclouds.version>    
+       <jclouds.version>1.6.0</jclouds.version>    
    </properties>
 
     <repositories>

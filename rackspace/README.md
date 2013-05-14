@@ -1,11 +1,19 @@
 # Rackspace Examples
 Example code that uses jclouds to perform common tasks on the Rackspace Cloud. The class names are self explanatory and the code is well commented for you to follow along.
 
+- [Requirements](#requirements)
+- [Environment](#environment)
+- [The Examples](#the-examples)
+- [Command Line](#command-line)
+- [Eclipse](#eclipse)
+- [Next Steps](#next-steps)
+- [Support and Feedback](#support-and-feedback)
+
 ## Requirements
 
 1. Username and API key for the Rackspace Cloud - See the [Getting Started guide](http://www.jclouds.org/documentation/quickstart/rackspace/).
 1. Java Development Kit (JDK) version 6 or later - [Download](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
-1. Apache Ant - [Download](http://ant.apache.org/bindownload.cgi).
+1. Apache Maven - [Maven in 5 Minutes](http://maven.apache.org/guides/getting-started/maven-in-five-minutes.html).
 1. Git - [Download](http://git-scm.com/downloads).
 
 ## Environment
@@ -14,15 +22,11 @@ To setup an environment to compile and run the examples use these commands:
 ```
 git clone https://github.com/jclouds/jclouds-examples.git
 cd jcloud-examples/rackspace/
-```
-Now follow the instructions for [Getting the binaries using Apache Ant](http://www.jclouds.org/documentation/userguide/installation-guide/). When you are done you should have a directory with the following files and sub-directories.
-
-```
 $ pwd
 /Users/username/jclouds-examples/rackspace
 
 $ ls
-build.xml    maven-ant-tasks.jar    README.md    images/    lib/    src/
+pom.xml    README.md    images/    src/
 ```
 
 ## The Examples
@@ -62,13 +66,28 @@ The [clouddns package](https://github.com/jclouds/jclouds-examples/tree/master/r
 
 
 ## Command Line
-To run these examples from the command line use these commands:
+
+To download all dependencies, run:
+
+```
+mvn dependency:copy-dependencies "-DoutputDirectory=./lib"
+```
+
+If you also want to download the source jars, run:
+
+```
+mvn dependency:copy-dependencies "-DoutputDirectory=./lib" "-Dclassifier=sources"
+```
+
+To run individual examples from the command line use these commands:
+
+Note: If you're on Windows, the only change you need to make is to use a ';' instead of a ':' in the paths.
 
 ```
 cd src/main/java/
 javac -classpath ".:../../../lib/*:../resources/" org/jclouds/examples/rackspace/*.java
-
 ```
+
 Every example class has a main method that takes your username as the first argument and your API key as the second argument. The one exception to this is the Authentication example that can take an optional third argument if you want to use your password for authentication.
 
 Try out an example.
@@ -77,8 +96,6 @@ Try out an example.
 java -classpath ".:../../../lib/*:../resources/" org.jclouds.examples.rackspace.cloudservers.CreateServer myUsername myApiKey
 ```
 Watch the terminal for output!
-
-Note: If you're on Windows, the only change you need to make is to use a ';' instead of a ':' in the paths.
 
 ## Eclipse
 To run these examples from Eclipse follow these instructions.
@@ -117,7 +134,7 @@ Welcome to the jclouds [community](http://www.jclouds.org/documentation/communit
 
 ## Support and Feedback
 
-Your feedback is appreciated! If you have specific issues with Rackspace support in jclouds, we'd prefer that you file an issue via [Github](https://github.com/jclouds/jclouds/issues).
+Your feedback is appreciated! If you have specific issues with Rackspace support in jclouds, we'd prefer that you file an issue via [JIRA](https://issues.apache.org/jira/browse/JCLOUDS).
 
 For general feedback and support requests, send an email to:
 

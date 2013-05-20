@@ -16,15 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jclouds.examples.rackspace.cloudloadbalancers;
-
-
-/**
- * Constants used by the Rackspace Examples.
- * 
- * @author Everett Toews
- */
-public interface Constants {
-   public static final String NAME = "jclouds-example";
-   public static final String ZONE = "DFW";
-}

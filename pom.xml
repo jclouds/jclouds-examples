@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Licensed to jclouds, Inc. (jclouds) under one or more
+contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  jclouds licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.apache.jclouds</groupId>
+    <artifactId>jclouds-project</artifactId>
+    <version>1.7.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.apache.jclouds.examples</groupId>
+  <artifactId>jclouds-examples</artifactId>
+  <version>1.7.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>jclouds examples</name>
+
+  <scm>
+    <connection>scm:git:git://github.com/jclouds/jclouds-examples.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/jclouds/jclouds-examples.git</developerConnection>
+    <url>https://github.com/jclouds/jclouds-examples</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <properties>
+    <jclouds.version>1.7.0-SNAPSHOT</jclouds.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>apache-snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>0.8</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludes>
+            <exclude>**/BUILD.txt</exclude>
+            <exclude>**/CHANGES.txt</exclude>
+            <exclude>**/NOTICE-src.txt</exclude>
+            <exclude>**/README.md</exclude>
+            <exclude>.git/**</exclude>
+            <exclude>**/.gitignore</exclude>
+            <exclude>**/*.json</exclude>
+            <exclude>**/*.log*</exclude>
+            <exclude>**/TODO</exclude>
+            <exclude>.mailmap</exclude>
+            <exclude>.idea/**</exclude>
+            <exclude>**/*.iml</exclude>
+            <exclude>**/.project</exclude>
+            <exclude>**/.classpath</exclude>
+            <exclude>**/.settings/**</exclude>
+            <exclude>**/.checkstyle</exclude>
+            <exclude>**/target/**</exclude>
+            <exclude>.repository/**</exclude>
+            <exclude>**/jquery-1.7.1.min.js</exclude>
+            <!-- binary -->
+          </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <version>1.9.0</version>
+        <configuration>
+          <strictCheck>true</strictCheck>
+          <encoding>${sourceEncoding}</encoding>
+          <aggregate>true</aggregate>
+          <header>project/src/etc/header.txt</header>
+          <mapping>
+            <clj>SEMICOLON_STYLE</clj>
+          </mapping>
+          <excludes>
+            <exclude>**/src/**/resources/**</exclude>
+            <exclude>**/LICENSE.txt</exclude>
+            <exclude>**/NOTICE.txt</exclude>
+            <exclude>**/README.md</exclude>
+            <exclude>**/README.txt</exclude>
+            <exclude>**/header.txt</exclude>
+          </excludes>
+          <properties>
+            <year>2011</year>
+            <copyrightHolder>jclouds, Inc.</copyrightHolder>
+          </properties>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>doc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>javadoc</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>aggregate-jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

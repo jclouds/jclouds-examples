@@ -33,9 +33,9 @@ under the License.
   <name>jclouds examples</name>
 
   <scm>
-    <connection>scm:git:git://github.com/jclouds/jclouds-examples.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/jclouds/jclouds-examples.git</developerConnection>
-    <url>https://github.com/jclouds/jclouds-examples</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-jclouds-examples.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-jclouds-examples.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-jclouds-examples.git</url>
     <tag>HEAD</tag>
   </scm>
 

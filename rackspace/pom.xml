@@ -69,6 +69,11 @@
       <artifactId>rackspace-cloudloadbalancers-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
+    <dependency>
+    	<groupId>org.apache.jclouds.labs</groupId>
+    	<artifactId>rackspace-clouddatabases-us</artifactId>
+    	<version>${jclouds.version}</version>
+    </dependency>
     <!-- UK -->
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
@@ -94,6 +99,16 @@
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudloadbalancers-uk</artifactId>
       <version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.jclouds.labs</groupId>
+    	<artifactId>rackspace-clouddatabases-uk</artifactId>
+    	<version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>mysql</groupId>
+    	<artifactId>mysql-connector-java</artifactId>
+    	<version>5.1.25</version>
     </dependency>
   </dependencies>
 </project>

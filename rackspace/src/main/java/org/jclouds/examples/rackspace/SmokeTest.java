@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,15 +18,18 @@
  */
 package org.jclouds.examples.rackspace;
 
+import java.io.IOException;
+
 import org.jclouds.examples.rackspace.cloudblockstorage.*;
 import org.jclouds.examples.rackspace.clouddns.*;
 import org.jclouds.examples.rackspace.cloudfiles.*;
 import org.jclouds.examples.rackspace.cloudloadbalancers.*;
 import org.jclouds.examples.rackspace.cloudservers.*;
+import org.jclouds.examples.rackspace.clouddatabases.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
- * 
+ *
  * @author Everett Toews
  */
 public class SmokeTest {
@@ -37,13 +40,14 @@ public class SmokeTest {
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
+    * @throws IOException 
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       SmokeTest smokeTest = new SmokeTest();
       smokeTest.smokeTest(args);
    }
 
-   private void smokeTest(String[] args) {
+   private void smokeTest(String[] args) throws IOException {
       Authentication.main(args);
       Logging.main(args);
 
@@ -81,7 +85,7 @@ public class SmokeTest {
       CreateLoadBalancerWithNewServers.main(args);
       DeleteServer.main(args);
       DeleteLoadBalancers.main(args);
-      
+
       CreateDomains.main(args);
       ListDomains.main(args);
       UpdateDomains.main(args);
@@ -92,5 +96,14 @@ public class SmokeTest {
       CRUDReverseDNSRecords.main(args);
       DeleteServer.main(args);
       DeleteDomains.main(args);
+
+      CreateInstance.main(args);
+      CreateDatabase.main(args);
+      CreateUser.main(args);
+      TestDatabase.main(args);
+      GrantRootAccess.main(args);
+      DeleteDatabase.main(args);
+      DeleteUser.main(args);
+      DeleteInstance.main(args);
    }
 }

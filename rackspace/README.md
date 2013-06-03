@@ -63,6 +63,14 @@ The [clouddns package](https://github.com/jclouds/jclouds-examples/tree/master/r
   * [CRUDReverseDNSRecords.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddns/CRUDReverseDNSRecords.java) - An example of creating a Cloud Server and a reverse DNS record (PTR) to go along with it.
   * Other examples of creating, manipulating, listing, and deleting domains and records.
 
+The [clouddatabases package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases) demonstrates how to accomplish common tasks for working with databases in the cloud.  
+
+  * [CreateInstance.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases/CreateInstance.java) - An example of creating a database instance.
+  * [CreateDatabase.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases/CreateDatabase.java) - An example of creating a database on the database instance.
+  * [CreateUser.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases/CreateUser.java) - An example of creating a database user.
+  * [TestDatabase.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases/TestDatabase.java) - An example of connecting to the database from the public Internet and making a simple request.
+  * Other examples include deleting instances, databases, and users, and granting root access.
+
 
 ## Command Line
 

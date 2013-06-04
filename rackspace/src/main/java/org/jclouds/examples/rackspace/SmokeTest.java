@@ -38,6 +38,7 @@ import org.jclouds.examples.rackspace.clouddns.UpdateDomains;
 import org.jclouds.examples.rackspace.clouddns.UpdateRecords;
 import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
 import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
+import org.jclouds.examples.rackspace.cloudfiles.CrossOriginResourceSharingContainer;
 import org.jclouds.examples.rackspace.cloudfiles.DeleteObjectsAndContainer;
 import org.jclouds.examples.rackspace.cloudfiles.ListContainers;
 import org.jclouds.examples.rackspace.cloudfiles.ListObjects;
@@ -90,6 +91,7 @@ public class SmokeTest {
       ListContainers.main(args);
       UploadObjects.main(args);
       ListObjects.main(args);
+      CrossOriginResourceSharingContainer.main(args);
       DeleteObjectsAndContainer.main(args);
 
       CreateVolumeAndAttach.main(args);

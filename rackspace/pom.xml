@@ -22,19 +22,19 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <jclouds.version>1.6.0</jclouds.version>
+    <jclouds.version>1.6.1-incubating</jclouds.version>
   </properties>
-  <groupId>org.jclouds.examples</groupId>
+  <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>rackspace-examples</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0</version>
   <dependencies>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-slf4j</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-sshj</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
@@ -44,27 +44,27 @@
       <version>1.0.13</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.provider</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudservers-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.provider</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>cloudfiles-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.provider</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudblockstorage-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.provider</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-clouddns-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.provider</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudloadbalancers-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>

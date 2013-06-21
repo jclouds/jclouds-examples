@@ -20,11 +20,10 @@ Example code that uses jclouds to perform common tasks on the Rackspace Cloud. T
 To setup an environment to compile and run the examples use these commands:
 
 ```
-git clone https://github.com/jclouds/jclouds-examples.git
-cd jcloud-examples/rackspace/
+$ git clone https://github.com/jclouds/jclouds-examples.git
+$ cd jcloud-examples/rackspace/
 $ pwd
 /Users/username/jclouds-examples/rackspace
-
 $ ls
 pom.xml    README.md    images/    src/
 ```
@@ -70,13 +69,13 @@ The [clouddns package](https://github.com/jclouds/jclouds-examples/tree/master/r
 To download all dependencies, run:
 
 ```
-mvn dependency:copy-dependencies "-DoutputDirectory=./lib"
+$ mvn dependency:copy-dependencies "-DoutputDirectory=./lib"
 ```
 
 If you also want to download the source jars, run:
 
 ```
-mvn dependency:copy-dependencies "-DoutputDirectory=./lib" "-Dclassifier=sources"
+$ mvn dependency:copy-dependencies "-DoutputDirectory=./lib" "-Dclassifier=sources"
 ```
 
 To run individual examples from the command line use these commands:
@@ -84,8 +83,8 @@ To run individual examples from the command line use these commands:
 Note: If you're on Windows, the only change you need to make is to use a ';' instead of a ':' in the paths.
 
 ```
-cd src/main/java/
-javac -classpath ".:../../../lib/*:../resources/" org/jclouds/examples/rackspace/*.java
+$ cd src/main/java/
+$ javac -classpath ".:../../../lib/*:../resources/" org/jclouds/examples/rackspace/*.java
 ```
 
 Every example class has a main method that takes your username as the first argument and your API key as the second argument. The one exception to this is the Authentication example that can take an optional third argument if you want to use your password for authentication.
@@ -93,7 +92,7 @@ Every example class has a main method that takes your username as the first argu
 Try out an example.
 
 ```
-java -classpath ".:../../../lib/*:../resources/" org.jclouds.examples.rackspace.cloudservers.CreateServer myUsername myApiKey
+$ java -classpath ".:../../../lib/*:../resources/" org.jclouds.examples.rackspace.cloudservers.CreateServer myUsername myApiKey
 ```
 Watch the terminal for output!
 

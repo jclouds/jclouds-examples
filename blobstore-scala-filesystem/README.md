@@ -10,11 +10,11 @@ Ensure that [sbt is installed](http://www.scala-sbt.org/release/docs/Getting-Sta
 
 Run `sbt` from the root of your project and invoke
 ```
-run _basedir_
+run <basedir> <containername> <blobname>
 ```
-where <em>basedir</em> is a directory in which the container will be created. E.g. if your basedir is `/home/blobstore`, run
+where <em>basedir</em> is a directory in which the container will be created. E.g. if your basedir is `/home/blobstore` and you want to store "myblob" in "mycontainer", run
 ```
-run /home/blobstore
+run /home/blobstore mycontainer myblob
 ```
 
 ## License

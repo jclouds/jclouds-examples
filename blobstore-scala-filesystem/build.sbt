@@ -1,8 +1,8 @@
-name :="blobstore-scala-filesystem"
+name := "blobstore-scala-filesystem"
 
-scalaVersion :="2.10.1"
+scalaVersion := "2.10.1"
 
-version :="1.0-SNAPSHOT"
+version := "1.0-SNAPSHOT"
 
 libraryDependencies ++= Seq( "org.jclouds.api" % "filesystem" % "1.6.0",
                              "com.google.code.findbugs" % "jsr305" % "1.3.+",

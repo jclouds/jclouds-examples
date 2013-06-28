@@ -31,6 +31,10 @@ This repository contains various examples of using
       <td>Example code to create a container, and list your containers using the portable <a href="https://github.com/jclouds/jclouds/blob/master/blobstore/src/main/clojure/org/jclouds/blobstore2.clj">blobstore2 functions</a></td>
     </tr>
     <tr>
+      <td><a href="blobstore-scala-filesystem/">BlobStore Basics (Scala)</a></td>
+      <td>Example code to create a container and blob using the filesystem <a href="http://jclouds.incubator.apache.org/documentation/userguide/blobstore-guide/">BlobStore API</a></td>
+    </tr>
+    <tr>
       <td><a href="blobstore-karaf-shell">BlobStore via Karaf Shell</a></td>
       <td>Example to read and write to a blobstore from inside the Apache Karaf Shell.</td>
     </tr>

@@ -24,12 +24,12 @@ import resource._
 /**
  * Demonstrates the use of the filesystem [[org.jclouds.blobstore.BlobStore]] in Scala
  *
- * Usage is: run \"basedir\" \"containername\" \"blobname\"
+ * Usage is: run &lt;basedir&gt; &lt;containername&gt; &lt;blobname&gt;
  *
  * @author adisesha
  */
 object Main extends App {
-  require(args.length == 3, "Invalid number of parameters. Usage: run \"basedir\" \"containername\" \"blobname\"")
+  require(args.length == 3, "Invalid number of parameters. Usage: run <basedir> <containername> <blobname>")
 
   val basedir = args(0)
   val containerName = args(1)

@@ -12,7 +12,7 @@ Run `sbt` from the root of your project and invoke
 ```
 run <basedir> <containername> <blobname>
 ```
-where <em>basedir</em> is a directory in which the container will be created. E.g. if your basedir is `/home/blobstore` and you want to store "myblob" in "mycontainer", run
+where <em>basedir</em> is a directory in which the container will be created. E.g. if your basedir is `/home/blobstore` and you want to store _myblob_ in _mycontainer_, run
 ```
 run /home/blobstore mycontainer myblob
 ```

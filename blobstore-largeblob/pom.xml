@@ -28,55 +28,59 @@ under the License.
   <name>blobstore-largeblob</name>
   <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
+  <properties>
+    <jclouds.version>1.6.1-incubating</jclouds.version>
+  </properties>
+
   <dependencies>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-blobstore</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-allblobstore</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-netty</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-apachehc</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-log4j</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-slf4j</artifactId>
-      <version>1.5.0-beta.3</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <!-- note that if you want a smaller distribution
-         remove the above dependency and place something 
-         like below -->
+        remove the above dependency and place something 
+        like below -->
     <!--
-        <dependency>
-        <groupId>org.jclouds.provider</groupId>
-        <artifactId>hpcloud-objectstorage</artifactId>
-        <version>1.5.0-beta.3</version>
-        </dependency>
+    <dependency>
+      <groupId>org.apache.jclouds.provider</groupId>
+      <artifactId>hpcloud-objectstorage</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
     -->
   </dependencies>
+
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
-
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
           <archive>
             <manifest>
@@ -88,10 +92,13 @@ under the License.
 
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
+          <descriptors>
+            <!-- unlike the "standard" jar-with-deps, includes
+                support for merging META-INF/services files -->
+            <descriptor>src/main/assembly/jar-with-dependencies.xml</descriptor>
+          </descriptors>
           <archive>
             <manifest>
               <mainClass>org.jclouds.examples.blobstore.largeblob.MainApp</mainClass>
@@ -109,7 +116,5 @@ under the License.
         </executions>
       </plugin>
     </plugins>
-
   </build>
-
 </project>

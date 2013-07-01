@@ -19,6 +19,7 @@
 
 package org.jclouds.examples.blobstore.largeblob;
 
+import static com.google.common.collect.Iterables.transform;
 import static org.jclouds.Constants.PROPERTY_ENDPOINT;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 import static org.jclouds.location.reference.LocationConstants.ENDPOINT;
@@ -26,26 +27,24 @@ import static org.jclouds.location.reference.LocationConstants.PROPERTY_REGION;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.core.MediaType;
 
+import org.jclouds.ContextBuilder;
 import org.jclouds.aws.domain.Region;
-import org.jclouds.blobstore.AsyncBlobStore;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.BlobStoreContextFactory;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.blobstore.util.BlobStoreUtils;
+import org.jclouds.http.HttpResponseException;
 import org.jclouds.http.config.JavaUrlHttpCommandExecutorServiceModule;
 import org.jclouds.logging.log4j.config.Log4JLoggingModule;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.netty.config.NettyPayloadModule;
+import org.jclouds.providers.ProviderMetadata;
+import org.jclouds.providers.Providers;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Module;
 
 /**
@@ -120,10 +119,13 @@ public class MainApp {
 
       // Args
 
-      String provider = args[0];
-      if (!Iterables.contains(BlobStoreUtils.getSupportedProviders(), provider))
-         throw new IllegalArgumentException("provider " + provider + " not in supported list: "
-                  + BlobStoreUtils.getSupportedProviders());
+      String providerId = args[0];
+      ProviderMetadata provider = null;
+      try {
+         provider = Providers.withId(providerId);
+      } catch(NoSuchElementException exception) {
+         throw new IllegalArgumentException("provider " + providerId + " not in supported list: " + transform(Providers.all(), Providers.idFunction()));
+      }
       String identity = args[1];
       String credential = args[2];
       String fileName = args[3];
@@ -139,17 +141,16 @@ public class MainApp {
       if (threadcount != null)
          overrides.setProperty("jclouds.mpu.parallel.degree", threadcount); // without setting,
       // default is 4 threads
-      overrides.setProperty(provider + ".identity", identity);
-      overrides.setProperty(provider + ".credential", credential);
-      BlobStoreContext context = new BlobStoreContextFactory().createContext(provider, MODULES, overrides);
+      overrides.setProperty(providerId + ".identity", identity);
+      overrides.setProperty(providerId + ".credential", credential);
+      BlobStoreContext context = ContextBuilder.newBuilder(provider).modules(MODULES).overrides(overrides).build(BlobStoreContext.class);
 
       try {
          long start = System.currentTimeMillis();
          // Create Container
-         AsyncBlobStore blobStore = context.getAsyncBlobStore(); // it can be changed to sync
+         BlobStore blobStore = context.getBlobStore();
          // BlobStore
-         ListenableFuture<Boolean> future = blobStore.createContainerInLocation(null, containerName);
-         future.get();
+         blobStore.createContainerInLocation(null, containerName);
 
          File input = new File(fileName);
          long length = input.length();
@@ -157,19 +158,12 @@ public class MainApp {
          Blob blob = blobStore.blobBuilder(objectName).payload(input)
                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
          // Upload a file
-         ListenableFuture<String> futureETag = blobStore.putBlob(containerName, blob, multipart());
-
-         // asynchronously wait for the upload
-         String eTag = futureETag.get();
+         String eTag = blobStore.putBlob(containerName, blob, multipart());
 
          printSpeed("Sucessfully uploaded eTag(" + eTag + ")", start, length);
-
-      } catch (InterruptedException e) {
-         System.err.println(e.getMessage());
-         e.printStackTrace();
-      } catch (ExecutionException e) {
-         System.err.println(e.getMessage());
-         e.printStackTrace();
+      } catch(HttpResponseException exception) {
+         System.err.println(exception.getMessage());
+         exception.printStackTrace();
       } finally {
          // Close connecton
          context.close();

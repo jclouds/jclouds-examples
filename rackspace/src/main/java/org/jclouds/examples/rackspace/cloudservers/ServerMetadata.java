@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Map;
 
@@ -63,6 +61,9 @@ public class ServerMetadata implements Closeable {
          serverMetadata.deleteMetadata(server);
          serverMetadata.getMetadata(server);
       }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
       finally {
          serverMetadata.close();
       }
@@ -102,8 +103,10 @@ public class ServerMetadata implements Closeable {
    private void setMetadata(Server server) {
       System.out.println("Set Metadata");
 
-      ImmutableMap<String, String> metadata = 
-            ImmutableMap.<String, String> of("key1", "value1", "key2", "value2", "key3", "value3");
+      ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of(
+            "key1", "value1", 
+            "key2", "value2", 
+            "key3", "value3");
       Map<String, String> responseMetadata = serverApi.setMetadata(server.getId(), metadata);
 
       System.out.println("  " + responseMetadata);
@@ -136,6 +139,8 @@ public class ServerMetadata implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 }

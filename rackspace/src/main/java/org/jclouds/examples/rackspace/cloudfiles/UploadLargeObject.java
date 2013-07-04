@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 import java.io.Closeable;
@@ -102,6 +101,8 @@ public class UploadLargeObject implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(storage.getContext());
+      if (storage != null) {
+         storage.getContext().close();
+      }
    }
 }

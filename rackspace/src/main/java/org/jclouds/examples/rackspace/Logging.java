@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Set;
 
@@ -66,6 +64,9 @@ public class Logging implements Closeable {
       try {
          logging.init(args);
       }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
       finally {
          logging.close();
       }
@@ -98,6 +99,8 @@ public class Logging implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext();
+      }
    }
 }

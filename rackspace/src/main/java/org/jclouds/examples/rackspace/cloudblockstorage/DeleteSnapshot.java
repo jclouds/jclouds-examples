@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.concurrent.TimeoutException;
 
@@ -110,6 +108,8 @@ public class DeleteSnapshot implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(cinder);
+      if (cinder != null) {
+         cinder.close();
+      }
    }
 }

@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 import static org.jclouds.util.Predicates2.retry;
@@ -174,6 +173,8 @@ public class CloudServersPublish implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 }

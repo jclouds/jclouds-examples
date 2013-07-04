@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 
 import java.io.Closeable;
@@ -51,6 +50,9 @@ public class DeleteServer implements Closeable {
       try {
          deleteServer.init(args);
          deleteServer.deleteServer();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
       }
       finally {
          deleteServer.close();
@@ -97,6 +99,8 @@ public class DeleteServer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 }

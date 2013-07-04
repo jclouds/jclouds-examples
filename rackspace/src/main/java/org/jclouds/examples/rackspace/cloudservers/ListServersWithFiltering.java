@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Set;
 
@@ -54,6 +52,9 @@ public class ListServersWithFiltering implements Closeable {
          listServersWithFiltering.init(args);
          listServersWithFiltering.listServersByParentLocationId();
          listServersWithFiltering.listServersByNameStartsWith();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
       }
       finally {
          listServersWithFiltering.close();
@@ -99,7 +100,9 @@ public class ListServersWithFiltering implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 
    public static Predicate<ComputeMetadata> nameStartsWith(final String prefix) {

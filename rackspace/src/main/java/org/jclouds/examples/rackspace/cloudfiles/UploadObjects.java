@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
@@ -151,6 +149,8 @@ public class UploadObjects implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(storage.getContext());
+      if (storage != null) {
+         storage.getContext().close();
+      }
    }
 }

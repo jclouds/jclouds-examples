@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Set;
 
@@ -52,6 +50,9 @@ public class ListContainers implements Closeable {
       try {
          listContainers.init(args);
          listContainers.listContainers();
+      }
+      catch (Exception e) {
+         e.printStackTrace();
       }
       finally {
          listContainers.close();
@@ -86,6 +87,8 @@ public class ListContainers implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(storage.getContext());
+      if (storage != null) {
+         storage.getContext().close();
+      }
    }
 }

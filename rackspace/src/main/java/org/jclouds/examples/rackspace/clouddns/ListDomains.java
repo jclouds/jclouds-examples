@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.examples.rackspace.clouddns.Constants.ALT_NAME;
 import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
 
@@ -110,8 +109,19 @@ public class ListDomains implements Closeable {
 
    /**
     * Always close your service when you're done with it.
+    * 
+    * Note that closing quietly like this is not necessary in Java 7. 
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      closeQuietly(dnsApi);
+      if (dnsApi != null) {
+         try {
+            dnsApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
    }
 }

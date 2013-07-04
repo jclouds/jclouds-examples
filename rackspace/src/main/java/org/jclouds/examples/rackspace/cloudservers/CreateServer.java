@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
@@ -192,6 +190,8 @@ public class CreateServer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 }

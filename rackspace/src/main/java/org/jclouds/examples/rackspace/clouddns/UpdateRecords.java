@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
 import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
@@ -105,7 +104,7 @@ public class UpdateRecords implements Closeable {
    private void updateRecords(Domain domain) throws TimeoutException {
       System.out.println("Update Records");
       
-      Set<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("A").concat().toImmutableSet();
+      Set<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("A").concat().toSet();
       Map<String, Record> idsToRecords = RecordFunctions.toRecordMap(recordDetails);
       Map<String, Record> updateRecords = Maps.transformValues(idsToRecords, updateTTLAndComment(235813, "New TTL")); 
       
@@ -128,8 +127,19 @@ public class UpdateRecords implements Closeable {
    
    /**
     * Always close your service when you're done with it.
+    * 
+    * Note that closing quietly like this is not necessary in Java 7. 
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      closeQuietly(dnsApi);
+      if (dnsApi != null) {
+         try {
+            dnsApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
    }
 }

@@ -18,6 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import java.io.Closeable;
 import java.util.Map;
 
 import org.jclouds.ContextBuilder;
@@ -39,7 +40,7 @@ import com.google.common.collect.ImmutableMap;
  *  
  * @author Everett Toews
  */
-public class CrossOriginResourceSharingContainer {
+public class CrossOriginResourceSharingContainer implements Closeable {
    private BlobStore storage;
    private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 

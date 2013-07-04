@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.Closeable;
@@ -176,7 +175,12 @@ public class DetachVolume implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(cinder);
-      closeQuietly(compute.getContext());
+      if (cinder != null) {
+         cinder.close();
+      }
+
+      if (compute != null) {
+         compute.getContext().close();
+      }
    }
 }

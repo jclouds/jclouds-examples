@@ -18,8 +18,6 @@
  */
 package org.jclouds.examples.rackspace;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
 import java.io.Closeable;
 import java.util.Properties;
 
@@ -65,6 +63,9 @@ public class Authentication implements Closeable {
          authentication.init(args);
          authentication.authenticateOnCall();
       }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
       finally {
          authentication.close();
       }
@@ -108,6 +109,8 @@ public class Authentication implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      closeQuietly(compute.getContext());
+      if (compute != null) {
+         compute.getContext();
+      }
    }
 }

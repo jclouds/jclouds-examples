@@ -18,7 +18,6 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static com.google.common.io.Closeables.closeQuietly;
 import static org.jclouds.examples.rackspace.clouddns.Constants.GET_DOMAIN_ID;
 import static org.jclouds.examples.rackspace.clouddns.Constants.IS_DOMAIN;
 import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
@@ -78,7 +77,7 @@ public class DeleteDomains implements Closeable {
    private void deleteAllDomains() throws TimeoutException {
       System.out.println("Delete Domains");
       
-      Set<Domain> allDomains = dnsApi.getDomainApi().list().concat().toImmutableSet();
+      Set<Domain> allDomains = dnsApi.getDomainApi().list().concat().toSet();
       Iterable<Domain> topLevelDomains = Iterables.filter(allDomains, IS_DOMAIN);
       Iterable<Integer> topLevelDomainIds = Iterables.transform(topLevelDomains, GET_DOMAIN_ID);
       
@@ -89,8 +88,19 @@ public class DeleteDomains implements Closeable {
 
    /**
     * Always close your service when you're done with it.
+    * 
+    * Note that closing quietly like this is not necessary in Java 7. 
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      closeQuietly(dnsApi);
+      if (dnsApi != null) {
+         try {
+            dnsApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
    }
 }

@@ -18,8 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import static com.google.common.io.Closeables.closeQuietly;
-
+import java.io.Closeable;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
@@ -33,7 +32,7 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredic
  *  
  * @author Everett Toews
  */
-public class DeleteLoadBalancers {
+public class DeleteLoadBalancers implements Closeable {
    private CloudLoadBalancersApi clb;
    private LoadBalancerApi lbApi;
 
@@ -96,8 +95,19 @@ public class DeleteLoadBalancers {
 
    /**
     * Always close your service when you're done with it.
+    * 
+    * Note that closing quietly like this is not necessary in Java 7. 
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      closeQuietly(clb);
+      if (clb != null) {
+         try {
+            clb.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
+      }
    }
 }

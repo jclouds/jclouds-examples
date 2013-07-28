@@ -199,6 +199,7 @@ public class UploadDirectoryToCDN implements Closeable {
       public BlobDetail call() throws Exception {
          Blob blob = storage.blobBuilder(toBeUploadedBlobDetail.getRemoteBlobName())
                .payload(toBeUploadedBlobDetail.getLocalFile())
+               .contentType("") // allows Cloud Files to determine the content type
                .build();
          String eTag = storage.putBlob(container, blob);
          BlobDetail uploadedBlobDetail = new BlobDetail(

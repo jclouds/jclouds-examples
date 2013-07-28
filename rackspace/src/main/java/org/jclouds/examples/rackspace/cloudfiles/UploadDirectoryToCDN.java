@@ -18,8 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.io.Closeable;
 import java.io.File;
@@ -51,16 +51,16 @@ import com.google.common.util.concurrent.MoreExecutors;
  */
 public class UploadDirectoryToCDN implements Closeable {
    // The provider configures jclouds To use the Rackspace Cloud (US)
-   // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-   public static final String PROVIDER = "cloudfiles-us";
-   public static final int THREADS = 10;
-   
+   // To use the Rackspace Cloud (UK) set the system property or default value to "cloudfiles-uk"
+   private static final String PROVIDER = System.getProperty("cloudfiles.provider", "cloudfiles-us");
+   private static final int THREADS = Integer.getInteger("upload.threadpool.size", 10);
+
    private final BlobStore storage;
    private final CloudFilesClient rackspace;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     * The third argument (args[2]) must be the path to the local directory
@@ -76,17 +76,18 @@ public class UploadDirectoryToCDN implements Closeable {
       catch (Exception e) {
          e.printStackTrace();
       }
-      finally {         
+      finally {
          uploadDirToCDN.close();
       }
    }
-   
+
    public UploadDirectoryToCDN(String username, String apiKey) {
       BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
       storage = context.getBlobStore();
-      rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi(); // can use unwrapApi() in jclouds 1.7.0
+      // can use context.unwrapApi(CloudFilesClient.class) in jclouds 1.7
+      rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
    }
 
    /**
@@ -129,33 +130,33 @@ public class UploadDirectoryToCDN implements Closeable {
       ListeningExecutorService executor = MoreExecutors.listeningDecorator(newFixedThreadPool(THREADS));
       List<ListenableFuture<BlobDetail>> blobUploaderFutures = Lists.newArrayList();      
       BlobUploaderCallback blobUploaderCallback = new BlobUploaderCallback();
-      
+
       try {
-   
+
          for (BlobDetail blobDetail: blobDetails) {
             BlobUploader blobUploader = new BlobUploader(container, blobDetail);         
             ListenableFuture<BlobDetail> blobDetailFuture = executor.submit(blobUploader);
             blobUploaderFutures.add(blobDetailFuture);
-            
+
             Futures.addCallback(blobDetailFuture, blobUploaderCallback);
          }
-         
+
          ListenableFuture<List<BlobDetail>> future = Futures.successfulAsList(blobUploaderFutures);
          List<BlobDetail> uploadedBlobDetails = future.get(); // begin the upload
          
          System.out.println();
-         
+
          for (int i = 0; i < uploadedBlobDetails.size(); i++) {
             if (uploadedBlobDetails.get(i) != null) {
                BlobDetail blobDetail = uploadedBlobDetails.get(i);
-               System.out.format("  %s (eTag: %s)\n", blobDetail.getRemoteBlobName(), blobDetail.getETag());
+               System.out.format("  %s (eTag: %s)%n", blobDetail.getRemoteBlobName(), blobDetail.getETag());
             }
             else {
-               System.out.format(" %s (ERROR)\n", blobDetails.get(i).getLocalFile().getAbsolutePath());
+               System.out.format(" %s (ERROR)%n", blobDetails.get(i).getLocalFile().getAbsolutePath());
             }
          }
       }
-      finally {      
+      finally {
          executor.shutdown();
       }
    }
@@ -208,9 +209,9 @@ public class UploadDirectoryToCDN implements Closeable {
          return uploadedBlobDetail;
       }
    }
-   
+
    /**
-    * Example of a FutureCallback triggered with an upload has finished. Just prints out a character to inform
+    * Example of a FutureCallback triggered when an upload has finished. Just prints out a character to inform
     * the user of upload progress.
     */
    private class BlobUploaderCallback implements FutureCallback<BlobDetail> {
@@ -221,7 +222,7 @@ public class UploadDirectoryToCDN implements Closeable {
 
       @Override
       public void onFailure(Throwable t) {
-         System.out.print("X");
+         System.out.print("X " + t);
       }
    }
 
@@ -232,15 +233,15 @@ public class UploadDirectoryToCDN implements Closeable {
    public static class BlobDetail {
       private final String remoteBlobName;
       private final File localFile;
-      private String eTag;
+      private final String eTag;
 
       protected BlobDetail(String remoteBlobName, File localFile) {
-         this.remoteBlobName = remoteBlobName;
-         this.localFile = localFile;
+         this(remoteBlobName, localFile, null);
       }
 
       protected BlobDetail(String remoteBlobName, File localFile, String eTag) {
-         this(remoteBlobName, localFile);
+         this.remoteBlobName = remoteBlobName;
+         this.localFile = localFile;
          this.eTag = eTag;
       }
 

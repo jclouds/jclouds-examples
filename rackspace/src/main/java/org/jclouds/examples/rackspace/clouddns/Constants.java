@@ -33,8 +33,8 @@ import com.google.common.base.Predicate;
  * @author Everett Toews
  */
 public interface Constants {
-   public static final String NAME = "jclouds-example.com";
-   public static final String ALT_NAME = "alt-jclouds-example.com";
+   public static final String NAME = System.getProperty("user.name") + "-jclouds-example.com";
+   public static final String ALT_NAME = "alt-" + NAME;
    public static final String CLOUD_SERVERS = "cloudServersOpenStack";
 
    // subdomains contain two or more '.'

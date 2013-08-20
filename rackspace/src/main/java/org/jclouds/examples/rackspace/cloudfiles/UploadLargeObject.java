@@ -76,6 +76,7 @@ public class UploadLargeObject implements Closeable {
       
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
+            .overrides(overrides)
             .buildView(BlobStoreContext.class);
       storage = context.getBlobStore();
    }

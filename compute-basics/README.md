@@ -49,13 +49,14 @@ To destroy all nodes of the group *mygroup*:
 
 ### Your own OpenStack Nova
 
-    java -jar target/compute-basics-jar-with-dependencies.jar openstack-nova \
+    java \
          -Dopenstack-nova.image-id=RegionOne/15 \
          -Dopenstack-nova.login-user=ubuntu \
          -Djclouds.trust-all-certs=true \
          -Djclouds.keystone.credential-type=passwordCredentials \
          -Dopenstack-nova.endpoint=https://keystone:35357 \
-          tenantId:user password mygroup add
+         -jar target/compute-basics-jar-with-dependencies.jar \
+         openstack-nova tenantId:user password mygroup add
 
 ### Virtualbox
 
@@ -64,12 +65,13 @@ To destroy all nodes of the group *mygroup*:
 
 ### Your own OpenStack Nova emulating EC2
 
-    java -jar target/compute-basics-jar-with-dependencies.jar openstack-nova-ec2 \
+    java \
          -Dopenstack-nova-ec2.image-id=nova/ami-00000009 \
          -Dopenstack-nova-ec2.login-user=ubuntu \
          -Djclouds.trust-all-certs=true \
          -Dopenstack-nova-ec2.endpoint=https://novahost/services/Cloud \
-          tenantId:accesskey secretkey mygroup add
+         -jar target/compute-basics-jar-with-dependencies.jar \
+         openstack-nova-ec2 tenantId:accesskey secretkey mygroup add
 
 ## License
 

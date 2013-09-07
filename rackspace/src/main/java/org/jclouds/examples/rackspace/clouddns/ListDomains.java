@@ -18,15 +18,14 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.ALT_NAME;
-import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
-
-import java.io.Closeable;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
 import org.jclouds.rackspace.clouddns.v1.domain.Domain;
 import org.jclouds.rackspace.clouddns.v1.domain.Subdomain;
+
+import java.io.Closeable;
+
+import static org.jclouds.examples.rackspace.clouddns.Constants.*;
 
 /**
  * This example lists domains. 
@@ -34,8 +33,7 @@ import org.jclouds.rackspace.clouddns.v1.domain.Subdomain;
  * @author Everett Toews
  */
 public class ListDomains implements Closeable {
-   private CloudDNSApi dnsApi;
-   private int domainId;
+   private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -44,13 +42,12 @@ public class ListDomains implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListDomains listDomains = new ListDomains();
+      ListDomains listDomains = new ListDomains(args[0], args[1]);
 
       try {
-         listDomains.init(args);
-         listDomains.listDomains();
+         int domainId = listDomains.listDomains();
          listDomains.listWithFilterByNamesMatching();
-         listDomains.listSubdomains();
+         listDomains.listSubdomains(domainId);
       }
       catch (Exception e) {
          e.printStackTrace();
@@ -60,50 +57,46 @@ public class ListDomains implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public ListDomains(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
    }
 
-   private void listDomains() {
-      System.out.println("List Domains");
+   private int listDomains() {
+      System.out.format("List Domains%n");
 
       Iterable<Domain> domains = dnsApi.getDomainApi().list().concat();
+      int domainId = 0;
       
       for (Domain domain: domains) {
-         System.out.println("  " + domain);
+         System.out.format("  %s%n", domain);
          
          if (domain.getName().equals(NAME)) {
             domainId = domain.getId();
          }
       }
+
+      return domainId;
    }
 
    private void listWithFilterByNamesMatching() {
-      System.out.println("List With Filter By Names Matching");
+      System.out.format("List With Filter By Names Matching%n");
       
       Iterable<Domain> domains = dnsApi.getDomainApi().listWithFilterByNamesMatching(ALT_NAME).concat();
       
       for (Domain domain: domains) {
-         System.out.println("  " + domain);         
+         System.out.format("  %s%n", domain);
       }
    }
 
-   private void listSubdomains() {
-      System.out.println("List Subdomains");
+   private void listSubdomains(int domainId) {
+      System.out.format("List Subdomains%n");
 
       Iterable<Subdomain> subdomains = dnsApi.getDomainApi().listSubdomains(domainId).concat();
       
       for (Subdomain subdomain: subdomains) {
-         System.out.println("  " + subdomain);         
+         System.out.format("  %s%n", subdomain);
       }
    }
 

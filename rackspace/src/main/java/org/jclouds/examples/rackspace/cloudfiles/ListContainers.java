@@ -18,9 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.Closeable;
-import java.util.Set;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -29,14 +26,19 @@ import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.ContainerMetadata;
 import org.jclouds.rest.RestContext;
 
+import java.io.Closeable;
+import java.util.Set;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+
 /**
- * List the object storage containers associated with your account.
+ * List the Cloud Files containers associated with your account.
  *  
  * @author Everett Toews
  */
 public class ListContainers implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final BlobStore blobStore;
+   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -45,10 +47,9 @@ public class ListContainers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListContainers listContainers = new ListContainers();
+      ListContainers listContainers = new ListContainers(args[0], args[1]);
 
       try {
-         listContainers.init(args);
          listContainers.listContainers();
       }
       catch (Exception e) {
@@ -59,27 +60,21 @@ public class ListContainers implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+   public ListContainers(String username, String apiKey) {
+      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       swift = context.unwrap();
    }
 
    private void listContainers() {
-      System.out.println("List Containers");
+      System.out.format("List Containers%n");
+
       Set<ContainerMetadata> containers = swift.getApi().listContainers();
 
       for (ContainerMetadata container: containers) {
-         System.out.println("  " + container);
+         System.out.format("  %s%n", container);
       }
    }
 
@@ -87,8 +82,8 @@ public class ListContainers implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

@@ -18,9 +18,16 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.CLOUD_SERVERS;
-import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
-import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import org.jclouds.ContextBuilder;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
+import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
+import org.jclouds.rackspace.clouddns.v1.domain.Record;
+import org.jclouds.rackspace.clouddns.v1.domain.RecordDetail;
+import org.jclouds.rackspace.clouddns.v1.features.ReverseDNSApi;
 
 import java.io.Closeable;
 import java.util.List;
@@ -28,16 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
-import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
-import org.jclouds.rackspace.clouddns.v1.domain.Record;
-import org.jclouds.rackspace.clouddns.v1.domain.RecordDetail;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import static org.jclouds.examples.rackspace.clouddns.Constants.*;
+import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
 /**
  * This example creates reverse DNS records on an existing domain for a Cloud Server. 
@@ -45,10 +44,8 @@ import com.google.common.collect.Lists;
  * @author Everett Toews
  */
 public class CRUDReverseDNSRecords implements Closeable {
-   private static NodeMetadata node;
-   private static RecordDetail recordDetail;
-
-   private CloudDNSApi dnsApi;
+   private final CloudDNSApi dnsApi;
+   private final ReverseDNSApi reverseDNSApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -57,18 +54,17 @@ public class CRUDReverseDNSRecords implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CRUDReverseDNSRecords crudReverseDNSRecords = new CRUDReverseDNSRecords();
+      CRUDReverseDNSRecords crudReverseDNSRecords = new CRUDReverseDNSRecords(args[0], args[1]);
 
       try {
          List<String> argsList = Lists.newArrayList(args);
          argsList.add("1"); // the number of Cloud Servers to start
-         node = CloudServersPublish.getPublishedCloudServers(argsList).iterator().next();
-         
-         crudReverseDNSRecords.init(args);
-         crudReverseDNSRecords.createReverseDNSRecords();
-         crudReverseDNSRecords.listReverseDNSRecords();
-         crudReverseDNSRecords.updateReverseDNSRecords();
-         crudReverseDNSRecords.deleteAllReverseDNSRecords();
+         NodeMetadata node = CloudServersPublish.getPublishedCloudServers(argsList).iterator().next();
+
+         RecordDetail recordDetail = crudReverseDNSRecords.createReverseDNSRecords(node);
+         crudReverseDNSRecords.listReverseDNSRecords(node);
+         crudReverseDNSRecords.updateReverseDNSRecords(node, recordDetail);
+         crudReverseDNSRecords.deleteAllReverseDNSRecords(node);
       }
       catch (Exception e) {
          e.printStackTrace();
@@ -78,21 +74,15 @@ public class CRUDReverseDNSRecords implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public CRUDReverseDNSRecords(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
+      reverseDNSApi = dnsApi.getReverseDNSApiForService(CLOUD_SERVERS);
    }
 
-   private void createReverseDNSRecords() throws TimeoutException {
-      System.out.println("Create Reverse DNS Records");
+   private RecordDetail createReverseDNSRecords(NodeMetadata node) throws TimeoutException {
+      System.out.format("Create Reverse DNS Records%n");
       
       Record createPTRRecordIPv4 = Record.builder()
             .name(NAME)
@@ -101,41 +91,43 @@ public class CRUDReverseDNSRecords implements Closeable {
             .ttl(11235)
             .build();
 
-      Set<Record> records = ImmutableSet.<Record> of(createPTRRecordIPv4);
+      Set<Record> records = ImmutableSet.of(createPTRRecordIPv4);
 
-      Iterable<RecordDetail> recordDetails = awaitComplete(dnsApi, dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).create(node.getUri(), records));
+      Iterable<RecordDetail> recordDetails = awaitComplete(dnsApi, reverseDNSApi.create(node.getUri(), records));
       
-      recordDetail = recordDetails.iterator().next();
-      System.out.println("  " + recordDetail);
+      RecordDetail recordDetail = recordDetails.iterator().next();
+      System.out.format("  %s%n", recordDetail);
+
+      return recordDetail;
    }
 
-   private void listReverseDNSRecords() {
-      System.out.println("List Reverse DNS Records");
+   private void listReverseDNSRecords(NodeMetadata node) {
+      System.out.format("List Reverse DNS Records%n");
 
-      Iterable<RecordDetail> recordDetails = dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).list(node.getUri()).concat();
+      Iterable<RecordDetail> recordDetails = reverseDNSApi.list(node.getUri()).concat();
       
       for (RecordDetail recordDetail: recordDetails) {
-         System.out.println("  " + recordDetail);
+         System.out.format("  %s%n", recordDetail);
       }
    }
 
-   private void updateReverseDNSRecords() throws TimeoutException {
-      System.out.println("Update Reverse DNS Records");
+   private void updateReverseDNSRecords(NodeMetadata node, RecordDetail recordDetail) throws TimeoutException {
+      System.out.format("Update Reverse DNS Records%n");
 
       Record updatePTRRecord = recordDetail.getRecord().toBuilder().comment("Hello Cloud DNS").build();
-      Map<String, Record> idsToRecords = ImmutableMap.<String, Record> of(recordDetail.getId(), updatePTRRecord);
+      Map<String, Record> idsToRecords = ImmutableMap.of(recordDetail.getId(), updatePTRRecord);
 
-      awaitComplete(dnsApi, dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).update(node.getUri(), idsToRecords));
+      awaitComplete(dnsApi, reverseDNSApi.update(node.getUri(), idsToRecords));
       
-      System.out.println("  " + dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).get(node.getUri(), recordDetail.getId()));
+      System.out.format("  %s%n", reverseDNSApi.get(node.getUri(), recordDetail.getId()));
    }
 
-   private void deleteAllReverseDNSRecords() throws TimeoutException {
-      System.out.println("Delete Reverse DNS Records");
+   private void deleteAllReverseDNSRecords(NodeMetadata node) throws TimeoutException {
+      System.out.format("Delete Reverse DNS Records%n");
 
       awaitComplete(dnsApi, dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).deleteAll(node.getUri()));
       
-      System.out.println("  Deleted all reverse DNS records");
+      System.out.format("  Deleted all reverse DNS records%n");
    }
 
    /**

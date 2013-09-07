@@ -18,8 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.Closeable;
-
+import com.google.common.collect.ImmutableMap;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -28,16 +27,19 @@ import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.options.CreateContainerOptions;
 import org.jclouds.rest.RestContext;
 
-import com.google.common.collect.ImmutableMap;
+import java.io.Closeable;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 /**
- * Create an object storage container with some metadata associated with it.
+ * Create a Cloud Files container with some metadata associated with it.
  *  
  * @author Everett Toews
  */
 public class CreateContainer implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final BlobStore blobStore;
+   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -46,10 +48,9 @@ public class CreateContainer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateContainer createContainer = new CreateContainer();
+      CreateContainer createContainer = new CreateContainer(args[0], args[1]);
 
       try {
-         createContainer.init(args);
          createContainer.createContainer();
       }
       catch (Exception e) {
@@ -60,38 +61,31 @@ public class CreateContainer implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+   public CreateContainer(String username, String apiKey) {
+      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       swift = context.unwrap();
    }
 
    private void createContainer() {
-      System.out.println("Create Container");
+      System.out.format("Create Container%n");
 
       CreateContainerOptions options = CreateContainerOptions.Builder
             .withMetadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
 
-      swift.getApi().createContainer(Constants.CONTAINER, options);
+      swift.getApi().createContainer(CONTAINER, options);
 
-      System.out.println("  " + Constants.CONTAINER);
+      System.out.format("  %s%n", CONTAINER);
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

@@ -18,20 +18,17 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.ALT_NAME;
-import static org.jclouds.examples.rackspace.clouddns.Constants.GET_DOMAIN_ID;
-import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
-import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
-
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.collect.Iterables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
 import org.jclouds.rackspace.clouddns.v1.domain.Domain;
 import org.jclouds.rackspace.clouddns.v1.domain.UpdateDomain;
 
-import com.google.common.collect.Iterables;
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.clouddns.Constants.*;
+import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
 /**
  * This example updates a domain. 
@@ -39,7 +36,7 @@ import com.google.common.collect.Iterables;
  * @author Everett Toews
  */
 public class UpdateDomains implements Closeable {
-   private CloudDNSApi dnsApi;
+   private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -48,10 +45,9 @@ public class UpdateDomains implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      UpdateDomains updateDomains = new UpdateDomains();
+      UpdateDomains updateDomains = new UpdateDomains(args[0], args[1]);
 
       try {
-         updateDomains.init(args);
          updateDomains.updateDomain();
          updateDomains.updateDomains();
       }
@@ -63,21 +59,14 @@ public class UpdateDomains implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public UpdateDomains(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
    }
 
    private void updateDomain() throws TimeoutException {
-      System.out.println("Update Domain");
+      System.out.format("Update Domain%n");
       
       int domainId = 0;
 
@@ -97,11 +86,11 @@ public class UpdateDomains implements Closeable {
 
       awaitComplete(dnsApi, dnsApi.getDomainApi().update(domainId, updateDomain));
       
-      System.out.println("  " + dnsApi.getDomainApi().get(domainId));
+      System.out.format("  %s%n", dnsApi.getDomainApi().get(domainId));
    }
 
    private void updateDomains() throws TimeoutException {
-      System.out.println("Update Domains");
+      System.out.format("Update Domains%n");
       
       Iterable<Domain> domains = dnsApi.getDomainApi().list().concat();
       Iterable<Integer> domainIds = Iterables.transform(domains, GET_DOMAIN_ID);
@@ -111,7 +100,7 @@ public class UpdateDomains implements Closeable {
       domains = dnsApi.getDomainApi().list().concat();
       
       for (Domain domain: domains) {
-         System.out.println("  " + domain);
+         System.out.format("  %s%n", domain);
       }
    }
    

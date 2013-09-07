@@ -18,10 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
@@ -30,9 +29,11 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.NodeApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import java.io.Closeable;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
 
 /**
  * This example removes a Node from a Load Balancer. 
@@ -40,8 +41,8 @@ import com.google.common.collect.Sets;
  * @author Everett Toews
  */
 public class RemoveNodes implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -50,10 +51,9 @@ public class RemoveNodes implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      RemoveNodes removeNodes = new RemoveNodes();
+      RemoveNodes removeNodes = new RemoveNodes(args[0], args[1]);
 
       try {
-         removeNodes.init(args);
          LoadBalancer loadBalancer = removeNodes.getLoadBalancer();
          Set<Node> nodes = removeNodes.getNodes(loadBalancer);
          removeNodes.removeNodesFromLoadBalancer(nodes, loadBalancer);
@@ -66,32 +66,25 @@ public class RemoveNodes implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public RemoveNodes(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    private LoadBalancer getLoadBalancer() {
       for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-         if (loadBalancer.getName().startsWith(Constants.NAME)) {
+         if (loadBalancer.getName().startsWith(NAME)) {
             return loadBalancer;
          }
       }
       
-      throw new RuntimeException(Constants.NAME + " not found. Run a CreateLoadBalancer* example first.");
+      throw new RuntimeException(NAME + " not found. Run a CreateLoadBalancer* example first.");
    }
    
    private Set<Node> getNodes(LoadBalancer loadBalancer) {
-      NodeApi nodeApi = clb.getNodeApiForZoneAndLoadBalancer(Constants.ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
       Set<Node> nodes = Sets.newHashSet();
       
       for (Node node: nodeApi.list().concat()) {
@@ -104,10 +97,10 @@ public class RemoveNodes implements Closeable {
    }
 
    private void removeNodesFromLoadBalancer(Set<Node> nodes, LoadBalancer loadBalancer) throws TimeoutException {
-      System.out.println("Remove Nodes");
+      System.out.format("Remove Nodes%n");
 
-      NodeApi nodeApi = clb.getNodeApiForZoneAndLoadBalancer(Constants.ZONE, loadBalancer.getId());
-      Iterable<Integer> nodeIds = Iterables.transform(nodes, new NodeToInteger()); 
+      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
+      Iterable<Integer> nodeIds = Iterables.transform(nodes, new NodeToId());
       
       nodeApi.remove(nodeIds);
 
@@ -118,10 +111,10 @@ public class RemoveNodes implements Closeable {
          throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
       }
       
-      System.out.println("  " + nodeIds);
+      System.out.format("  %s%n", nodeIds);
    }
    
-   private static class NodeToInteger implements Function<Node, Integer> {
+   private static class NodeToId implements Function<Node, Integer> {
       @Override
       public Integer apply(Node node) {
          return node.getId();
@@ -136,9 +129,9 @@ public class RemoveNodes implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

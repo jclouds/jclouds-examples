@@ -18,13 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.BufferedWriter;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URI;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -35,13 +28,18 @@ import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.SwiftObject;
 import org.jclouds.rest.RestContext;
 
+import java.io.*;
+import java.net.URI;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.*;
+
 /**
  * This example will create a container, put a file in it, and publish it on the internet!
  */
 public class CloudFilesPublish implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
-   private CloudFilesClient rackspace;
+   private final BlobStore blobStore;
+   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final CloudFilesClient cloudFilesClient;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -50,10 +48,9 @@ public class CloudFilesPublish implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CloudFilesPublish cloudFilesPublish = new CloudFilesPublish();
+      CloudFilesPublish cloudFilesPublish = new CloudFilesPublish(args[0], args[1]);
 
       try {
-         cloudFilesPublish.init(args);
          cloudFilesPublish.createContainer();
          cloudFilesPublish.createObjectFromFile();
          cloudFilesPublish.enableCdnContainer();
@@ -66,20 +63,13 @@ public class CloudFilesPublish implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+   public CloudFilesPublish(String username, String apiKey) {
+      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       swift = context.unwrap();
-      rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
+      cloudFilesClient = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
    }
 
    /**
@@ -87,18 +77,20 @@ public class CloudFilesPublish implements Closeable {
     * retrieve any kind of digital asset.
     */
    private void createContainer() {
-      System.out.println("Create Container");
-      swift.getApi().createContainer(Constants.CONTAINER_PUBLISH);
-      System.out.println("  " + Constants.CONTAINER_PUBLISH);
+      System.out.format("Create Container%n");
+
+      swift.getApi().createContainer(CONTAINER_PUBLISH);
+
+      System.out.format("  %s%n", CONTAINER_PUBLISH);
    }
 
    /**
     * This method will put a plain text object into the container.
     */
    private void createObjectFromFile() throws IOException {
-      System.out.println("Create Object From File");
+      System.out.format("Create Object From File%n");
 
-      File tempFile = File.createTempFile(Constants.FILENAME, Constants.SUFFIX);
+      File tempFile = File.createTempFile(FILENAME, SUFFIX);
       tempFile.deleteOnExit();
 
       BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
@@ -106,12 +98,12 @@ public class CloudFilesPublish implements Closeable {
       out.close();
 
       SwiftObject object = swift.getApi().newSwiftObject();
-      object.getInfo().setName(Constants.FILENAME + Constants.SUFFIX);
+      object.getInfo().setName(FILENAME + SUFFIX);
       object.setPayload(tempFile);
 
-      swift.getApi().putObject(Constants.CONTAINER_PUBLISH, object);
+      swift.getApi().putObject(CONTAINER_PUBLISH, object);
 
-      System.out.println("  " + Constants.FILENAME + Constants.SUFFIX);
+      System.out.format("  %s%s%n", FILENAME, SUFFIX);
    }
 
    /**
@@ -119,17 +111,19 @@ public class CloudFilesPublish implements Closeable {
     * make it 100% publicly accessible over the Internet.
     */
    private void enableCdnContainer() {
-      System.out.println("Enable CDN Container");
-      URI cdnURI = rackspace.enableCDN(Constants.CONTAINER_PUBLISH);
-      System.out.println("  Go to " + cdnURI + "/" + Constants.FILENAME + Constants.SUFFIX);
+      System.out.format("Enable CDN Container%n");
+
+      URI cdnURI = cloudFilesClient.enableCDN(CONTAINER_PUBLISH);
+
+      System.out.format("  Go to %s/%s%s%n", cdnURI, FILENAME, SUFFIX);
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

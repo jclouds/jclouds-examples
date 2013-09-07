@@ -18,19 +18,17 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.GET_DOMAIN_ID;
-import static org.jclouds.examples.rackspace.clouddns.Constants.IS_DOMAIN;
-import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
+import com.google.common.collect.Iterables;
+import org.jclouds.ContextBuilder;
+import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
+import org.jclouds.rackspace.clouddns.v1.domain.Domain;
 
 import java.io.Closeable;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
-import org.jclouds.rackspace.clouddns.v1.domain.Domain;
-
-import com.google.common.collect.Iterables;
+import static org.jclouds.examples.rackspace.clouddns.Constants.*;
+import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
 /**
  * This example deletes all domains. 
@@ -38,7 +36,7 @@ import com.google.common.collect.Iterables;
  * @author Everett Toews
  */
 public class DeleteDomains implements Closeable {
-   private CloudDNSApi dnsApi;
+   private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -47,10 +45,9 @@ public class DeleteDomains implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteDomains deleteDomains = new DeleteDomains();
+      DeleteDomains deleteDomains = new DeleteDomains(args[0], args[1]);
 
       try {
-         deleteDomains.init(args);
          deleteDomains.deleteAllDomains();
       }
       catch (Exception e) {
@@ -61,21 +58,14 @@ public class DeleteDomains implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public DeleteDomains(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
    }
 
    private void deleteAllDomains() throws TimeoutException {
-      System.out.println("Delete Domains");
+      System.out.format("Delete Domains%n");
       
       Set<Domain> allDomains = dnsApi.getDomainApi().list().concat().toSet();
       Iterable<Domain> topLevelDomains = Iterables.filter(allDomains, IS_DOMAIN);
@@ -83,7 +73,7 @@ public class DeleteDomains implements Closeable {
       
       awaitComplete(dnsApi, dnsApi.getDomainApi().delete(topLevelDomainIds, true));
             
-      System.out.println("  Deleted " + Iterables.size(topLevelDomainIds) + " top level domains and all subdomains");
+      System.out.format("  Deleted %s top level domains and all subdomains%n", Iterables.size(topLevelDomainIds));
    }
 
    /**

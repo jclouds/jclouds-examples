@@ -18,9 +18,6 @@
  */
 package org.jclouds.examples.rackspace;
 
-import java.io.Closeable;
-import java.util.Properties;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -29,6 +26,9 @@ import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.rest.RestContext;
+
+import java.io.Closeable;
+import java.util.Properties;
 
 /**
  * To authenticate using jclouds you need to provide your credentials to a Context as in the init() method below. 
@@ -45,10 +45,10 @@ import org.jclouds.rest.RestContext;
  * @author Everett Toews
  */
 public class Authentication implements Closeable {
-   private ComputeService compute;
-   private RestContext<NovaApi, NovaAsyncApi> nova;
+   private final ComputeService compute;
+   private final RestContext<NovaApi, NovaAsyncApi> nova;
 
-   /**
+    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
     * The first argument (args[0]) must be your username
@@ -57,10 +57,9 @@ public class Authentication implements Closeable {
     *            otherwise default to using API key.
     */
    public static void main(String[] args) {
-      Authentication authentication = new Authentication();
+      Authentication authentication = new Authentication(args);
 
       try {
-         authentication.init(args);
          authentication.authenticateOnCall();
       }
       catch (Exception e) {
@@ -71,26 +70,26 @@ public class Authentication implements Closeable {
       }
    }
 
-   private void init(String[] args) {
+   public Authentication(String[] args) {
       // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
+      // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
+      String provider = System.getProperty("provider.cs", "rackspace-cloudservers-us");
 
-      String username = args[0];
-      String credential = args[1];
+       String username = args[0];
+       String credential = args[1];
 
-      Properties overrides = new Properties();
+       Properties overrides = new Properties();
 
-      if (args.length == 3 && "password".equals(args[2])) {
-         overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
-      }
+       if (args.length == 3 && "password".equals(args[2])) {
+           overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
+       }
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
-            .credentials(username, credential)
-            .overrides(overrides)
-            .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
-      nova = context.unwrap();
+       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+               .credentials(username, credential)
+               .overrides(overrides)
+               .buildView(ComputeServiceContext.class);
+       compute = context.getComputeService();
+       nova = context.unwrap();
    }
 
    /**
@@ -98,11 +97,11 @@ public class Authentication implements Closeable {
     * getConfiguredZones() will result in an org.jclouds.rest.AuthorizationException
     */
    private void authenticateOnCall() {
-      System.out.println("Authenticate On Call");
+      System.out.format("Authenticate On Call%n");
 
       nova.getApi().getConfiguredZones();
 
-      System.out.println("  Authenticated");
+      System.out.format("  Authenticated");
    }
 
    /**

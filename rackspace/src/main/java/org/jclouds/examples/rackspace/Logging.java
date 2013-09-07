@@ -18,9 +18,8 @@
  */
 package org.jclouds.examples.rackspace;
 
-import java.io.Closeable;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -29,8 +28,8 @@ import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.rest.RestContext;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Module;
+import java.io.Closeable;
+import java.util.Set;
 
 /**
  * This example shows you how to log what jclouds is doing. This is extremely useful for debugging, submitting bug
@@ -48,21 +47,20 @@ import com.google.inject.Module;
  * @author Everett Toews
  */
 public class Logging implements Closeable {
-   private ComputeService compute;
-   private RestContext<NovaApi, NovaAsyncApi> nova;
-   private Set<String> zones;
+   private final ComputeService compute;
+   private final RestContext<NovaApi, NovaAsyncApi> nova;
 
-   /**
+    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      Logging logging = new Logging();
+      Logging logging = new Logging(args[0], args[1]);
 
       try {
-         logging.init(args);
+         logging.getConfiguredZones();
       }
       catch (Exception e) {
          e.printStackTrace();
@@ -72,13 +70,10 @@ public class Logging implements Closeable {
       }
    }
 
-   private void init(String[] args) {
+   public Logging(String username, String apiKey) {
       // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
+      // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
+      String provider = System.getProperty("provider.cs", "rackspace-cloudservers-us");
 
       // This module is responsible for enabling logging
       Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
@@ -89,10 +84,17 @@ public class Logging implements Closeable {
             .buildView(ComputeServiceContext.class);
       compute = context.getComputeService();
       nova = context.unwrap();
+   }
 
-      // Calling getConfiguredZones() talks to the cloud which gets logged
-      zones = nova.getApi().getConfiguredZones();
-      System.out.println("Zones: " + zones);
+   private void getConfiguredZones() {
+       // Calling getConfiguredZones() talks to the cloud which gets logged
+       Set<String> zones = nova.getApi().getConfiguredZones();
+
+       System.out.format("Zones%n");
+
+       for (String zone : zones) {
+           System.out.format("  %s%n", zone);
+       }
    }
 
    /**

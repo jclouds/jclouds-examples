@@ -18,9 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import java.io.Closeable;
-import java.util.Set;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -28,8 +27,11 @@ import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.predicates.NodePredicates;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import java.io.Closeable;
+import java.util.Set;
+
+import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
 
 /**
  * This example lists servers filtered by Predicates. Run the CreateServer example before this to get some results.
@@ -37,7 +39,8 @@ import com.google.common.base.Predicate;
  * @author Everett Toews
  */
 public class ListServersWithFiltering implements Closeable {
-   private ComputeService compute;
+   private final ComputeService computeService;
+
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -46,10 +49,9 @@ public class ListServersWithFiltering implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListServersWithFiltering listServersWithFiltering = new ListServersWithFiltering();
+      ListServersWithFiltering listServersWithFiltering = new ListServersWithFiltering(args[0], args[1]);
 
       try {
-         listServersWithFiltering.init(args);
          listServersWithFiltering.listServersByParentLocationId();
          listServersWithFiltering.listServersByNameStartsWith();
       }
@@ -61,38 +63,32 @@ public class ListServersWithFiltering implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+   public ListServersWithFiltering(String username, String apiKey) {
+      ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
+
    }
 
    private void listServersByParentLocationId() {
-      System.out.println("List Servers By Parent Location Id");
+      System.out.format("List Servers By Parent Location Id%n");
 
-      Set<? extends NodeMetadata> servers = compute.listNodesDetailsMatching(NodePredicates
-            .parentLocationId(Constants.ZONE));
+      Set<? extends NodeMetadata> servers = computeService.listNodesDetailsMatching(NodePredicates
+            .parentLocationId(ZONE));
 
       for (NodeMetadata nodeMetadata: servers) {
-         System.out.println("  " + nodeMetadata);
+         System.out.format("  %s%n", nodeMetadata);
       }
    }
 
    private void listServersByNameStartsWith() {
-      System.out.println("List Servers By Name Starts With");
+      System.out.format("List Servers By Name Starts With%n");
 
-      Set<? extends NodeMetadata> servers = compute.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));
+      Set<? extends NodeMetadata> servers = computeService.listNodesDetailsMatching(nameStartsWith("jclouds-ex"));
 
       for (NodeMetadata nodeMetadata: servers) {
-         System.out.println("  " + nodeMetadata);
+         System.out.format("  %s%n", nodeMetadata);
       }
    }
 
@@ -100,8 +96,8 @@ public class ListServersWithFiltering implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 

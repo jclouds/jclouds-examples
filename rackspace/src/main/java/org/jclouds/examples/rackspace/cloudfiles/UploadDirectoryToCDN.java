@@ -18,8 +18,14 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
-import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.*;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.cloudfiles.CloudFilesApiMetadata;
+import org.jclouds.cloudfiles.CloudFilesClient;
 
 import java.io.Closeable;
 import java.io.File;
@@ -28,19 +34,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.cloudfiles.CloudFilesApiMetadata;
-import org.jclouds.cloudfiles.CloudFilesClient;
-
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 /**
  * Upload an entire directory and all of its sub-directories to a Cloud Files container. The local directory hierarchy
@@ -50,13 +46,10 @@ import com.google.common.util.concurrent.MoreExecutors;
  * @author Everett Toews
  */
 public class UploadDirectoryToCDN implements Closeable {
-   // The provider configures jclouds To use the Rackspace Cloud (US)
-   // To use the Rackspace Cloud (UK) set the system property or default value to "cloudfiles-uk"
-   private static final String PROVIDER = System.getProperty("cloudfiles.provider", "cloudfiles-us");
    private static final int THREADS = Integer.getInteger("upload.threadpool.size", 10);
 
-   private final BlobStore storage;
-   private final CloudFilesClient rackspace;
+   private final BlobStore blobStore;
+   private final CloudFilesClient cloudFilesClient;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -85,9 +78,9 @@ public class UploadDirectoryToCDN implements Closeable {
       BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       // can use context.unwrapApi(CloudFilesClient.class) in jclouds 1.7
-      rackspace = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
+      cloudFilesClient = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
    }
 
    /**
@@ -97,9 +90,9 @@ public class UploadDirectoryToCDN implements Closeable {
       File dir = new File(dirPath);
       checkArgument(dir.isDirectory(), "%s is not a directory", dirPath);
       
-      System.out.println("Uploading " + dirPath + " to " + container);
+      System.out.format("Uploading %s to %s", dirPath, container);
 
-      storage.createContainerInLocation(null, container);
+      blobStore.createContainerInLocation(null, container);
 
       List<BlobDetail> blobDetails = Lists.newArrayList();
       generateFileList(dir, "", blobDetails);
@@ -144,7 +137,7 @@ public class UploadDirectoryToCDN implements Closeable {
          ListenableFuture<List<BlobDetail>> future = Futures.successfulAsList(blobUploaderFutures);
          List<BlobDetail> uploadedBlobDetails = future.get(); // begin the upload
          
-         System.out.println();
+         System.out.format("%n");
 
          for (int i = 0; i < uploadedBlobDetails.size(); i++) {
             if (uploadedBlobDetails.get(i) != null) {
@@ -166,20 +159,20 @@ public class UploadDirectoryToCDN implements Closeable {
     * make it available as a static website.
     */
    private void enableCdnContainer(String container) {
-      System.out.println("Enable CDN");
+      System.out.format("Enable CDN%n");
 
-      URI cdnURI = rackspace.enableCDN(container);
-      rackspace.setCDNStaticWebsiteIndex(container, "index.html");
+      URI cdnURI = cloudFilesClient.enableCDN(container);
+      cloudFilesClient.setCDNStaticWebsiteIndex(container, "index.html");
 
-      System.out.println("  Go to " + cdnURI + "/");
+      System.out.format("  Go to %s/%n", cdnURI);
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 
@@ -198,11 +191,11 @@ public class UploadDirectoryToCDN implements Closeable {
 
       @Override
       public BlobDetail call() throws Exception {
-         Blob blob = storage.blobBuilder(toBeUploadedBlobDetail.getRemoteBlobName())
+         Blob blob = blobStore.blobBuilder(toBeUploadedBlobDetail.getRemoteBlobName())
                .payload(toBeUploadedBlobDetail.getLocalFile())
                .contentType("") // allows Cloud Files to determine the content type
                .build();
-         String eTag = storage.putBlob(container, blob);
+         String eTag = blobStore.putBlob(container, blob);
          BlobDetail uploadedBlobDetail = new BlobDetail(
                toBeUploadedBlobDetail.getRemoteBlobName(), toBeUploadedBlobDetail.getLocalFile(), eTag);
          
@@ -217,12 +210,12 @@ public class UploadDirectoryToCDN implements Closeable {
    private class BlobUploaderCallback implements FutureCallback<BlobDetail> {
       @Override
       public void onSuccess(BlobDetail result) {
-         System.out.print(".");
+         System.out.format(".");
       }
 
       @Override
       public void onFailure(Throwable t) {
-         System.out.print("X " + t);
+         System.out.format("X %s", t);
       }
    }
 

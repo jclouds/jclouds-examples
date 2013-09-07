@@ -18,10 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.collect.Sets;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.AddNode;
@@ -31,7 +28,15 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.NodeApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
 
-import com.google.common.collect.Sets;
+import java.io.Closeable;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.ZONE;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.DISABLED;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
 /**
  * This example adds a Node to a Load Balancer. 
@@ -39,8 +44,8 @@ import com.google.common.collect.Sets;
  * @author Everett Toews
  */
 public class AddNodes implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -49,10 +54,9 @@ public class AddNodes implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      AddNodes addNodes = new AddNodes();
+      AddNodes addNodes = new AddNodes(args[0], args[1]);
 
       try {
-         addNodes.init(args);
          LoadBalancer loadBalancer = addNodes.getLoadBalancer();
          Set<AddNode> addNodeSet = addNodes.createAddNodes();
          addNodes.addNodesToLoadBalancer(addNodeSet, loadBalancer);
@@ -65,28 +69,21 @@ public class AddNodes implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public AddNodes(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    private LoadBalancer getLoadBalancer() {
       for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-         if (loadBalancer.getName().startsWith(Constants.NAME)) {
+         if (loadBalancer.getName().startsWith(NAME)) {
             return loadBalancer;
          }
       }
       
-      throw new RuntimeException(Constants.NAME + " not found. Run a CreateLoadBalancer* example first.");
+      throw new RuntimeException(NAME + " not found. Run a CreateLoadBalancer* example first.");
    }
 
    /**
@@ -99,14 +96,14 @@ public class AddNodes implements Closeable {
    private Set<AddNode> createAddNodes() {
       AddNode addNode11 = AddNode.builder()
             .address("10.180.1.1")
-            .condition(Node.Condition.DISABLED)
+            .condition(DISABLED)
             .port(80)
             .weight(20)
             .build();
       
       AddNode addNode12 = AddNode.builder()
             .address("10.180.1.2")
-            .condition(Node.Condition.ENABLED)
+            .condition(ENABLED)
             .port(80)
             .weight(20)
             .build();
@@ -122,9 +119,9 @@ public class AddNodes implements Closeable {
     * CreateLoadBalancerWithNewServers.  
     */
    private void addNodesToLoadBalancer(Set<AddNode> addNodes, LoadBalancer loadBalancer) throws TimeoutException {
-      System.out.println("Add Nodes");
+      System.out.format("Add Nodes%n");
 
-      NodeApi nodeApi = clb.getNodeApiForZoneAndLoadBalancer(Constants.ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
       Set<Node> nodes = nodeApi.add(addNodes);
       
       // Wait for the Load Balancer to become Active before moving on
@@ -135,7 +132,7 @@ public class AddNodes implements Closeable {
       }
       
       for (Node node: nodes) {         
-         System.out.println("  " + node);
+         System.out.format("  %s%n", node);
       }
    }
 
@@ -147,9 +144,9 @@ public class AddNodes implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

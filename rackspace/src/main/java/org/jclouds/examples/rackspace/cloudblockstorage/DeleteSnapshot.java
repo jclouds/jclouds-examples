@@ -18,17 +18,16 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
-import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
-import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
 import org.jclouds.openstack.cinder.v1.domain.Snapshot;
 import org.jclouds.openstack.cinder.v1.features.SnapshotApi;
 import org.jclouds.openstack.cinder.v1.predicates.SnapshotPredicates;
-import org.jclouds.rest.RestContext;
+
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example deletes a snapshot.
@@ -36,21 +35,20 @@ import org.jclouds.rest.RestContext;
  * @author Everett Toews
  */
 public class DeleteSnapshot implements Closeable {
-   private RestContext<CinderApi, CinderAsyncApi> cinder;
-   private SnapshotApi snapshotApi;
+   private final CinderApi cinderApi;
+   private final SnapshotApi snapshotApi;
 
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username 
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteSnapshot deleteSnapshot = new DeleteSnapshot();
+      DeleteSnapshot deleteSnapshot = new DeleteSnapshot(args[0], args[1]);
 
       try {
-         deleteSnapshot.init(args);
          Snapshot snapshot = deleteSnapshot.getSnapshot();
          deleteSnapshot.deleteSnapshot(snapshot);
       } 
@@ -62,18 +60,11 @@ public class DeleteSnapshot implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
-      String provider = "rackspace-cloudblockstorage-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      cinder = ContextBuilder.newBuilder(provider)
+   public DeleteSnapshot(String username, String apiKey) {
+      cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .build(CinderApiMetadata.CONTEXT_TOKEN);
-      snapshotApi = cinder.getApi().getSnapshotApiForZone(Constants.ZONE);
+            .buildApi(CinderApi.class);
+      snapshotApi = cinderApi.getSnapshotApiForZone(ZONE);
    }
 
    /**
@@ -81,16 +72,16 @@ public class DeleteSnapshot implements Closeable {
     */
    private Snapshot getSnapshot() {
       for (Snapshot snapshot : snapshotApi.list()) {
-         if (snapshot.getName().startsWith(Constants.NAME)) {
+         if (snapshot.getName().startsWith(NAME)) {
             return snapshot;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateSnapshot example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateSnapshot example first.");
    }
 
    private void deleteSnapshot(Snapshot snapshot) throws TimeoutException {
-      System.out.println("Delete Snapshot");
+      System.out.format("Delete Snapshot%n");
       
       boolean result = snapshotApi.delete(snapshot.getId());
 
@@ -101,15 +92,24 @@ public class DeleteSnapshot implements Closeable {
          throw new TimeoutException("Timeout on snapshot: " + snapshot);
       }
 
-      System.out.println("  " + result);
+      System.out.format("  %s%n", result);
    }
 
    /**
     * Always close your service when you're done with it.
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() {
-      if (cinder != null) {
-         cinder.close();
+      if (cinderApi != null) {
+         try {
+            cinderApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 }

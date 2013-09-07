@@ -18,15 +18,14 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.cinder.v1.CinderApi;
+import org.jclouds.openstack.cinder.v1.domain.Volume;
+
 import java.io.Closeable;
 import java.util.Set;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.openstack.cinder.v1.CinderApi;
-import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
-import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
-import org.jclouds.openstack.cinder.v1.domain.Volume;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
 
 /**
  * This example lists all volumes.
@@ -34,21 +33,20 @@ import org.jclouds.rest.RestContext;
  * @author Everett Toews
  */
 public class ListVolumes implements Closeable {
-   private RestContext<CinderApi, CinderAsyncApi> cinder;
-   private Set<String> zones;
+   private final CinderApi cinderApi;
+   private final Set<String> zones;
 
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListVolumes listVolumes = new ListVolumes();
+      ListVolumes listVolumes = new ListVolumes(args[0], args[1]);
 
       try {
-         listVolumes.init(args);
          listVolumes.listVolumes();
       }
       catch (Exception e) {
@@ -59,38 +57,40 @@ public class ListVolumes implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
-      String provider = "rackspace-cloudblockstorage-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      cinder = ContextBuilder.newBuilder(provider)
+   public ListVolumes(String username, String apiKey) {
+      cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .build(CinderApiMetadata.CONTEXT_TOKEN);
-      zones = cinder.getApi().getConfiguredZones();
+            .buildApi(CinderApi.class);
+      zones = cinderApi.getConfiguredZones();
    }
 
    private void listVolumes() {
-      System.out.println("List Volumes");
+      System.out.format("List Volumes%n");
 
       for (String zone: zones) {
-         System.out.println("  " + zone);
+         System.out.format("  %s%n", zone);
 
-         for (Volume volume: cinder.getApi().getVolumeApiForZone(zone).listInDetail()) {
-            System.out.println("    " + volume);
+         for (Volume volume: cinderApi.getVolumeApiForZone(zone).listInDetail()) {
+            System.out.format("    %s%n", volume);
          }
       }
    }
 
    /**
     * Always close your service when you're done with it.
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() {
-      if (cinder != null) {
-         cinder.close();
+      if (cinderApi != null) {
+         try {
+            cinderApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 }

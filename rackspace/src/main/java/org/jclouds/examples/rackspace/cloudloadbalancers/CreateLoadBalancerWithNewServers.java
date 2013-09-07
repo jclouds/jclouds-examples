@@ -18,26 +18,25 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.jclouds.ContextBuilder;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
+import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
+import org.jclouds.rackspace.cloudloadbalancers.v1.domain.*;
+import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
+import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
+
 import java.io.Closeable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
-import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.AddNode;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.CreateLoadBalancer;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.Node;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.VirtualIP;
-import org.jclouds.rackspace.cloudloadbalancers.v1.domain.VirtualIPWithId;
-import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
-import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.VirtualIP.Type.PUBLIC;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseLoadBalancer.Algorithm.RANDOM;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
 /**
  * This example creates a Load Balancer with new Cloud Servers on the Rackspace Cloud. 
@@ -45,8 +44,8 @@ import com.google.common.collect.Sets;
  * @author Everett Toews
  */
 public class CreateLoadBalancerWithNewServers implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -55,14 +54,13 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateLoadBalancerWithNewServers createLoadBalancer = new CreateLoadBalancerWithNewServers();
+      CreateLoadBalancerWithNewServers createLoadBalancer = new CreateLoadBalancerWithNewServers(args[0], args[1]);
 
       try {
          List<String> argsList = Lists.newArrayList(args);
          argsList.add("2"); // the number of Cloud Servers to start
          Set<? extends NodeMetadata> nodes = CloudServersPublish.getPublishedCloudServers(argsList);
 
-         createLoadBalancer.init(args);
          Set<AddNode> addNodes = createLoadBalancer.createNodeRequests(nodes);
          createLoadBalancer.createLoadBalancer(addNodes);
       }
@@ -74,18 +72,11 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public CreateLoadBalancerWithNewServers(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    /**
@@ -99,7 +90,7 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
          
          AddNode addNode = AddNode.builder()
                .address(privateAddress)
-               .condition(Node.Condition.ENABLED)
+               .condition(ENABLED)
                .port(80)
                .weight(20)
                .build();
@@ -119,15 +110,15 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     * CreateLoadBalancerWithExistingServers.
     */
    private void createLoadBalancer(Set<AddNode> addNodes) throws TimeoutException {
-      System.out.println("Create Cloud Load Balancer");
+      System.out.format("Create Cloud Load Balancer%n");
 
       CreateLoadBalancer createLB = CreateLoadBalancer.builder()
-            .name(Constants.NAME)
+            .name(NAME)
             .protocol("HTTP")
             .port(80)
-            .algorithm(LoadBalancer.Algorithm.RANDOM)
+            .algorithm(RANDOM)
             .nodes(addNodes)
-            .virtualIPType(VirtualIP.Type.PUBLIC)
+            .virtualIPType(PUBLIC)
             .build();
       
       LoadBalancer loadBalancer = lbApi.create(createLB);
@@ -139,13 +130,13 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
          throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
       }
 
-      System.out.println("  " + loadBalancer);
-      System.out.println("  Go to http://" + getVirtualIPv4(loadBalancer.getVirtualIPs()));
+      System.out.format("  %s%n", loadBalancer);
+      System.out.format("  Go to http://%s%n", getVirtualIPv4(loadBalancer.getVirtualIPs()));
    }
    
    private String getVirtualIPv4(Set<VirtualIPWithId> set) {
       for (VirtualIPWithId virtualIP: set) {
-         if (virtualIP.getType().equals(VirtualIP.Type.PUBLIC) && 
+         if (virtualIP.getType().equals(PUBLIC) &&
              virtualIP.getIpVersion().equals(VirtualIP.IPVersion.IPV4)) {
             return virtualIP.getAddress();
          }
@@ -162,9 +153,9 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

@@ -18,10 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -31,8 +29,12 @@ import org.jclouds.http.HttpResponse;
 import org.jclouds.http.HttpResponseException;
 import org.jclouds.util.Strings2;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 /**
  * The Temporary URL feature (TempURL) allows you to create limited-time Internet addresses which allow you to grant 
@@ -55,8 +57,8 @@ public class GenerateTempURL implements Closeable {
    private static final String FILENAME = "object.txt";
    private static final int TEN_MINUTES = 10 * 60;
    
-   private BlobStore storage;
-   private BlobStoreContext storageContext;
+   private final BlobStore blobStore;
+   private final BlobStoreContext blobStoreContext;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -65,10 +67,9 @@ public class GenerateTempURL implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      GenerateTempURL generateTempURL = new GenerateTempURL();
+      GenerateTempURL generateTempURL = new GenerateTempURL(args[0], args[1]);
 
       try {
-         generateTempURL.init(args);
          generateTempURL.generatePutTempURL();
          generateTempURL.generateGetTempURL();
          generateTempURL.generateDeleteTempURL();
@@ -81,35 +82,28 @@ public class GenerateTempURL implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      storageContext = ContextBuilder.newBuilder(provider)
+   public GenerateTempURL(String username, String apiKey) {
+      blobStoreContext = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = storageContext.getBlobStore();
+      blobStore = blobStoreContext.getBlobStore();
    }
    
    private void generatePutTempURL() throws IOException {
-      System.out.println("Generate PUT Temp URL");
+      System.out.format("Generate PUT Temp URL%n");
 
       String payload = "This object will be public for 10 minutes.";
-      Blob blob = storage.blobBuilder(FILENAME).payload(payload).contentType("text/plain").build();
-      HttpRequest request = storageContext.getSigner().signPutBlob(Constants.CONTAINER, blob, TEN_MINUTES);
+      Blob blob = blobStore.blobBuilder(FILENAME).payload(payload).contentType("text/plain").build();
+      HttpRequest request = blobStoreContext.getSigner().signPutBlob(CONTAINER, blob, TEN_MINUTES);
       
-      System.out.println("  " + request.getMethod() + " " + request.getEndpoint());
+      System.out.format("  %s %s", request.getMethod(), request.getEndpoint());
       
       // PUT the file using jclouds
-      HttpResponse response = storageContext.utils().http().invoke(request);
+      HttpResponse response = blobStoreContext.utils().http().invoke(request);
       int statusCode = response.getStatusCode();
       
       if (statusCode >= 200 && statusCode < 299) {
-         System.out.println("  PUT Success (" + statusCode + ")");
+         System.out.format("  PUT Success (%s)%n", statusCode);
       }
       else {
          throw new HttpResponseException(null, response);
@@ -117,33 +111,33 @@ public class GenerateTempURL implements Closeable {
    }
 
    private void generateGetTempURL() throws IOException {
-      System.out.println("Generate GET Temp URL");
+      System.out.format("Generate GET Temp URL%n");
       
-      HttpRequest request = storageContext.getSigner().signGetBlob(Constants.CONTAINER, FILENAME, TEN_MINUTES);
+      HttpRequest request = blobStoreContext.getSigner().signGetBlob(CONTAINER, FILENAME, TEN_MINUTES);
       
-      System.out.println("  " + request.getMethod() + " " + request.getEndpoint());
+      System.out.format("  %s %s", request.getMethod(), request.getEndpoint());
       
       // GET the file using jclouds
       File file = File.createTempFile(FILENAME, ".tmp");
-      String content = Strings2.toString(storageContext.utils().http().invoke(request).getPayload());
+      String content = Strings2.toString(blobStoreContext.utils().http().invoke(request).getPayload());
       Files.write(content, file, Charsets.UTF_8);
       
-      System.out.println("  GET Success (" + file.getAbsolutePath() + ")");
+      System.out.format("  GET Success (%s)%n", file.getAbsolutePath());
    }
 
    private void generateDeleteTempURL() throws IOException {
-      System.out.println("Generate DELETE Temp URL");
+      System.out.format("Generate DELETE Temp URL%n");
       
-      HttpRequest request = storageContext.getSigner().signRemoveBlob(Constants.CONTAINER, FILENAME);
+      HttpRequest request = blobStoreContext.getSigner().signRemoveBlob(CONTAINER, FILENAME);
       
-      System.out.println("  " + request.getMethod() + " " + request.getEndpoint());
+      System.out.format("  %s %s", request.getMethod(), request.getEndpoint());
       
       // DELETE the file using jclouds
-      HttpResponse response = storageContext.utils().http().invoke(request);
+      HttpResponse response = blobStoreContext.utils().http().invoke(request);
       int statusCode = response.getStatusCode();
       
       if (statusCode >= 200 && statusCode < 299) {
-         System.out.println("  DELETE Success (" + statusCode + ")");
+         System.out.format("  DELETE Success (%s)", statusCode);
       }
       else {
          throw new HttpResponseException(null, response);
@@ -154,8 +148,8 @@ public class GenerateTempURL implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

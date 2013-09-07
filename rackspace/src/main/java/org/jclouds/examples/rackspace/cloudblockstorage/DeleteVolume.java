@@ -18,17 +18,16 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
-import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
-import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
 import org.jclouds.openstack.cinder.v1.domain.Volume;
 import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
-import org.jclouds.rest.RestContext;
+
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example deletes a volume.
@@ -36,21 +35,20 @@ import org.jclouds.rest.RestContext;
  * @author Everett Toews
  */
 public class DeleteVolume implements Closeable {
-   private RestContext<CinderApi, CinderAsyncApi> cinder;
-   private VolumeApi volumeApi;
+   private final CinderApi cinderApi;
+   private final VolumeApi volumeApi;
 
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteVolume deleteVolume = new DeleteVolume();
+      DeleteVolume deleteVolume = new DeleteVolume(args[0], args[1]);
 
       try {
-         deleteVolume.init(args);
          Volume volume = deleteVolume.getVolume();
          deleteVolume.deleteVolume(volume);
       }
@@ -62,18 +60,11 @@ public class DeleteVolume implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
-      String provider = "rackspace-cloudblockstorage-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      cinder = ContextBuilder.newBuilder(provider)
+   public DeleteVolume(String username, String apiKey) {
+      cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
+            .buildApi(CinderApi.class);
+      volumeApi = cinderApi.getVolumeApiForZone(ZONE);
    }
 
    /**
@@ -81,16 +72,16 @@ public class DeleteVolume implements Closeable {
     */
    private Volume getVolume() {
       for (Volume volume: volumeApi.list()) {
-         if (volume.getName().startsWith(Constants.NAME)) {
+         if (volume.getName().startsWith(NAME)) {
             return volume;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    private void deleteVolume(Volume volume) throws TimeoutException {
-      System.out.println("Delete Volume");
+      System.out.format("Delete Volume%n");
 
       boolean result = volumeApi.delete(volume.getId());
 
@@ -101,15 +92,24 @@ public class DeleteVolume implements Closeable {
          throw new TimeoutException("Timeout on volume: " + volume);
       }
 
-      System.out.println("  " + result);
+      System.out.format("  %s%n", result);
    }
 
    /**
     * Always close your service when you're done with it.
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() {
-      if (cinder != null) {
-         cinder.close();
+      if (cinderApi != null) {
+         try {
+            cinderApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 }

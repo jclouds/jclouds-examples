@@ -18,14 +18,15 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
-
-import java.io.Closeable;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
 import org.jclouds.rackspace.clouddns.v1.domain.Domain;
 import org.jclouds.rackspace.clouddns.v1.domain.RecordDetail;
+
+import java.io.Closeable;
+
+import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
+import static org.jclouds.examples.rackspace.clouddns.Constants.PROVIDER;
 
 /**
  * This example lists records. 
@@ -33,7 +34,7 @@ import org.jclouds.rackspace.clouddns.v1.domain.RecordDetail;
  * @author Everett Toews
  */
 public class ListRecords implements Closeable {
-   private CloudDNSApi dnsApi;
+   private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -42,10 +43,9 @@ public class ListRecords implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListRecords listRecords = new ListRecords();
+      ListRecords listRecords = new ListRecords(args[0], args[1]);
 
       try {
-         listRecords.init(args);
          Domain domain = listRecords.getDomain();
          listRecords.listRecords(domain);
          listRecords.listRecordsByNameAndType(domain);
@@ -59,15 +59,8 @@ public class ListRecords implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public ListRecords(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
    }
@@ -83,32 +76,32 @@ public class ListRecords implements Closeable {
    }
 
    private void listRecords(Domain domain) {
-      System.out.println("List Records");
+      System.out.format("List Records%n");
 
       Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).list().concat();
       
       for (RecordDetail recordDetail: recordDetails) {
-         System.out.println("  " + recordDetail);
+         System.out.format("  %s%n", recordDetail);
       }
    }
 
    private void listRecordsByNameAndType(Domain domain) {
-      System.out.println("List Records by Name and Type");
+      System.out.format("List Records by Name and Type%n");
 
       Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByNameAndType(NAME, "A").concat();
       
       for (RecordDetail recordDetail: recordDetails) {
-         System.out.println("  " + recordDetail);
+         System.out.format("  %s%n", recordDetail);
       }
    }
 
    private void listRecordsByType(Domain domain) {
-      System.out.println("List Records by Type");
+      System.out.format("List Records by Type%n");
 
       Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("MX").concat();
       
       for (RecordDetail recordDetail: recordDetails) {
-         System.out.println("  " + recordDetail);
+         System.out.format("  %s%n", recordDetail);
       }
    }
 

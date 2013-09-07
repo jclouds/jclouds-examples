@@ -18,15 +18,7 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import static org.jclouds.examples.rackspace.clouddns.Constants.ALT_NAME;
-import static org.jclouds.examples.rackspace.clouddns.Constants.NAME;
-import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
-
-import java.io.Closeable;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.collect.ImmutableSet;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
 import org.jclouds.rackspace.clouddns.v1.domain.CreateDomain;
@@ -35,7 +27,13 @@ import org.jclouds.rackspace.clouddns.v1.domain.Domain;
 import org.jclouds.rackspace.clouddns.v1.domain.Record;
 import org.jclouds.rackspace.clouddns.v1.functions.DomainFunctions;
 
-import com.google.common.collect.ImmutableSet;
+import java.io.Closeable;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.clouddns.Constants.*;
+import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
 /**
  * This example creates a domain with subdomains and records. 
@@ -43,7 +41,7 @@ import com.google.common.collect.ImmutableSet;
  * @author Everett Toews
  */
 public class CreateDomains implements Closeable {
-   private CloudDNSApi dnsApi;
+   private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -52,10 +50,9 @@ public class CreateDomains implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateDomains createDomains = new CreateDomains();
+      CreateDomains createDomains = new CreateDomains(args[0], args[1]);
 
       try {
-         createDomains.init(args);
          createDomains.createDomains();
       }
       catch (Exception e) {
@@ -66,21 +63,14 @@ public class CreateDomains implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddns-uk"
-      String provider = "rackspace-clouddns-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      dnsApi = ContextBuilder.newBuilder(provider)
+   public CreateDomains(String username, String apiKey) {
+      dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
    }
 
    private void createDomains() throws TimeoutException {
-      System.out.println("Create Domains");
+      System.out.format("Create Domains%n");
       
       Record createMXRecord = Record.builder()
             .name(NAME)
@@ -130,8 +120,8 @@ public class CreateDomains implements Closeable {
       Set<CreateDomain> createDomains = ImmutableSet.of(createDomain1, createDomain2);
       Map<String, Domain> domains = DomainFunctions.toDomainMap(awaitComplete(dnsApi, dnsApi.getDomainApi().create(createDomains)));
       
-      System.out.println("  " + domains.get(NAME));
-      System.out.println("  " + domains.get(ALT_NAME));
+      System.out.format("  %s%n", domains.get(NAME));
+      System.out.format("  %s%n", domains.get(ALT_NAME));
    }
 
    /**

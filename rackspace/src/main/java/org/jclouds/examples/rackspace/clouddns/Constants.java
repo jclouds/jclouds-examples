@@ -18,13 +18,12 @@
  */
 package org.jclouds.examples.rackspace.clouddns;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.jclouds.rackspace.clouddns.v1.domain.Domain;
-
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import org.jclouds.rackspace.clouddns.v1.domain.Domain;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -33,6 +32,10 @@ import com.google.common.base.Predicate;
  * @author Everett Toews
  */
 public interface Constants {
+   // The provider configures jclouds To use the Rackspace Cloud (US)
+   // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-clouddns-uk"
+   public static final String PROVIDER = System.getProperty("provider.cdns", "rackspace-clouddns-us");
+
    public static final String NAME = System.getProperty("user.name") + "-jclouds-example.com";
    public static final String ALT_NAME = "alt-" + NAME;
    public static final String CLOUD_SERVERS = "cloudServersOpenStack";

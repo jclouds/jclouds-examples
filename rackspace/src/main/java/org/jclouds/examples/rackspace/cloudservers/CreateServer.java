@@ -18,21 +18,24 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import java.io.Closeable;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.RunNodesException;
-import org.jclouds.compute.config.ComputeServiceProperties;
 import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.domain.Location;
+
+import java.io.Closeable;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 
 /**
  * This example creates an Ubuntu 12.04 server with 512 MB of RAM on the Rackspace Cloud. 
@@ -40,7 +43,7 @@ import org.jclouds.domain.Location;
  * @author Everett Toews
  */
 public class CreateServer implements Closeable {
-   private ComputeService compute;
+   private final ComputeService computeService;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -49,10 +52,9 @@ public class CreateServer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateServer createServer = new CreateServer();
+      CreateServer createServer = new CreateServer(args[0], args[1]);
 
       try {
-         createServer.init(args);
          createServer.createServer();
       }
       catch (Exception e) {
@@ -63,24 +65,17 @@ public class CreateServer implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
+   public CreateServer(String username, String apiKey) {
       // These properties control how often jclouds polls for a status udpate
       Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(POLL_INITIAL_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(POLL_MAX_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .overrides(overrides)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
    }
 
    /**
@@ -88,7 +83,7 @@ public class CreateServer implements Closeable {
     * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
     * using the following Template.
     * 
-    * Template template = compute.templateBuilder()
+    * Template template = computeService.templateBuilder()
     *     .locationId(getLocationId())
     *     .osFamily(OsFamily.UBUNTU)
     *     .osVersionMatches("12.04")
@@ -96,25 +91,25 @@ public class CreateServer implements Closeable {
     *     .build();
     */
    private void createServer() throws RunNodesException, TimeoutException {
-      Template template = compute.templateBuilder()
+      Template template = computeService.templateBuilder()
             .locationId(getLocationId())
             .fromHardware(getHardware())
             .fromImage(getImage())
             .build();
 
-      System.out.println("Create Server");
+      System.out.format("Create Server%n");
 
       // This method will continue to poll for the server status and won't return until this server is ACTIVE
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-      Set<? extends NodeMetadata> nodes = compute.createNodesInGroup(Constants.NAME, 1, template);
+      Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(NAME, 1, template);
 
       NodeMetadata nodeMetadata = nodes.iterator().next();
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
-      System.out.println("  " + nodeMetadata);
-      System.out.println("  Login: ssh " + nodeMetadata.getCredentials().getUser() + "@" + publicAddress);
-      System.out.println("  Password: " + nodeMetadata.getCredentials().getPassword());
+      System.out.format("  %s%n", nodeMetadata);
+      System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
+      System.out.format("  Password: %s%n", nodeMetadata.getCredentials().getPassword());
    }
 
    /**
@@ -123,12 +118,12 @@ public class CreateServer implements Closeable {
     * @return The first available Location
     */
    private String getLocationId() {
-      System.out.println("Locations");
+      System.out.format("Locations%n");
 
-      Set<? extends Location> locations = compute.listAssignableLocations();
+      Set<? extends Location> locations = computeService.listAssignableLocations();
 
       for (Location location: locations) {
-         System.out.println("  " + location);
+         System.out.format("  %s%n", location);
       }
 
       return locations.iterator().next().getId();
@@ -140,20 +135,20 @@ public class CreateServer implements Closeable {
     * @return The Hardware with 512 MB of RAM
     */
    private Hardware getHardware() {
-      System.out.println("Hardware Profiles (Flavors)");
+      System.out.format("Hardware Profiles (Flavors)%n");
 
-      Set<? extends Hardware> profiles = compute.listHardwareProfiles();
+      Set<? extends Hardware> profiles = computeService.listHardwareProfiles();
       Hardware result = null;
 
       for (Hardware profile: profiles) {
-         System.out.println("  " + profile);
+         System.out.format("  %s%n", profile);
          if (profile.getRam() == 512) {
             result = profile;
          }
       }
 
       if (result == null) {
-         System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.");
+         System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.%n");
          result = profiles.iterator().next();
       }
 
@@ -166,20 +161,20 @@ public class CreateServer implements Closeable {
     * @return An Ubuntu 12.04 Image 
     */
    private Image getImage() {
-      System.out.println("Images");
+      System.out.format("Images%n");
 
-      Set<? extends Image> images = compute.listImages();
+      Set<? extends Image> images = computeService.listImages();
       Image result = null;
 
       for (Image image: images) {
-         System.out.println("  " + image);
+         System.out.format("  %s%n", image);
          if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
             result = image;
          }
       }
 
       if (result == null) {
-         System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.");
+         System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.%n");
          result = images.iterator().next();
       }
 
@@ -190,8 +185,8 @@ public class CreateServer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 }

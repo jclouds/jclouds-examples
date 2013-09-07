@@ -18,10 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.collect.Sets;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
@@ -31,7 +28,13 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.NodeApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
 
-import com.google.common.collect.Sets;
+import java.io.Closeable;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.DISABLED;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
 /**
  * This example updates Nodes in a Load Balancer. 
@@ -39,8 +42,8 @@ import com.google.common.collect.Sets;
  * @author Everett Toews
  */
 public class UpdateNodes implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -49,10 +52,9 @@ public class UpdateNodes implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      UpdateNodes updateNodes = new UpdateNodes();
+      UpdateNodes updateNodes = new UpdateNodes(args[0], args[1]);
 
       try {
-         updateNodes.init(args);
          LoadBalancer loadBalancer = updateNodes.getLoadBalancer();
          Set<Node> nodes = updateNodes.getNodes(loadBalancer);
          updateNodes.updateNodesInLoadBalancer(nodes, loadBalancer);
@@ -65,36 +67,29 @@ public class UpdateNodes implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public UpdateNodes(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    private LoadBalancer getLoadBalancer() throws TimeoutException {
       for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-         if (loadBalancer.getName().startsWith(Constants.NAME)) {
+         if (loadBalancer.getName().startsWith(NAME)) {
             return loadBalancer;
          }
       }
       
-      throw new RuntimeException(Constants.NAME + " not found. Run a CreateLoadBalancer* example first.");
+      throw new RuntimeException(NAME + " not found. Run a CreateLoadBalancer* example first.");
    }
    
    private Set<Node> getNodes(LoadBalancer loadBalancer) {
-      NodeApi nodeApi = clb.getNodeApiForZoneAndLoadBalancer(Constants.ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
       Set<Node> nodes = Sets.newHashSet();
       
       for (Node node: nodeApi.list().concat()) {
-         if (node.getCondition().equals(Node.Condition.DISABLED)) {
+         if (node.getCondition().equals(DISABLED)) {
             nodes.add(node);
          }
       }
@@ -103,17 +98,17 @@ public class UpdateNodes implements Closeable {
    }
 
    private void updateNodesInLoadBalancer(Set<Node> nodes, LoadBalancer loadBalancer) throws TimeoutException {
-      System.out.println("Update Nodes");
+      System.out.format("Update Nodes%n");
 
-      NodeApi nodeApi = clb.getNodeApiForZoneAndLoadBalancer(Constants.ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
       UpdateNode updateNode = UpdateNode.builder()
-            .condition(Node.Condition.ENABLED)
+            .condition(ENABLED)
             .weight(20)
             .build();
 
       for (Node node: nodes) {         
          nodeApi.update(node.getId(), updateNode);
-         System.out.println("  " + node.getId() + " " + updateNode);
+         System.out.format("  %s %s%n", node.getId(), updateNode);
       }
 
       // Wait for the Load Balancer to become Active before moving on
@@ -132,9 +127,9 @@ public class UpdateNodes implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

@@ -18,19 +18,15 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import static org.jclouds.scriptbuilder.domain.Statements.exec;
-
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Module;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.cinder.v1.CinderApi;
-import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
-import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
 import org.jclouds.openstack.cinder.v1.domain.Volume;
 import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
@@ -46,9 +42,11 @@ import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
-import com.google.inject.Module;
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
+import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 /**
  * This example detaches the volume created in the CreateVolumeAndAttach example.
@@ -56,26 +54,25 @@ import com.google.inject.Module;
  * @author Everett Toews
  */
 public class DetachVolume implements Closeable {
-   private ComputeService compute;
-   private RestContext<NovaApi, NovaAsyncApi> nova;
-   private ServerApi serverApi;
-   private VolumeAttachmentApi volumeAttachmentApi;
+   private final ComputeService computeService;
+   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final ServerApi serverApi;
+   private final VolumeAttachmentApi volumeAttachmentApi;
 
-   private RestContext<CinderApi, CinderAsyncApi> cinder;
-   private VolumeApi volumeApi;
+   private final CinderApi cinderApi;
+   private final VolumeApi volumeApi;
 
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DetachVolume detachVolume = new DetachVolume();
+      DetachVolume detachVolume = new DetachVolume(args[0], args[1]);
 
       try {
-         detachVolume.init(args);
          VolumeAttachment volumeAttachment = detachVolume.getVolumeAttachment();
          detachVolume.unmountVolume(volumeAttachment);
          detachVolume.detachVolume(volumeAttachment);
@@ -88,13 +85,10 @@ public class DetachVolume implements Closeable {
       }
    }
 
-   private void init(String[] args) {
+   public DetachVolume(String username, String apiKey) {
       // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
+      // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
+      String provider = System.getProperty("provider.cs", "rackspace-cloudservers-us");
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
@@ -102,15 +96,15 @@ public class DetachVolume implements Closeable {
             .credentials(username, apiKey)
             .modules(modules)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
       nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(Constants.ZONE).get();
-      serverApi = nova.getApi().getServerApiForZone(Constants.ZONE);
+      serverApi = nova.getApi().getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
 
-      provider = "rackspace-cloudblockstorage-us";
-
-      cinder = ContextBuilder.newBuilder(provider).credentials(username, apiKey).build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
+      cinderApi = ContextBuilder.newBuilder(PROVIDER)
+            .credentials(username, apiKey)
+            .buildApi(CinderApi.class);
+      volumeApi = cinderApi.getVolumeApiForZone(ZONE);
    }
 
    /**
@@ -120,7 +114,7 @@ public class DetachVolume implements Closeable {
       FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 
       for (Server server: servers) {
-         if (server.getName().startsWith(Constants.NAME)) {
+         if (server.getName().startsWith(NAME)) {
             FluentIterable<? extends VolumeAttachment> attachments = volumeAttachmentApi
                   .listAttachmentsOnServer(server.getId());
 
@@ -128,35 +122,35 @@ public class DetachVolume implements Closeable {
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    /**
     * Make sure you've unmounted the volume first. Failure to do so could result in failure or data loss.
     */
    private void unmountVolume(VolumeAttachment volumeAttachment) {
-      System.out.println("Unmount Volume");
+      System.out.format("Unmount Volume%n");
 
       String script = new ScriptBuilder().addStatement(exec("umount /mnt")).render(OsFamily.UNIX);
 
       RunScriptOptions options = RunScriptOptions.Builder
-            .overrideLoginUser(Constants.ROOT)
-            .overrideLoginPassword(Constants.PASSWORD)
+            .overrideLoginUser(ROOT)
+            .overrideLoginPassword(PASSWORD)
             .blockOnComplete(true);
 
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(Constants.ZONE, volumeAttachment.getServerId());
-      ExecResponse response = compute.runScriptOnNode(zoneAndId.slashEncode(), script, options);
+      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, volumeAttachment.getServerId());
+      ExecResponse response = computeService.runScriptOnNode(zoneAndId.slashEncode(), script, options);
 
       if (response.getExitStatus() == 0) {
-         System.out.println("  Exit Status: " + response.getExitStatus());
+         System.out.format("  Exit Status: %s%n", response.getExitStatus());
       }
       else {
-         System.out.println("  Error: " + response.getOutput());
+         System.out.format("  Error: %s%n",response.getOutput());
       }
    }
 
    private void detachVolume(VolumeAttachment volumeAttachment) throws TimeoutException {
-      System.out.println("Detach Volume");
+      System.out.format("Detach Volume%n");
 
       boolean result = volumeAttachmentApi
             .detachVolumeFromServer(volumeAttachment.getVolumeId(), volumeAttachment.getServerId());
@@ -168,19 +162,28 @@ public class DetachVolume implements Closeable {
          throw new TimeoutException("Timeout on volume: " + volumeAttachment.getVolumeId());
       }
 
-      System.out.println("  " + result);
+      System.out.format("  %s%n", result);
    }
 
    /**
     * Always close your service when you're done with it.
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() {
-      if (cinder != null) {
-         cinder.close();
+      if (cinderApi != null) {
+         try {
+            cinderApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
 
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 }

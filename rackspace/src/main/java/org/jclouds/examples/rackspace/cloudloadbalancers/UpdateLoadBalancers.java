@@ -18,9 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
@@ -28,14 +25,20 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.domain.UpdateLoadBalancer;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
 
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
+import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseLoadBalancer.Algorithm.RANDOM;
+
 /**
  * This example updates a Load Balancer. 
  *  
  * @author Everett Toews
  */
 public class UpdateLoadBalancers implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -44,10 +47,9 @@ public class UpdateLoadBalancers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      UpdateLoadBalancers updateLoadBalancers = new UpdateLoadBalancers();
+      UpdateLoadBalancers updateLoadBalancers = new UpdateLoadBalancers(args[0], args[1]);
 
       try {
-         updateLoadBalancers.init(args);
          LoadBalancer loadBalancer = updateLoadBalancers.getLoadBalancer();
          updateLoadBalancers.updateLoadBalancer(loadBalancer);
       }
@@ -59,38 +61,31 @@ public class UpdateLoadBalancers implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public UpdateLoadBalancers(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    private LoadBalancer getLoadBalancer() {
       for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-         if (loadBalancer.getName().startsWith(Constants.NAME)) {
+         if (loadBalancer.getName().startsWith(NAME)) {
             return loadBalancer;
          }
       }
       
-      throw new RuntimeException(Constants.NAME + " not found. Run a CreateLoadBalancer* example first.");
+      throw new RuntimeException(NAME + " not found. Run a CreateLoadBalancer* example first.");
    }
 
    private void updateLoadBalancer(LoadBalancer loadBalancer) throws TimeoutException {
-      System.out.println("Update Load Balancer");
+      System.out.format("Update Load Balancer%n");
 
       UpdateLoadBalancer updateLB = UpdateLoadBalancer.builder()
-            .name(Constants.NAME + "-update")
+            .name(NAME + "-update")
             .protocol("HTTPS")
             .port(443)
-            .algorithm(LoadBalancer.Algorithm.RANDOM)
+            .algorithm(RANDOM)
             .build();
       
       lbApi.update(loadBalancer.getId(), updateLB);
@@ -102,7 +97,7 @@ public class UpdateLoadBalancers implements Closeable {
          throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
       }
 
-      System.out.println("  " + true);
+      System.out.format("  %s%n", true);
    }
 
    /**
@@ -113,9 +108,9 @@ public class UpdateLoadBalancers implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

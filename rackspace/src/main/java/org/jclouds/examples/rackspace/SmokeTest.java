@@ -18,44 +18,11 @@
  */
 package org.jclouds.examples.rackspace;
 
-import org.jclouds.examples.rackspace.cloudblockstorage.CreateSnapshot;
-import org.jclouds.examples.rackspace.cloudblockstorage.CreateVolumeAndAttach;
-import org.jclouds.examples.rackspace.cloudblockstorage.DeleteSnapshot;
-import org.jclouds.examples.rackspace.cloudblockstorage.DeleteVolume;
-import org.jclouds.examples.rackspace.cloudblockstorage.DetachVolume;
-import org.jclouds.examples.rackspace.cloudblockstorage.ListSnapshots;
-import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeAttachments;
-import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumeTypes;
-import org.jclouds.examples.rackspace.cloudblockstorage.ListVolumes;
-import org.jclouds.examples.rackspace.clouddns.CRUDReverseDNSRecords;
-import org.jclouds.examples.rackspace.clouddns.CreateDomains;
-import org.jclouds.examples.rackspace.clouddns.CreateRecords;
-import org.jclouds.examples.rackspace.clouddns.DeleteDomains;
-import org.jclouds.examples.rackspace.clouddns.DeleteRecords;
-import org.jclouds.examples.rackspace.clouddns.ListDomains;
-import org.jclouds.examples.rackspace.clouddns.ListRecords;
-import org.jclouds.examples.rackspace.clouddns.UpdateDomains;
-import org.jclouds.examples.rackspace.clouddns.UpdateRecords;
-import org.jclouds.examples.rackspace.cloudfiles.CloudFilesPublish;
-import org.jclouds.examples.rackspace.cloudfiles.CreateContainer;
-import org.jclouds.examples.rackspace.cloudfiles.CrossOriginResourceSharingContainer;
-import org.jclouds.examples.rackspace.cloudfiles.DeleteObjectsAndContainer;
-import org.jclouds.examples.rackspace.cloudfiles.ListContainers;
-import org.jclouds.examples.rackspace.cloudfiles.ListObjects;
-import org.jclouds.examples.rackspace.cloudfiles.UploadObjects;
-import org.jclouds.examples.rackspace.cloudloadbalancers.AddNodes;
-import org.jclouds.examples.rackspace.cloudloadbalancers.CreateLoadBalancerWithExistingServers;
-import org.jclouds.examples.rackspace.cloudloadbalancers.CreateLoadBalancerWithNewServers;
-import org.jclouds.examples.rackspace.cloudloadbalancers.DeleteLoadBalancers;
-import org.jclouds.examples.rackspace.cloudloadbalancers.ListLoadBalancers;
-import org.jclouds.examples.rackspace.cloudloadbalancers.RemoveNodes;
-import org.jclouds.examples.rackspace.cloudloadbalancers.UpdateLoadBalancers;
-import org.jclouds.examples.rackspace.cloudloadbalancers.UpdateNodes;
-import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
-import org.jclouds.examples.rackspace.cloudservers.CreateServer;
-import org.jclouds.examples.rackspace.cloudservers.DeleteServer;
-import org.jclouds.examples.rackspace.cloudservers.ListServersWithFiltering;
-import org.jclouds.examples.rackspace.cloudservers.ServerMetadata;
+import org.jclouds.examples.rackspace.cloudblockstorage.*;
+import org.jclouds.examples.rackspace.clouddns.*;
+import org.jclouds.examples.rackspace.cloudfiles.*;
+import org.jclouds.examples.rackspace.cloudloadbalancers.*;
+import org.jclouds.examples.rackspace.cloudservers.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
@@ -68,8 +35,8 @@ public class SmokeTest {
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
       SmokeTest smokeTest = new SmokeTest();

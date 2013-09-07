@@ -18,9 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.Closeable;
-import java.util.Set;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -31,15 +28,21 @@ import org.jclouds.openstack.swift.domain.ObjectInfo;
 import org.jclouds.openstack.swift.options.ListContainerOptions;
 import org.jclouds.rest.RestContext;
 
+import java.io.Closeable;
+import java.util.Set;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+
 /**
- * Delete the objects from the CreateObjects example and delete the object storage container from the 
+ * Delete the objects from the CreateObjects example and delete the Cloud Files container from the
  * CreateContainer example.
  *  
  * @author Everett Toews
  */
 public class DeleteObjectsAndContainer implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final BlobStore blobStore;
+   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -48,10 +51,9 @@ public class DeleteObjectsAndContainer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteObjectsAndContainer deleteObjectsAndContainer = new DeleteObjectsAndContainer();
+      DeleteObjectsAndContainer deleteObjectsAndContainer = new DeleteObjectsAndContainer(args[0], args[1]);
 
       try {
-         deleteObjectsAndContainer.init(args);
          deleteObjectsAndContainer.deleteObjectsAndContainer();
       }
       catch (Exception e) {
@@ -62,37 +64,30 @@ public class DeleteObjectsAndContainer implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+   public DeleteObjectsAndContainer(String username, String apiKey) {
+      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       swift = context.unwrap();
    }
 
    /**
-    * This will delete all containers that start with {@link CONTAINER} and the objects within those containers.
+    * This will delete all containers that start with {@link Constants#CONTAINER} and the objects within those containers.
     */
    private void deleteObjectsAndContainer() {
-      System.out.println("Delete Container");
+      System.out.format("Delete Container%n");
 
       Set<ContainerMetadata> containers = swift.getApi()
-            .listContainers(ListContainerOptions.Builder.withPrefix(Constants.CONTAINER));
+            .listContainers(ListContainerOptions.Builder.withPrefix(CONTAINER));
 
       for (ContainerMetadata container: containers) {
-         System.out.println("  " + container.getName());
+         System.out.format("  %s%n", container.getName());
 
          Set<ObjectInfo> objects = swift.getApi().listObjects(container.getName());
 
          for (ObjectInfo object: objects) {
-            System.out.println("    " + object.getName());
+            System.out.format("    %s%n", object.getName());
 
             swift.getApi().removeObject(container.getName(), object.getName());
          }
@@ -105,8 +100,8 @@ public class DeleteObjectsAndContainer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

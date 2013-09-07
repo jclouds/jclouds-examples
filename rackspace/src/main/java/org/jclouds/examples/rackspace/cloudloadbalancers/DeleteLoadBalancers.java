@@ -18,14 +18,16 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
+
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
 
 /**
  * This example deletes Load Balancers. 
@@ -33,8 +35,8 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredic
  * @author Everett Toews
  */
 public class DeleteLoadBalancers implements Closeable {
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -43,10 +45,9 @@ public class DeleteLoadBalancers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteLoadBalancers listLoadBalancers = new DeleteLoadBalancers();
+      DeleteLoadBalancers listLoadBalancers = new DeleteLoadBalancers(args[0], args[1]);
 
       try {
-         listLoadBalancers.init(args);
          listLoadBalancers.deleteLoadBalancers();
       }
       catch (Exception e) {
@@ -57,28 +58,21 @@ public class DeleteLoadBalancers implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public DeleteLoadBalancers(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
    }
 
    /**
     * This method will delete all Load Balancers starting with Constants.NAME.
     */
    private void deleteLoadBalancers() throws TimeoutException {
-      System.out.println("Delete Load Balancers");
+      System.out.format("Delete Load Balancers%n");
       
       for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-         if (loadBalancer.getName().startsWith(Constants.NAME)) {
+         if (loadBalancer.getName().startsWith(NAME)) {
             lbApi.delete(loadBalancer.getId());
 
             // Wait for the Load Balancer to be Deleted before moving on
@@ -88,7 +82,7 @@ public class DeleteLoadBalancers implements Closeable {
                throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
             }
 
-            System.out.println("  " + loadBalancer);
+            System.out.format("  %s%n", loadBalancer);
          }
       }         
    }
@@ -101,9 +95,9 @@ public class DeleteLoadBalancers implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

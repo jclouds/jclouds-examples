@@ -18,43 +18,41 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import java.io.Closeable;
-import java.util.concurrent.TimeoutException;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
-import org.jclouds.openstack.cinder.v1.CinderApiMetadata;
-import org.jclouds.openstack.cinder.v1.CinderAsyncApi;
 import org.jclouds.openstack.cinder.v1.domain.Snapshot;
 import org.jclouds.openstack.cinder.v1.domain.Volume;
 import org.jclouds.openstack.cinder.v1.features.SnapshotApi;
 import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.options.CreateSnapshotOptions;
 import org.jclouds.openstack.cinder.v1.predicates.SnapshotPredicates;
-import org.jclouds.rest.RestContext;
+
+import java.io.Closeable;
+import java.util.concurrent.TimeoutException;
+
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example creates a snapshot of a volume.
- * 
+ *
  * @author Everett Toews
  */
 public class CreateSnapshot implements Closeable {
-   private RestContext<CinderApi, CinderAsyncApi> cinder;
-   private VolumeApi volumeApi;
-   private SnapshotApi snapshotApi;
+   private final CinderApi cinderApi;
+   private final VolumeApi volumeApi;
+   private final SnapshotApi snapshotApi;
 
-   /**
+    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    *
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      CreateSnapshot createSnapshot = new CreateSnapshot();
+      CreateSnapshot createSnapshot = new CreateSnapshot(args[0], args[1]);
 
       try {
-         createSnapshot.init(args);
          Volume volume = createSnapshot.getVolume();
          createSnapshot.createSnapshot(volume);
       }
@@ -66,19 +64,12 @@ public class CreateSnapshot implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudblockstorage-uk"
-      String provider = "rackspace-cloudblockstorage-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      cinder = ContextBuilder.newBuilder(provider)
-            .credentials(username, apiKey)
-            .build(CinderApiMetadata.CONTEXT_TOKEN);
-      volumeApi = cinder.getApi().getVolumeApiForZone(Constants.ZONE);
-      snapshotApi = cinder.getApi().getSnapshotApiForZone(Constants.ZONE);
+   public CreateSnapshot(String username, String apiKey) {
+       cinderApi = ContextBuilder.newBuilder(PROVIDER)
+               .credentials(username, apiKey)
+               .buildApi(CinderApi.class);
+       volumeApi = cinderApi.getVolumeApiForZone(ZONE);
+       snapshotApi = cinderApi.getSnapshotApiForZone(ZONE);
    }
 
    /**
@@ -86,19 +77,19 @@ public class CreateSnapshot implements Closeable {
     */
    private Volume getVolume() {
       for (Volume volume: volumeApi.list()) {
-         if (volume.getName().startsWith(Constants.NAME)) {
+         if (volume.getName().startsWith(NAME)) {
             return volume;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    private void createSnapshot(Volume volume) throws TimeoutException {
-      System.out.println("Create Snapshot");
+      System.out.format("Create Snapshot%n");
 
       CreateSnapshotOptions options = CreateSnapshotOptions.Builder
-            .name(Constants.NAME)
+            .name(NAME)
             .description("Snapshot of " + volume.getId());
 
       Snapshot snapshot = snapshotApi.create(volume.getId(), options);
@@ -110,15 +101,24 @@ public class CreateSnapshot implements Closeable {
          throw new TimeoutException("Timeout on volume: " + volume);
       }
 
-      System.out.println("  " + snapshot);
+      System.out.format("  %s%n", snapshot);
    }
 
-   /**
-    * Always close your service when you're done with it.
-    */
+    /**
+     * Always close your service when you're done with it.
+     *
+     * Note that closing quietly like this is not necessary in Java 7.
+     * You would use try-with-resources in the main method instead.
+     * When jclouds switches to Java 7 the try/catch block below can be removed.
+     */
    public void close() {
-      if (cinder != null) {
-         cinder.close();
+      if (cinderApi != null) {
+         try {
+            cinderApi.close();
+         }
+         catch (Exception e) {
+            e.printStackTrace();
+         }
       }
    }
 }

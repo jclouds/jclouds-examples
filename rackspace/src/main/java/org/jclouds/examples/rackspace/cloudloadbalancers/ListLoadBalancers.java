@@ -18,12 +18,14 @@
  */
 package org.jclouds.examples.rackspace.cloudloadbalancers;
 
-import java.io.Closeable;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
+
+import java.io.Closeable;
+
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.PROVIDER;
 
 /**
  * This example lists all Load Balancers. 
@@ -31,7 +33,7 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
  * @author Everett Toews
  */
 public class ListLoadBalancers implements Closeable {
-   private CloudLoadBalancersApi clb;
+   private final CloudLoadBalancersApi clbApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -40,10 +42,9 @@ public class ListLoadBalancers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListLoadBalancers listLoadBalancers = new ListLoadBalancers();
+      ListLoadBalancers listLoadBalancers = new ListLoadBalancers(args[0], args[1]);
 
       try {
-         listLoadBalancers.init(args);
          listLoadBalancers.listLoadBalancers();
       }
       catch (Exception e) {
@@ -54,29 +55,22 @@ public class ListLoadBalancers implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+   public ListLoadBalancers(String username, String apiKey) {
+      clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
    }
 
    private void listLoadBalancers() {
-      System.out.println("List Load Balancers");
+      System.out.format("List Load Balancers%n");
       
-      for (String zone: clb.getConfiguredZones()) {
-         System.out.println("  " + zone);
+      for (String zone: clbApi.getConfiguredZones()) {
+         System.out.format("  %s%n", zone);
          
-         LoadBalancerApi lbApi = clb.getLoadBalancerApiForZone(zone);
+         LoadBalancerApi lbApi = clbApi.getLoadBalancerApiForZone(zone);
          
          for (LoadBalancer loadBalancer: lbApi.list().concat()) {
-            System.out.println("    " + loadBalancer);
+            System.out.format("    %s%n", loadBalancer);
          }         
       }
    }
@@ -89,9 +83,9 @@ public class ListLoadBalancers implements Closeable {
     * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
    public void close() {
-      if (clb != null) {
+      if (clbApi != null) {
          try {
-            clb.close();
+            clbApi.close();
          }
          catch (Exception e) {
             e.printStackTrace();

@@ -26,7 +26,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * @author Everett Toews
  */
 public interface Constants {
+   // The provider configures jclouds To use the Rackspace Cloud (US)
+   // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
+   public static final String PROVIDER = System.getProperty("provider.cs", "rackspace-cloudservers-us");
+   public static final String ZONE = System.getProperty("zone.cs", "DFW");
+
    public static final String NAME = "jclouds-example";
-   public static final String ZONE = "DFW";
    public static final String POLL_PERIOD_TWENTY_SECONDS = String.valueOf(SECONDS.toMillis(20));
 }

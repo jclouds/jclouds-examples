@@ -18,17 +18,19 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import static org.jclouds.compute.predicates.NodePredicates.inGroup;
+import org.jclouds.ContextBuilder;
+import org.jclouds.compute.ComputeService;
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.domain.NodeMetadata;
 
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.Set;
 
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.config.ComputeServiceProperties;
-import org.jclouds.compute.domain.NodeMetadata;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
+import static org.jclouds.compute.predicates.NodePredicates.inGroup;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 
 /**
  * This example destroys the server created in the CreateServer example. 
@@ -36,7 +38,7 @@ import org.jclouds.compute.domain.NodeMetadata;
  * @author Everett Toews
  */
 public class DeleteServer implements Closeable {
-   private ComputeService compute;
+   private ComputeService computeService;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -45,10 +47,9 @@ public class DeleteServer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      DeleteServer deleteServer = new DeleteServer();
+      DeleteServer deleteServer = new DeleteServer(args[0], args[1]);
 
       try {
-         deleteServer.init(args);
          deleteServer.deleteServer();
       }
       catch (Exception e) {
@@ -59,39 +60,32 @@ public class DeleteServer implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
+   public DeleteServer(String username, String apiKey) {
       // These properties control how often jclouds polls for a status udpate
       Properties overrides = new Properties();
-      overrides.setProperty(ComputeServiceProperties.POLL_INITIAL_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
-      overrides.setProperty(ComputeServiceProperties.POLL_MAX_PERIOD, Constants.POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(POLL_INITIAL_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
+      overrides.setProperty(POLL_MAX_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .overrides(overrides)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
    }
 
    /**
-    * This will delete all servers in group {@link Constants.NAME}
+    * This will delete all servers in group {@link Constants#NAME}
     */
    private void deleteServer() {
-      System.out.println("Delete Server");
+      System.out.format("Delete Server%n");
 
       // This method will continue to poll for the server status and won't return until this server is DELETED
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
-      Set<? extends NodeMetadata> servers = compute.destroyNodesMatching(inGroup(Constants.NAME));
+      Set<? extends NodeMetadata> servers = computeService.destroyNodesMatching(inGroup(NAME));
 
       for (NodeMetadata nodeMetadata: servers) {
-         System.out.println("  " + nodeMetadata);
+         System.out.format("  %s%n", nodeMetadata);
       }
    }
 
@@ -99,8 +93,8 @@ public class DeleteServer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 }

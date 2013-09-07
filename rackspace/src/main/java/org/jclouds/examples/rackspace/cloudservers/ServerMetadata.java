@@ -18,9 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import java.io.Closeable;
-import java.util.Map;
-
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -30,8 +29,12 @@ import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
+import java.io.Closeable;
+import java.util.Map;
+
+import static org.jclouds.examples.rackspace.cloudservers.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
 
 /**
  * This example sets, gets, updates, and deletes metadata from a server.
@@ -39,9 +42,9 @@ import com.google.common.collect.ImmutableMap;
  * @author Everett Toews
  */
 public class ServerMetadata implements Closeable {
-   private ComputeService compute;
-   private RestContext<NovaApi, NovaAsyncApi> nova;
-   private ServerApi serverApi;
+   private final ComputeService computeService;
+   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final ServerApi serverApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -50,11 +53,9 @@ public class ServerMetadata implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ServerMetadata serverMetadata = new ServerMetadata();
+      ServerMetadata serverMetadata = new ServerMetadata(args[0], args[1]);
 
       try {
-         serverMetadata.init(args);
-
          Server server = serverMetadata.getServer();
          serverMetadata.setMetadata(server);
          serverMetadata.updateMetadata(server);
@@ -69,20 +70,13 @@ public class ServerMetadata implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+   public ServerMetadata(String username, String apiKey) {
+      ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
       nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(Constants.ZONE);
+      serverApi = nova.getApi().getServerApiForZone(ZONE);
    }
 
    /**
@@ -92,16 +86,16 @@ public class ServerMetadata implements Closeable {
       FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 
       for (Server server: servers) {
-         if (server.getName().startsWith(Constants.NAME)) {
+         if (server.getName().startsWith(NAME)) {
             return server;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateServer example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateServer example first.");
    }
 
    private void setMetadata(Server server) {
-      System.out.println("Set Metadata");
+      System.out.format("Set Metadata%n");
 
       ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of(
             "key1", "value1", 
@@ -109,38 +103,38 @@ public class ServerMetadata implements Closeable {
             "key3", "value3");
       Map<String, String> responseMetadata = serverApi.setMetadata(server.getId(), metadata);
 
-      System.out.println("  " + responseMetadata);
+      System.out.format("  %s%n", responseMetadata);
    }
 
    private void updateMetadata(Server server) {
-      System.out.println("Udpate Metadata");
+      System.out.format("Udpate Metadata%n");
 
       ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of("key2", "new-value2");
       Map<String, String> responseMetadata = serverApi.updateMetadata(server.getId(), metadata);
 
-      System.out.println("  " + responseMetadata);
+      System.out.format("  %s%n", responseMetadata);
    }
 
    private void deleteMetadata(Server server) {
-      System.out.println("Delete Metadata");
+      System.out.format("Delete Metadata%n");
 
       serverApi.deleteMetadata(server.getId(), "key3");
    }
 
    private void getMetadata(Server server) {
-      System.out.println("Get Metadata");
+      System.out.format("Get Metadata%n");
 
       Map<String, String> metadata = serverApi.getMetadata(server.getId());
 
-      System.out.println("  " + metadata);
+      System.out.format("  %s%n", metadata);
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 }

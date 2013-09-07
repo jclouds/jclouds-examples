@@ -18,14 +18,6 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import java.io.BufferedWriter;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -35,14 +27,21 @@ import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.SwiftObject;
 import org.jclouds.rest.RestContext;
 
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+
 /**
- * Upload objects in the object storage container from the CreateContainer example.
+ * Upload objects in the Cloud Files container from the CreateContainer example.
  *  
  * @author Everett Toews
  */
 public class UploadObjects implements Closeable {
-   private BlobStore storage;
-   private RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final BlobStore blobStore;
+   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -51,10 +50,9 @@ public class UploadObjects implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      UploadObjects uploadContainer = new UploadObjects();
+      UploadObjects uploadContainer = new UploadObjects(args[0], args[1]);
 
       try {
-         uploadContainer.init(args);
          uploadContainer.uploadObjectFromFile();
          uploadContainer.uploadObjectFromString();
          uploadContainer.uploadObjectFromStringWithMetadata();
@@ -67,18 +65,11 @@ public class UploadObjects implements Closeable {
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "cloudfiles-uk"
-      String provider = "cloudfiles-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-
-      BlobStoreContext context = ContextBuilder.newBuilder(provider)
+   public UploadObjects(String username, String apiKey) {
+      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(BlobStoreContext.class);
-      storage = context.getBlobStore();
+      blobStore = context.getBlobStore();
       swift = context.unwrap();
    }
 
@@ -86,7 +77,7 @@ public class UploadObjects implements Closeable {
     * Upload an object from a File using the Swift API. 
     */
    private void uploadObjectFromFile() throws IOException {
-      System.out.println("Upload Object From File");
+      System.out.format("Upload Object From File%n");
 
       String filename = "uploadObjectFromFile";
       String suffix = ".txt";
@@ -102,16 +93,16 @@ public class UploadObjects implements Closeable {
       object.getInfo().setName(filename + suffix);
       object.setPayload(tempFile);
 
-      swift.getApi().putObject(Constants.CONTAINER, object);
+      swift.getApi().putObject(CONTAINER, object);
 
-      System.out.println("  " + filename + suffix);
+      System.out.format("  %s%s%n", filename, suffix);
    }
 
    /**
     * Upload an object from a String using the Swift API. 
     */
    private void uploadObjectFromString() {
-      System.out.println("Upload Object From String");
+      System.out.format("Upload Object From String%n");
 
       String filename = "uploadObjectFromString.txt";
 
@@ -119,38 +110,38 @@ public class UploadObjects implements Closeable {
       object.getInfo().setName(filename);
       object.setPayload("uploadObjectFromString");
 
-      swift.getApi().putObject(Constants.CONTAINER, object);
+      swift.getApi().putObject(CONTAINER, object);
 
-      System.out.println("  " + filename);
+      System.out.format("  %s%n", filename);
    }
 
    /**
     * Upload an object from a String with metadata using the BlobStore API. 
     */
    private void uploadObjectFromStringWithMetadata() {
-      System.out.println("Upload Object From String With Metadata");
+      System.out.format("Upload Object From String With Metadata%n");
 
       String filename = "uploadObjectFromStringWithMetadata.txt";
 
       Map<String, String> userMetadata = new HashMap<String, String>();
       userMetadata.put("key1", "value1");
 
-      Blob blob = storage.blobBuilder(filename)
+      Blob blob = blobStore.blobBuilder(filename)
             .payload("uploadObjectFromStringWithMetadata")
             .userMetadata(userMetadata)
             .build();
 
-      storage.putBlob(Constants.CONTAINER, blob);
+      blobStore.putBlob(CONTAINER, blob);
 
-      System.out.println("  " + filename);
+      System.out.format("  %s%n", filename);
    }
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (storage != null) {
-         storage.getContext().close();
+      if (blobStore != null) {
+         blobStore.getContext().close();
       }
    }
 }

@@ -18,8 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import java.io.Closeable;
-
+import com.google.common.collect.FluentIterable;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -31,7 +30,10 @@ import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
 
-import com.google.common.collect.FluentIterable;
+import java.io.Closeable;
+
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
 
 /**
  * This example lists the volume attachments of a server.
@@ -39,23 +41,22 @@ import com.google.common.collect.FluentIterable;
  * @author Everett Toews
  */
 public class ListVolumeAttachments implements Closeable {
-   private ComputeService compute;
-   private RestContext<NovaApi, NovaAsyncApi> nova;
-   private ServerApi serverApi;
-   private VolumeAttachmentApi volumeAttachmentApi;
+   private final ComputeService computeService;
+   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final ServerApi serverApi;
+   private final VolumeAttachmentApi volumeAttachmentApi;
 
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
     * 
-    * The first argument (args[0]) must be your username The second argument
-    * (args[1]) must be your API key
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) {
-      ListVolumeAttachments listVolumeAttachments = new ListVolumeAttachments();
+      ListVolumeAttachments listVolumeAttachments = new ListVolumeAttachments(args[0], args[1]);
 
       try {
-         listVolumeAttachments.init(args);
          Server server = listVolumeAttachments.getServer();
          listVolumeAttachments.listVolumeAttachments(server);
       }
@@ -67,21 +68,18 @@ public class ListVolumeAttachments implements Closeable {
       }
    }
 
-   private void init(String[] args) {
+   public ListVolumeAttachments(String username, String apiKey) {
       // The provider configures jclouds To use the Rackspace Cloud (US)
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudservers-uk"
-      String provider = "rackspace-cloudservers-us";
-
-      String username = args[0];
-      String apiKey = args[1];
+      // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
+      String provider = System.getProperty("provider.cs", "rackspace-cloudservers-us");
 
       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
       nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(Constants.ZONE).get();
-      serverApi = nova.getApi().getServerApiForZone(Constants.ZONE);
+      serverApi = nova.getApi().getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
    }
 
    /**
@@ -91,19 +89,19 @@ public class ListVolumeAttachments implements Closeable {
       FluentIterable<? extends Server> servers = serverApi.listInDetail().concat();
 
       for (Server server: servers) {
-         if (server.getName().startsWith(Constants.NAME)) {
+         if (server.getName().startsWith(NAME)) {
             return server;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateVolumeAndAttach example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateVolumeAndAttach example first.");
    }
 
    private void listVolumeAttachments(Server server) {
-      System.out.println("List Volume Attachments");
+      System.out.format("List Volume Attachments%n");
 
       for (VolumeAttachment volumeAttachment: volumeAttachmentApi.listAttachmentsOnServer(server.getId())) {
-         System.out.println("  " + volumeAttachment);
+         System.out.format("  %s%n", volumeAttachment);
       }
    }
 
@@ -111,8 +109,8 @@ public class ListVolumeAttachments implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() {
-      if (compute != null) {
-         compute.getContext().close();
+      if (computeService != null) {
+         computeService.getContext().close();
       }
    }
 }

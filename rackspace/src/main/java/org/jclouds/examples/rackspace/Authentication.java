@@ -101,7 +101,7 @@ public class Authentication implements Closeable {
 
       nova.getApi().getConfiguredZones();
 
-      System.out.format("  Authenticated");
+      System.out.format("  Authenticated%n");
    }
 
    /**

@@ -47,6 +47,8 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Closeables;
 import com.google.common.util.concurrent.Uninterruptibles;
 
+import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
+
 /**
  * This example uses the already created database instance, database user, and database from the examples:
  * CreateInstance, CreateDatabase, CreateUser
@@ -58,11 +60,12 @@ import com.google.common.util.concurrent.Uninterruptibles;
  * @author Zack Shoylev
  */
 public class TestDatabase implements Closeable {
-   // private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestDatabase.class); // If you want to log instead of print
-   private CloudLoadBalancersApi clb;
-   private LoadBalancerApi lbApi;
-   private TroveApi api;
-   private InstanceApi instanceApi;
+   // If you want to log instead of print, uncomment the line below
+   // private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestDatabase.class); 
+   private final CloudLoadBalancersApi clbApi;
+   private final LoadBalancerApi lbApi;
+   private final TroveApi troveApi;
+   private final InstanceApi instanceApi;
 
    /**
     * To get a username and API key see 
@@ -70,54 +73,42 @@ public class TestDatabase implements Closeable {
     * 
     * The first argument  (args[0]) must be your username.
     * The second argument (args[1]) must be your API key.
-    * @throws IOException 
     */   
-   public static void main(String[] args) throws IOException {
-      
-      TestDatabase testDatabase = new TestDatabase();
+   public static void main(String[] args) throws IOException {      
+      TestDatabase testDatabase = new TestDatabase(args[0], args[1]);
 
       try {
-         testDatabase.init(args);
-         
-         Instance instance = testDatabase.getInstance();
-         
          Set<AddNode> addNodes = testDatabase.addNodesOfDatabaseInstances();
          testDatabase.createLoadBalancer(addNodes);
          
          boolean success;
          do{
-            success = testDatabase.testDatabase(instance);
+            success = testDatabase.testDatabase();
             Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
          } while(!success);
-      } catch (Exception e) {
+      } 
+      catch (Exception e) {
          e.printStackTrace();
-      } finally {
+      } 
+      finally {
          testDatabase.close();
       }
    }
 
-   private void init(String[] args) {
+   public TestDatabase(String username, String apiKey) {
       // The provider configures jclouds to use the Rackspace Cloud (US).
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk"
-      String provider = "rackspace-cloudloadbalancers-us";
+      // To use the Rackspace Cloud (UK) set the provider to "rackspace-cloudloadbalancers-uk".
+      String provider = System.getProperty("provider.clb", "rackspace-cloudloadbalancers-us");
 
-      String username = args[0];
-      String apiKey = args[1];
-
-      clb = ContextBuilder.newBuilder(provider)
+      clbApi = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clb.getLoadBalancerApiForZone(Constants.ZONE);
-      
-      // The provider configures jclouds to use the Rackspace Cloud (US).
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddatabases-uk".
-      provider = "rackspace-clouddatabases-us";
-      
-      api = ContextBuilder.newBuilder(provider)
-                          .credentials(username, apiKey)
-                          .buildApi(TroveApi.class);
-      
-      instanceApi = api.getInstanceApiForZone(Constants.ZONE);
+      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
+
+      troveApi = ContextBuilder.newBuilder(PROVIDER)
+            .credentials(username, apiKey)
+            .buildApi(TroveApi.class);
+      instanceApi = troveApi.getInstanceApiForZone(ZONE);
    }
 
    /**
@@ -125,12 +116,12 @@ public class TestDatabase implements Closeable {
     */
    private Instance getInstance() {
       for (Instance instance: instanceApi.list()) {
-         if (instance.getName().startsWith(Constants.NAME)) {
+         if (instance.getName().startsWith(NAME)) {
             return instanceApi.get(instance.getId());
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateInstance example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateInstance example first.");
    }
    
    /**
@@ -150,13 +141,12 @@ public class TestDatabase implements Closeable {
     * Builds and executes the request to create a load balancer service using a set of nodes.
     * 
     * @param addNodes The set of cloud load balancer nodes.
-    * @throws TimeoutException
     */
    private void createLoadBalancer(Set<AddNode> addNodes) throws TimeoutException {
-      System.out.println("Create Cloud Load Balancer");
+      System.out.format("Create Cloud Load Balancer%n");
 
       CreateLoadBalancer createLB = CreateLoadBalancer.builder()
-            .name(Constants.NAME)
+            .name(NAME)
             .protocol("MYSQL")
             .port(3306)
             .algorithm(LoadBalancer.Algorithm.RANDOM)
@@ -170,7 +160,8 @@ public class TestDatabase implements Closeable {
       do {
          loadBalancer = lbApi.create(createLB);
          Uninterruptibles.sleepUninterruptibly(30, TimeUnit.SECONDS);
-      } while(loadBalancer == null);
+      } 
+      while(loadBalancer == null);
 
       
       // Wait for the Load Balancer to become Active before moving on.
@@ -181,8 +172,7 @@ public class TestDatabase implements Closeable {
          throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
       }
       
-      System.out.println("  " + loadBalancer);
-      System.out.println("  Go to http://" + getVirtualIPv4(loadBalancer.getVirtualIPs()));
+      System.out.format("  %s%n", loadBalancer);
    }
    
    private String getVirtualIPv4(Set<VirtualIPWithId> set) {
@@ -201,39 +191,38 @@ public class TestDatabase implements Closeable {
     */
    private LoadBalancer getLb() {
       for (LoadBalancer ls : lbApi.list().concat()) {
-         if (ls.getName().startsWith(Constants.NAME)) {
+         if (ls.getName().startsWith(NAME)) {
             return ls;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateInstance example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateInstance example first.");
    }
 
    /**
     * Connects to the database using JDBC over the load balancer and executes a simple query without creating a database table.
     * This will verify that the database engine is running on the remote instance.
     * 
-    * @param instance The database instance to test against.
     * @return true if connection successful and database engine responsive.
-    * @throws TimeoutException
     */
-   private boolean testDatabase(Instance instance) throws TimeoutException {
-      System.out.println("Connect to database");
+   private boolean testDatabase() throws TimeoutException {
+      System.out.format("Connect to database%n");
       
       // See http://dev.mysql.com/doc/refman/5.6/en/connector-j-examples.html
-      Connection conn = null;
+      Connection conn;
+      
       try {
          StringBuilder connString = new StringBuilder();
-         connString.append( "jdbc:mysql://" ); // Begin building the JDBC connection string by specifying the database type.
-         connString.append( getVirtualIPv4(getLb().getVirtualIPs()) ); // IPv4 of cloud load balancer that will be used to connect to the database
+         connString.append("jdbc:mysql://"); // Begin building the JDBC connection string by specifying the database type.
+         connString.append(getVirtualIPv4(getLb().getVirtualIPs())); // IPv4 of cloud load balancer that will be used to connect to the database
          connString.append("/");
-         connString.append(Constants.NAME); // Database name
+         connString.append(NAME); // Database name
          connString.append("?user=");
-         connString.append(Constants.NAME); // User name
+         connString.append(NAME); // User name
          connString.append("&password=");
-         connString.append(Constants.PASSWORD); // Database user password
+         connString.append(PASSWORD); // Database user password
          
-         System.out.println("Connecting to " + connString);
+         System.out.format("  Connecting to %s%n", connString);
          
          conn = DriverManager.getConnection(connString.toString());
 
@@ -241,61 +230,75 @@ public class TestDatabase implements Closeable {
          ResultSet rs = null;
 
          try {
-             stmt = conn.createStatement();
-             rs = stmt.executeQuery("SELECT 3+5"); // A simple query that tests the engine but creates no tables and is fairly fast.
-             rs.first();
-             System.out.println("3+5 is " + rs.getInt(1));
-         } catch (SQLException e){
-             // handle any errors
-             System.out.println("SQLException: " + e.getMessage());
-             System.out.println("SQLState: " + e.getSQLState());
-             System.out.println("VendorError: " + e.getErrorCode());
-             e.printStackTrace();
-             return false;
-         } finally {            
-             // Release resources in reverse order of creation.
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("SELECT 3+5"); // A simple query that tests the engine but creates no tables and is fairly fast.
+            rs.first();
+
+            System.out.format("  3+5 is %s%n", rs.getInt(1));
+         } 
+         catch (SQLException e){
+            System.out.format("SQLException: %s%n", e.getMessage());
+            System.out.format("SQLState: %s%n", e.getSQLState());
+            System.out.format("VendorError: %s%n", e.getErrorCode());
+            e.printStackTrace();
             
-             if (rs != null) {
-                 try {
-                     rs.close();
-                 } catch (SQLException sqlEx) { } // Ignore - you might get an exception if closing out of order.
+            return false;
+         } 
+         finally {            
+            // Release resources in reverse order of creation.
+            
+            if (rs != null) {
+               try {
+                  rs.close();
+               }
+               catch (SQLException sqlEx) {
+                  // Ignore - you might get an exception if closing out of order.
+               }
+            }
 
-                 rs = null;
-             }
-
-             if (stmt != null) {
-                 try {
-                     stmt.close();
-                 } catch (SQLException sqlEx) { } // Ignore - you might get an exception if closing out of order.
-
-                 stmt = null;
-             }
+            if (stmt != null) {
+               try {
+                  stmt.close();
+               }
+               catch (SQLException sqlEx) {
+                  // Ignore - you might get an exception if closing out of order.
+               }
+            }
              
-             if(conn != null)
-                try {
-                   conn.close();
-                } catch (SQLException sqlEx) { } // Ignore - rare bugs not necessarily related to a specific database.
+            if(conn != null) {
+               try {
+                  conn.close();
+               }
+               catch (SQLException sqlEx) {
+                  // Ignore - rare bugs not necessarily related to a specific database.
+               }
+            }
          }
-     } catch (SQLException e) {
-         // handle any errors
-         System.out.println("SQLException: " + e.getMessage());
-         System.out.println("SQLState: " + e.getSQLState());
-         System.out.println("VendorError: " + e.getErrorCode());
+      } 
+      catch (SQLException e) {
+         System.out.format("SQLException: %s%n", e.getMessage());
+         System.out.format("SQLState: %s%n", e.getSQLState());
+         System.out.format("VendorError: %s%n", e.getErrorCode());
          e.printStackTrace();
+         
          return false;
-     }
-      return true;      
+      }
+
+      return true;
    }
 
    /**
     * Always close your service when you're done with it.
-    * @throws IOException 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
       if(lbApi != null) {
          lbApi.delete(getLb().getId());
       }
-      Closeables.close(api, true);
-      Closeables.close(clb, true);
+      Closeables.close(troveApi, true);
+      Closeables.close(clbApi, true);
    }
 }

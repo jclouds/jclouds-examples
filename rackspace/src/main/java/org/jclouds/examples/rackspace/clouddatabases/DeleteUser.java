@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.examples.rackspace.cloudblockstorage.Constants;
 import org.jclouds.openstack.trove.v1.TroveApi;
 import org.jclouds.openstack.trove.v1.domain.Instance;
 import org.jclouds.openstack.trove.v1.features.InstanceApi;
@@ -31,15 +30,17 @@ import org.jclouds.openstack.trove.v1.features.UserApi;
 
 import com.google.common.io.Closeables;
 
+import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
+
 /**
  * This example will delete the User created in the CreateUser example.
  * 
  * @author Zack Shoylev
  */
 public class DeleteUser implements Closeable {
-   private TroveApi api;
-   private InstanceApi instanceApi;
-   private UserApi userApi;
+   private final TroveApi troveApi;
+   private final InstanceApi instanceApi;
+   private final UserApi userApi;
 
    /**
     * To get a username and API key see 
@@ -49,34 +50,27 @@ public class DeleteUser implements Closeable {
     * The second argument (args[1]) must be your API key.
     * @throws IOException 
     */
-   public static void main(String[] args) throws IOException {
-      
-      DeleteUser deleteUser = new DeleteUser();
+   public static void main(String[] args) throws IOException {      
+      DeleteUser deleteUser = new DeleteUser(args[0], args[1]);
 
       try {
-         deleteUser.init(args);         
-         deleteUser.deleteUser(deleteUser.getInstance());
-      } catch (Exception e) {
+         deleteUser.deleteUser();
+      } 
+      catch (Exception e) {
          e.printStackTrace();
-      } finally {
+      } 
+      finally {
          deleteUser.close();
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace Cloud (US).
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddatabases-uk".
-      String provider = "rackspace-clouddatabases-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-      
-      api = ContextBuilder.newBuilder(provider)
+   public DeleteUser(String username, String apiKey) {
+      troveApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(TroveApi.class);
-      
-      instanceApi = api.getInstanceApiForZone(Constants.ZONE);
-      userApi = api.getUserApiForInstanceInZone(getInstance().getId(), Constants.ZONE);
+
+      instanceApi = troveApi.getInstanceApiForZone(ZONE);
+      userApi = troveApi.getUserApiForInstanceInZone(getInstance().getId(), ZONE);
    }
 
    /**
@@ -84,27 +78,30 @@ public class DeleteUser implements Closeable {
     */
    private Instance getInstance() {
       for (Instance instance : instanceApi.list()) {
-         if (instance.getName().startsWith(Constants.NAME)) {
+         if (instance.getName().startsWith(NAME)) {
             return instance;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateInstance example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateInstance example first.");
    }
 
-   private void deleteUser(Instance instance) throws TimeoutException {
-      System.out.println("Delete User");
+   private void deleteUser() throws TimeoutException {
+      System.out.format("Delete User%n");
 
-      boolean result = userApi.delete(Constants.NAME);
+      boolean result = userApi.delete(NAME);
 
-      System.out.println("  " + result);
+      System.out.format("  %s%n", result);
    }
 
    /**
     * Always close your service when you're done with it.
-    * @throws IOException 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
-      Closeables.close(api, true);
+      Closeables.close(troveApi, true);
    }
 }

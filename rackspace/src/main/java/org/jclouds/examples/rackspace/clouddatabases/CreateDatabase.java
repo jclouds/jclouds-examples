@@ -30,55 +30,48 @@ import org.jclouds.openstack.trove.v1.features.InstanceApi;
 
 import com.google.common.io.Closeables;
 
+import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
+
 /**
  * This example creates a MySQL database on a Cloud Databases instance.
  * The instance is created in the CreateInstance example.
  * Think of the instance as a type of server. Multiple databases can run on the same instance.
- * 
+ *
  * @author Zack Shoylev
  */
 public class CreateDatabase implements Closeable {
-   private TroveApi api;
-   private InstanceApi instanceApi;
-   private DatabaseApi databaseApi;
+   private final TroveApi troveApi;
+   private final InstanceApi instanceApi;
+   private final DatabaseApi databaseApi;
 
    /**
-    * To get a username and API key see 
+    * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
-    * The first argument  (args[0]) must be your username.
-    * The second argument (args[1]) must be your API key.
-    * @throws IOException 
+    *
+    * The first argument (args[0]) must be your username
+    * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      
-      CreateDatabase createDatabase = new CreateDatabase();
+      CreateDatabase createDatabase = new CreateDatabase(args[0], args[1]);
 
       try {
-         createDatabase.init(args);
-         Instance instance = createDatabase.getInstance();
-         createDatabase.createDatabase(instance);
-      } catch (Exception e) {
+         createDatabase.createDatabase();
+      }
+      catch (Exception e) {
          e.printStackTrace();
-      } finally {
+      }
+      finally {
          createDatabase.close();
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace Cloud (US).
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddatabases-uk".
-      String provider = "rackspace-clouddatabases-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-      
-      api = ContextBuilder.newBuilder(provider)
+   public CreateDatabase(String username, String apiKey) {
+      troveApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(TroveApi.class);
-      
-      instanceApi = api.getInstanceApiForZone(Constants.ZONE);
-      databaseApi = api.getDatabaseApiForInstanceInZone(getInstance().getId(), Constants.ZONE);
+
+      instanceApi = troveApi.getInstanceApiForZone(ZONE);
+      databaseApi = troveApi.getDatabaseApiForInstanceInZone(getInstance().getId(), ZONE);
    }
 
    /**
@@ -86,26 +79,30 @@ public class CreateDatabase implements Closeable {
     */
    private Instance getInstance() {
       for (Instance instance: instanceApi.list()) {
-         if (instance.getName().startsWith(Constants.NAME)) {
+         if (instance.getName().startsWith(NAME)) {
             return instance;
          }
       }
 
-      throw new RuntimeException(Constants.NAME + " not found. Run the CreateInstance example first.");
+      throw new RuntimeException(NAME + " not found. Run the CreateInstance example first.");
    }
 
-   private void createDatabase(Instance instance) throws TimeoutException {
-      System.out.println("Create Database");
+   private void createDatabase() throws TimeoutException {
+      System.out.format("Create Database%n");
 
-      boolean result = databaseApi.create(Constants.NAME);
-      System.out.println("  " + result);
+      boolean result = databaseApi.create(NAME);
+
+      System.out.format("  %s%n", result);
    }
 
    /**
     * Always close your service when you're done with it.
-    * @throws IOException 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
-      Closeables.close(api, true);
+      Closeables.close(troveApi, true);
    }
 }

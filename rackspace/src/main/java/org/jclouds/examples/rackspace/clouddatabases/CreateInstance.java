@@ -32,6 +32,8 @@ import org.jclouds.openstack.trove.v1.utils.TroveUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Closeables;
 
+import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
+
 /**
  * This example creates a Cloud Databases instance. 
  * This instance will be used to run a database later on in the Create Database example.
@@ -39,8 +41,8 @@ import com.google.common.io.Closeables;
  * @author Zack Shoylev
  */
 public class CreateInstance implements Closeable {
-   private TroveApi api;
-   private FlavorApi flavorApi;
+   private final TroveApi troveApi;
+   private final FlavorApi flavorApi;
 
    /**
     * To get a username and API key see 
@@ -48,36 +50,28 @@ public class CreateInstance implements Closeable {
     * 
     * The first argument  (args[0]) must be your username.
     * The second argument (args[1]) must be your API key.
-    * @throws IOException 
     */
    public static void main(String[] args) throws IOException {
-      
-      CreateInstance createInstance = new CreateInstance();
+      CreateInstance createInstance = new CreateInstance(args[0], args[1]);
 
       try {
-         createInstance.init(args);
          Flavor flavor = createInstance.getFlavor();
          createInstance.createInstance(flavor);
-      } catch (Exception e) {
+      }
+      catch (Exception e) {
          e.printStackTrace();
-      } finally {
+      }
+      finally {
          createInstance.close();
       }
    }
 
-   private void init(String[] args) {
-      // The provider configures jclouds to use the Rackspace Cloud (US).
-      // To use the Rackspace Cloud (UK) set the provider to "rackspace-clouddatabases-uk".
-      String provider = "rackspace-clouddatabases-us";
-
-      String username = args[0];
-      String apiKey = args[1];
-      
-      api = ContextBuilder.newBuilder(provider)
+   public CreateInstance(String username, String apiKey) {
+      troveApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(TroveApi.class);
-      
-      flavorApi = api.getFlavorApiForZone(Constants.ZONE);
+
+      flavorApi = troveApi.getFlavorApiForZone(ZONE);
    }
 
    /**
@@ -88,20 +82,23 @@ public class CreateInstance implements Closeable {
    }
 
    private void createInstance(Flavor flavor) throws TimeoutException {
-      System.out.println("Create Instance for flavor: " + flavor.getId());
+      System.out.format("Create Instance for Flavor: %s%n", flavor.getId());
 
-      TroveUtils utils = new TroveUtils(api);
+      TroveUtils utils = new TroveUtils(troveApi);
       // This call will take a while - it ensures a working instance is created.
-      Instance instance = utils.getWorkingInstance(Constants.ZONE, Constants.NAME, "" + flavor.getId(), 1);
+      Instance instance = utils.getWorkingInstance(ZONE, NAME, "" + flavor.getId(), 1);
 
-      System.out.println("  " + instance);
+      System.out.format("  %s%n", instance);
    }
 
    /**
     * Always close your service when you're done with it.
-    * @throws IOException 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
+    * You would use try-with-resources in the main method instead.
+    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
-      Closeables.close(api, true);
+      Closeables.close(troveApi, true);
    }
 }

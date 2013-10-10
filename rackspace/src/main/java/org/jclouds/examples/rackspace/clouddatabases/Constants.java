@@ -18,16 +18,17 @@
  */
 package org.jclouds.examples.rackspace.clouddatabases;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 /**
  * Constants used by the Rackspace Examples.
  * 
  * @author Zack Shoylev
  */
 public interface Constants {
+   // The provider configures jclouds To use the Rackspace Cloud (US)
+   // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-clouddatabases-uk"
+   public static final String PROVIDER = System.getProperty("provider.cdb", "rackspace-clouddatabases-us");
+   public static final String ZONE = System.getProperty("zone.cdb", "DFW");
+
    public static final String NAME = "jclouds-example";
    public static final String PASSWORD = "0192j41dm311iaadjaoqpvplw";
-   public static final String ZONE = "DFW";
-   public static final String POLL_PERIOD_TWENTY_SECONDS = String.valueOf(SECONDS.toMillis(20));
 }

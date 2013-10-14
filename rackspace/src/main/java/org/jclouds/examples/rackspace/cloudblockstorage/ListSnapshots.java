@@ -18,11 +18,13 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
 import org.jclouds.openstack.cinder.v1.domain.Snapshot;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
 
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
@@ -43,7 +45,7 @@ public class ListSnapshots implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       ListSnapshots listSnapshots = new ListSnapshots(args[0], args[1]);
 
       try {
@@ -81,16 +83,8 @@ public class ListSnapshots implements Closeable {
     *
     * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
-   public void close() {
-      if (cinderApi != null) {
-         try {
-            cinderApi.close();
-         }
-         catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
+   public void close() throws IOException {
+      Closeables.close(cinderApi, true);
    }
 }

@@ -40,7 +40,6 @@ public class SmokeTest {
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
-    * @throws IOException 
     */
    public static void main(String[] args) throws IOException {
       SmokeTest smokeTest = new SmokeTest();

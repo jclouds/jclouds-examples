@@ -18,6 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -25,6 +26,7 @@ import org.jclouds.blobstore.domain.Blob;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
@@ -47,7 +49,7 @@ public class UploadLargeObject implements Closeable {
     * The second argument (args[1]) must be your API key
     * The third argument (args[2]) must be the absolute path to a large file
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       UploadLargeObject createContainer = new UploadLargeObject(args[0], args[1]);
 
       try {
@@ -95,9 +97,7 @@ public class UploadLargeObject implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (blobStore != null) {
-         blobStore.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(blobStore.getContext(), true);
    }
 }

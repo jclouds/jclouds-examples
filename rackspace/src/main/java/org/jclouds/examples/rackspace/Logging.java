@@ -19,6 +19,7 @@
 package org.jclouds.examples.rackspace;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
 import com.google.inject.Module;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
@@ -29,6 +30,7 @@ import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.rest.RestContext;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -47,7 +49,7 @@ import java.util.Set;
  * @author Everett Toews
  */
 public class Logging implements Closeable {
-   private final ComputeService compute;
+   private final ComputeService computeService;
    private final RestContext<NovaApi, NovaAsyncApi> nova;
 
     /**
@@ -56,7 +58,7 @@ public class Logging implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       Logging logging = new Logging(args[0], args[1]);
 
       try {
@@ -82,7 +84,7 @@ public class Logging implements Closeable {
             .credentials(username, apiKey)
             .modules(modules) // don't forget to add the modules to your context!
             .buildView(ComputeServiceContext.class);
-      compute = context.getComputeService();
+      computeService = context.getComputeService();
       nova = context.unwrap();
    }
 
@@ -100,9 +102,7 @@ public class Logging implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (compute != null) {
-         compute.getContext();
-      }
+   public void close() throws IOException {
+      Closeables.close(computeService.getContext(), true);
    }
 }

@@ -19,6 +19,7 @@
 package org.jclouds.examples.rackspace.cloudfiles;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 import com.google.common.util.concurrent.*;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
@@ -29,6 +30,7 @@ import org.jclouds.cloudfiles.CloudFilesClient;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -59,7 +61,7 @@ public class UploadDirectoryToCDN implements Closeable {
     * The third argument (args[2]) must be the path to the local directory
     * The fourth argument (args[3]) must be the remote container name
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       UploadDirectoryToCDN uploadDirToCDN = new UploadDirectoryToCDN(args[0], args[1]);
 
       try {
@@ -170,10 +172,8 @@ public class UploadDirectoryToCDN implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (blobStore != null) {
-         blobStore.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(blobStore.getContext(), true);
    }
 
    /**

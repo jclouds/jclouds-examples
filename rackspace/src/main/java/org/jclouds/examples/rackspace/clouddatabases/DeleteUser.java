@@ -48,7 +48,6 @@ public class DeleteUser implements Closeable {
     * 
     * The first argument  (args[0]) must be your username.
     * The second argument (args[1]) must be your API key.
-    * @throws IOException 
     */
    public static void main(String[] args) throws IOException {      
       DeleteUser deleteUser = new DeleteUser(args[0], args[1]);
@@ -99,7 +98,6 @@ public class DeleteUser implements Closeable {
     *
     * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
       Closeables.close(troveApi, true);

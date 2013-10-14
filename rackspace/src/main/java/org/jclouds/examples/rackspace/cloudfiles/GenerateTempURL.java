@@ -19,6 +19,7 @@
 package org.jclouds.examples.rackspace.cloudfiles;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
@@ -66,7 +67,7 @@ public class GenerateTempURL implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       GenerateTempURL generateTempURL = new GenerateTempURL(args[0], args[1]);
 
       try {
@@ -147,9 +148,7 @@ public class GenerateTempURL implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (blobStore != null) {
-         blobStore.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(blobStore.getContext(), true);
    }
 }

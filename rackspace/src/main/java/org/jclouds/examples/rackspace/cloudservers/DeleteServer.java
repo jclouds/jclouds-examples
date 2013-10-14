@@ -18,12 +18,14 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.NodeMetadata;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
@@ -46,7 +48,7 @@ public class DeleteServer implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       DeleteServer deleteServer = new DeleteServer(args[0], args[1]);
 
       try {
@@ -92,9 +94,7 @@ public class DeleteServer implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (computeService != null) {
-         computeService.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(computeService.getContext(), true);
    }
 }

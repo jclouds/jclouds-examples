@@ -20,6 +20,7 @@ package org.jclouds.examples.rackspace.cloudservers;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
 import com.google.common.net.HostAndPort;
 import com.google.inject.Module;
 import org.jclouds.ContextBuilder;
@@ -35,6 +36,7 @@ import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -63,11 +65,11 @@ public class CloudServersPublish implements Closeable {
     * The second argument (args[1]) must be your API key
     * The optional third argument (args[2]) is the number of Cloud Servers to start
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       getPublishedCloudServers(Arrays.asList(args));
    }
 
-   public static Set<? extends NodeMetadata> getPublishedCloudServers(List<String> args) {
+   public static Set<? extends NodeMetadata> getPublishedCloudServers(List<String> args) throws IOException {
       CloudServersPublish cloudServersPublish = new CloudServersPublish(args);
       Set<? extends NodeMetadata> nodes = null;
       
@@ -168,9 +170,7 @@ public class CloudServersPublish implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (computeService != null) {
-         computeService.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(computeService.getContext(), true);
    }
 }

@@ -19,6 +19,7 @@
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
 import com.google.common.collect.FluentIterable;
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -31,6 +32,7 @@ import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.rest.RestContext;
 
 import java.io.Closeable;
+import java.io.IOException;
 
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
@@ -53,7 +55,7 @@ public class ListVolumeAttachments implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       ListVolumeAttachments listVolumeAttachments = new ListVolumeAttachments(args[0], args[1]);
 
       try {
@@ -108,9 +110,7 @@ public class ListVolumeAttachments implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (computeService != null) {
-         computeService.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(computeService.getContext(), true);
    }
 }

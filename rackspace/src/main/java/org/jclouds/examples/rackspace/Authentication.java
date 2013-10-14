@@ -18,6 +18,7 @@
  */
 package org.jclouds.examples.rackspace;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -28,6 +29,7 @@ import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.rest.RestContext;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -45,7 +47,7 @@ import java.util.Properties;
  * @author Everett Toews
  */
 public class Authentication implements Closeable {
-   private final ComputeService compute;
+   private final ComputeService computeService;
    private final RestContext<NovaApi, NovaAsyncApi> nova;
 
     /**
@@ -56,7 +58,7 @@ public class Authentication implements Closeable {
     * [Optional] The third argument (args[2]) must be "password" if password authentication is used, 
     *            otherwise default to using API key.
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       Authentication authentication = new Authentication(args);
 
       try {
@@ -88,7 +90,7 @@ public class Authentication implements Closeable {
                .credentials(username, credential)
                .overrides(overrides)
                .buildView(ComputeServiceContext.class);
-       compute = context.getComputeService();
+       computeService = context.getComputeService();
        nova = context.unwrap();
    }
 
@@ -107,9 +109,7 @@ public class Authentication implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (compute != null) {
-         compute.getContext();
-      }
+   public void close() throws IOException {
+      Closeables.close(computeService.getContext(), true);
    }
 }

@@ -20,6 +20,7 @@ package org.jclouds.examples.rackspace.cloudblockstorage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
 import com.google.inject.Module;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
@@ -44,6 +45,7 @@ import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -72,7 +74,7 @@ public class CreateVolumeAndAttach implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       CreateVolumeAndAttach createVolumeAndAttach = new CreateVolumeAndAttach(args[0], args[1]);
 
       try {
@@ -204,20 +206,9 @@ public class CreateVolumeAndAttach implements Closeable {
     *
     * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
-   public void close() {
-      if (cinderApi != null) {
-         try {
-            cinderApi.close();
-         }
-         catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
-      
-      if (computeService != null) {
-         computeService.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(cinderApi, true);
+      Closeables.close(computeService.getContext(), true);
    }
 }

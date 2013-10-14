@@ -20,6 +20,7 @@ package org.jclouds.examples.rackspace.cloudloadbalancers;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.examples.rackspace.cloudservers.CloudServersPublish;
@@ -29,6 +30,7 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.predicates.LoadBalancerPredicates;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -53,7 +55,7 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       CreateLoadBalancerWithNewServers createLoadBalancer = new CreateLoadBalancerWithNewServers(args[0], args[1]);
 
       try {
@@ -150,16 +152,8 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     * 
     * Note that closing quietly like this is not necessary in Java 7. 
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
-   public void close() {
-      if (clbApi != null) {
-         try {
-            clbApi.close();
-         }
-         catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
+   public void close() throws IOException {
+      Closeables.close(clbApi, true);
    }
 }

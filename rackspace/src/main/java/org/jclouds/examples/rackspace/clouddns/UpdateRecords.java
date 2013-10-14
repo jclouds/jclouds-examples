@@ -20,6 +20,7 @@ package org.jclouds.examples.rackspace.clouddns;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.clouddns.v1.CloudDNSApi;
 import org.jclouds.rackspace.clouddns.v1.domain.Domain;
@@ -28,6 +29,7 @@ import org.jclouds.rackspace.clouddns.v1.domain.RecordDetail;
 import org.jclouds.rackspace.clouddns.v1.functions.RecordFunctions;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -50,7 +52,7 @@ public class UpdateRecords implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       UpdateRecords updateRecords = new UpdateRecords(args[0], args[1]);
 
       try {
@@ -122,16 +124,8 @@ public class UpdateRecords implements Closeable {
     * 
     * Note that closing quietly like this is not necessary in Java 7. 
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.  
     */
-   public void close() {
-      if (dnsApi != null) {
-         try {
-            dnsApi.close();
-         }
-         catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
+   public void close() throws IOException {
+      Closeables.close(dnsApi, true);
    }
 }

@@ -100,7 +100,6 @@ public class CreateDatabase implements Closeable {
     *
     * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
    public void close() throws IOException {
       Closeables.close(troveApi, true);

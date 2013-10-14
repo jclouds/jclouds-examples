@@ -18,6 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -28,6 +29,7 @@ import org.jclouds.openstack.swift.options.ListContainerOptions;
 import org.jclouds.rest.RestContext;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
 
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
@@ -48,7 +50,7 @@ public class ListObjects implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       ListObjects listContainers = new ListObjects(args[0], args[1]);
 
       try {
@@ -95,9 +97,7 @@ public class ListObjects implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() {
-      if (blobStore != null) {
-         blobStore.getContext().close();
-      }
+   public void close() throws IOException {
+      Closeables.close(blobStore.getContext(), true);
    }
 }

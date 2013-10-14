@@ -18,6 +18,7 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
 import org.jclouds.openstack.cinder.v1.domain.Volume;
@@ -25,6 +26,7 @@ import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
@@ -45,7 +47,7 @@ public class DeleteVolume implements Closeable {
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
-   public static void main(String[] args) {
+   public static void main(String[] args) throws IOException {
       DeleteVolume deleteVolume = new DeleteVolume(args[0], args[1]);
 
       try {
@@ -100,16 +102,8 @@ public class DeleteVolume implements Closeable {
     *
     * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
-    * When jclouds switches to Java 7 the try/catch block below can be removed.
     */
-   public void close() {
-      if (cinderApi != null) {
-         try {
-            cinderApi.close();
-         }
-         catch (Exception e) {
-            e.printStackTrace();
-         }
-      }
+   public void close() throws IOException {
+      Closeables.close(cinderApi, true);
    }
 }

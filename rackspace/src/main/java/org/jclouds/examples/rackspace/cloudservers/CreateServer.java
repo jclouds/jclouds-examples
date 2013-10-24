@@ -68,7 +68,7 @@ public class CreateServer implements Closeable {
    }
 
    public CreateServer(String username, String apiKey) {
-      // These properties control how often jclouds polls for a status udpate
+      // These properties control how often jclouds polls for a status update
       Properties overrides = new Properties();
       overrides.setProperty(POLL_INITIAL_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
       overrides.setProperty(POLL_MAX_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
@@ -93,13 +93,13 @@ public class CreateServer implements Closeable {
     *     .build();
     */
    private void createServer() throws RunNodesException, TimeoutException {
+      System.out.format("Create Server%n");
+
       Template template = computeService.templateBuilder()
             .locationId(getLocationId())
             .fromHardware(getHardware())
             .fromImage(getImage())
             .build();
-
-      System.out.format("Create Server%n");
 
       // This method will continue to poll for the server status and won't return until this server is ACTIVE
       // If you want to know what's happening during the polling, enable logging. See
@@ -120,12 +120,12 @@ public class CreateServer implements Closeable {
     * @return The first available Location
     */
    private String getLocationId() {
-      System.out.format("Locations%n");
+      System.out.format("  Locations%n");
 
       Set<? extends Location> locations = computeService.listAssignableLocations();
 
       for (Location location: locations) {
-         System.out.format("  %s%n", location);
+         System.out.format("    %s%n", location);
       }
 
       return locations.iterator().next().getId();
@@ -137,13 +137,13 @@ public class CreateServer implements Closeable {
     * @return The Hardware with 512 MB of RAM
     */
    private Hardware getHardware() {
-      System.out.format("Hardware Profiles (Flavors)%n");
+      System.out.format("  Hardware Profiles (Flavors)%n");
 
       Set<? extends Hardware> profiles = computeService.listHardwareProfiles();
       Hardware result = null;
 
       for (Hardware profile: profiles) {
-         System.out.format("  %s%n", profile);
+         System.out.format("    %s%n", profile);
          if (profile.getRam() == 512) {
             result = profile;
          }
@@ -163,13 +163,13 @@ public class CreateServer implements Closeable {
     * @return An Ubuntu 12.04 Image 
     */
    private Image getImage() {
-      System.out.format("Images%n");
+      System.out.format("  Images%n");
 
       Set<? extends Image> images = computeService.listImages();
       Image result = null;
 
       for (Image image: images) {
-         System.out.format("  %s%n", image);
+         System.out.format("    %s%n", image);
          if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
             result = image;
          }

@@ -119,12 +119,12 @@ public class CreateVolumeAndAttach implements Closeable {
    }
 
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
+      System.out.format("Create Server%n");
+
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .osDescriptionMatches(".*CentOS 6.2.*")
+            .osDescriptionMatches(".*CentOS 6.4.*")
             .minRam(512).build();
-
-      System.out.format("Create Server%n");
 
       Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(NAME, 1, template);
       NodeMetadata nodeMetadata = nodes.iterator().next();

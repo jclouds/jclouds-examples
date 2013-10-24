@@ -96,7 +96,7 @@ public class CloudServersPublish implements Closeable {
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
-      // These properties control how often jclouds polls for a status udpate
+      // These properties control how often jclouds polls for a status update
       Properties overrides = new Properties();
       overrides.setProperty(POLL_INITIAL_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
       overrides.setProperty(POLL_MAX_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
@@ -110,13 +110,13 @@ public class CloudServersPublish implements Closeable {
    }
 
    private Set<? extends NodeMetadata> createServer() throws RunNodesException, TimeoutException {
+      System.out.format("Create Server%n");
+
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .osDescriptionMatches(".*CentOS 6.2.*")
+            .osDescriptionMatches(".*CentOS 6.4.*")
             .minRam(512)
             .build();
-
-      System.out.format("Create Server");
 
       // This method will continue to poll for the server status and won't return until this server is ACTIVE
       // If you want to know what's happening during the polling, enable logging.
@@ -124,7 +124,7 @@ public class CloudServersPublish implements Closeable {
       Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(NAME, numServers, template);
 
       for (NodeMetadata nodeMetadata: nodes) {
-         System.out.format("  ", nodeMetadata);
+         System.out.format("  %s%n", nodeMetadata);
       }
 
       return nodes;
@@ -135,7 +135,7 @@ public class CloudServersPublish implements Closeable {
          String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
          String privateAddress = nodeMetadata.getPrivateAddresses().iterator().next();
 
-         System.out.format("Configure And Start Webserver%n");
+         System.out.format("  Configure And Start Webserver%n");
 
          awaitSsh(publicAddress);
 
@@ -155,9 +155,9 @@ public class CloudServersPublish implements Closeable {
 
          computeService.runScriptOnNode(nodeMetadata.getId(), script, options);
 
-         System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
-         System.out.format("  Password: %s%n", nodeMetadata.getCredentials().getPassword());
-         System.out.format("  Go to http://%s%n", publicAddress);
+         System.out.format("    Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
+         System.out.format("    Password: %s%n", nodeMetadata.getCredentials().getPassword());
+         System.out.format("    Go to http://%s%n", publicAddress);
       }
    }
 

@@ -26,6 +26,7 @@ import org.jclouds.examples.rackspace.cloudfiles.*;
 import org.jclouds.examples.rackspace.cloudloadbalancers.*;
 import org.jclouds.examples.rackspace.cloudservers.*;
 import org.jclouds.examples.rackspace.clouddatabases.*;
+import org.jclouds.examples.rackspace.autoscale.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
@@ -104,5 +105,11 @@ public class SmokeTest {
       DeleteDatabase.main(args);
       DeleteUser.main(args);
       DeleteInstance.main(args);
+
+      CreatePolicy.main(args);
+      UpdatePolicy.main(args);
+      CreateWebhook.main(args);
+      ExecuteWebhook.main(args);
+      AutoscaleCleanup.main(args);
    }
 }

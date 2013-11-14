@@ -27,7 +27,6 @@ import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
-import org.jclouds.domain.Location;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -96,7 +95,7 @@ public class CreateServer implements Closeable {
       System.out.format("Create Server%n");
 
       Template template = computeService.templateBuilder()
-            .locationId(getLocationId())
+            .locationId(ZONE)
             .fromHardware(getHardware())
             .fromImage(getImage())
             .build();
@@ -112,23 +111,6 @@ public class CreateServer implements Closeable {
       System.out.format("  %s%n", nodeMetadata);
       System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
       System.out.format("  Password: %s%n", nodeMetadata.getCredentials().getPassword());
-   }
-
-   /**
-    * This method uses the generic ComputeService.listAssignableLocations() to find the location.
-    * 
-    * @return The first available Location
-    */
-   private String getLocationId() {
-      System.out.format("  Locations%n");
-
-      Set<? extends Location> locations = computeService.listAssignableLocations();
-
-      for (Location location: locations) {
-         System.out.format("    %s%n", location);
-      }
-
-      return locations.iterator().next().getId();
    }
 
    /**

@@ -30,6 +30,7 @@ import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.options.RunScriptOptions;
+import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.predicates.SocketOpen;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
@@ -112,10 +113,11 @@ public class CloudServersPublish implements Closeable {
    private Set<? extends NodeMetadata> createServer() throws RunNodesException, TimeoutException {
       System.out.format("Create Server%n");
 
+      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
             .osDescriptionMatches(".*CentOS 6.4.*")
-            .minRam(512)
+            .hardwareId(zoneAndId.slashEncode())
             .build();
 
       // This method will continue to poll for the server status and won't return until this server is ACTIVE

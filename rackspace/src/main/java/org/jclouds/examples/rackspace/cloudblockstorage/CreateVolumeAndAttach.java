@@ -38,6 +38,7 @@ import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
+import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
@@ -121,10 +122,12 @@ public class CreateVolumeAndAttach implements Closeable {
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
       System.out.format("Create Server%n");
 
+      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
             .osDescriptionMatches(".*CentOS 6.4.*")
-            .minRam(512).build();
+            .hardwareId(zoneAndId.slashEncode())
+            .build();
 
       Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(NAME, 1, template);
       NodeMetadata nodeMetadata = nodes.iterator().next();

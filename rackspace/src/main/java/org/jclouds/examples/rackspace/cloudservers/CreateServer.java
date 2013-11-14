@@ -39,7 +39,7 @@ import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIO
 import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 
 /**
- * This example creates an Ubuntu 12.04 server with 512 MB of RAM on the Rackspace Cloud. 
+ * This example creates an Ubuntu 12.04 server with 1024 MB of RAM on the Rackspace Cloud.
  *  
  * @author Everett Toews
  */
@@ -88,7 +88,7 @@ public class CreateServer implements Closeable {
     *     .locationId(getLocationId())
     *     .osFamily(OsFamily.UBUNTU)
     *     .osVersionMatches("12.04")
-    *     .minRam(512)
+    *     .minRam(1024)
     *     .build();
     */
    private void createServer() throws RunNodesException, TimeoutException {
@@ -116,7 +116,7 @@ public class CreateServer implements Closeable {
    /**
     * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
     * 
-    * @return The Hardware with 512 MB of RAM
+    * @return The Hardware with 1024 MB of RAM
     */
    private Hardware getHardware() {
       System.out.format("  Hardware Profiles (Flavors)%n");
@@ -126,13 +126,13 @@ public class CreateServer implements Closeable {
 
       for (Hardware profile: profiles) {
          System.out.format("    %s%n", profile);
-         if (profile.getRam() == 512) {
+         if (profile.getProviderId().equals("performance1-1")) {
             result = profile;
          }
       }
 
       if (result == null) {
-         System.err.println("Flavor with 512 MB of RAM not found. Using first flavor found.%n");
+         System.err.println("Performance 1-1 flavor not found. Using first flavor found.%n");
          result = profiles.iterator().next();
       }
 

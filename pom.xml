@@ -31,9 +31,9 @@
   <name>jclouds examples</name>
 
   <scm>
-    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-jclouds-examples.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-jclouds-examples.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-jclouds-examples.git</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/jclouds-examples.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/jclouds-examples.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=jclouds-examples.git</url>
     <tag>HEAD</tag>
   </scm>
 

@@ -32,7 +32,7 @@ This repository contains various examples of using
     </tr>
     <tr>
       <td><a href="blobstore-scala-filesystem/">BlobStore Basics (Scala)</a></td>
-      <td>Example code to create a container and blob using the filesystem <a href="http://jclouds.incubator.apache.org/documentation/userguide/blobstore-guide/">BlobStore API</a></td>
+      <td>Example code to create a container and blob using the filesystem <a href="http://jclouds.apache.org/documentation/userguide/blobstore-guide/">BlobStore API</a></td>
     </tr>
     <tr>
       <td><a href="blobstore-karaf-shell">BlobStore via Karaf Shell</a></td>
@@ -69,7 +69,7 @@ This repository contains various examples of using
   </tbody>
 </table>
 
-![jclouds logo](http://jclouds.incubator.apache.org/style/fullsizejcloudslogo.jpg)
+![jclouds logo](http://jclouds.apache.org/style/fullsizejcloudslogo.jpg)
 
 ## License
 

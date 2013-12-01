@@ -76,7 +76,7 @@ under the License.
       <version>${camel.version}</version>
     </dependency>
 
-    <!-- Jclouds Dependencies -->
+    <!-- jclouds Dependencies -->
     <dependency>
       <groupId>org.jclouds.driver</groupId>
       <artifactId>jclouds-slf4j</artifactId>

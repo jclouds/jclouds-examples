@@ -106,7 +106,7 @@ Watch the terminal for output!
 ## Eclipse
 To run these examples from Eclipse follow these instructions.
 
-Create a new Java Project and choose jcloud-examples/rackspace/ as the Location.
+Create a new Java Project and choose jclouds-examples/rackspace/ as the Location.
 
 ![Eclipse: Create Java Project](https://raw.github.com/jclouds/jclouds-examples/master/rackspace/images/Eclipse1.png "Eclipse: Create Java Project")
 

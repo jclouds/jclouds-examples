@@ -29,25 +29,29 @@ under the License.
   <name>blobstore-basics</name>
   <description>jclouds blobstore example that creates a container, then displays the size of each container</description>
 
+  <properties>
+    <jclouds.version>1.6.3</jclouds.version>
+  </properties>
+
   <dependencies>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-blobstore</artifactId>
-      <version>1.6.0</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-allblobstore</artifactId>
-      <version>1.6.0</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
          like below -->
     <!--
         <dependency>
-        <groupId>org.jclouds.provider</groupId>
+        <groupId>org.apache.jclouds.provider</groupId>
         <artifactId>hpcloud-objectstorage</artifactId>
-        <version>1.6.0</version>
+        <version>${jclouds.version}</version>
         </dependency>
     -->
   </dependencies>

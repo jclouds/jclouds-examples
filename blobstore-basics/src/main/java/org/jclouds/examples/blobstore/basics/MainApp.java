@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.contains;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -107,9 +106,8 @@ public class MainApp {
          // List Container
          for (StorageMetadata resourceMd : blobStore.list()) {
             if (resourceMd.getType() == StorageType.CONTAINER || resourceMd.getType() == StorageType.FOLDER) {
-               // Use Map API
-               Map<String, InputStream> containerMap = context.createInputStreamMap(resourceMd.getName());
-               System.out.printf("  %s: %s entries%n", resourceMd.getName(), containerMap.size());
+               String name = resourceMd.getName();
+               System.out.printf("  %s: %s entries%n", name, context.getBlobStore().countBlobs(name));
             }
          }
 

@@ -108,14 +108,12 @@
     <dependency>
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>rackspace-autoscale</artifactId>
-      <!-- <version>${jclouds.version}</version>  -->
-      <version>1.7.0-SNAPSHOT</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>rackspace-autoscale-us</artifactId>
-      <!-- <version>${jclouds.version}</version>  -->
-      <version>1.7.0-SNAPSHOT</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>

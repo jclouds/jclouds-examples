@@ -75,7 +75,7 @@ public class CreateWebhook implements Closeable {
 
       groupApi = autoscaleApi.getGroupApiForZone(ZONE);
       String groupId = Utils.getGroupId(groupApi);
-      policyApi = autoscaleApi.getPolicyApiForZoneAndGroup(groupId, ZONE);
+      policyApi = autoscaleApi.getPolicyApiForZoneAndGroup(ZONE, groupId);
       String policyId = Utils.getPolicyId(policyApi);
       webhookApi = autoscaleApi.getWebhookApiForZoneAndGroupAndPolicy(ZONE, groupId, policyId);
    }

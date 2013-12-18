@@ -69,7 +69,7 @@ public class CreateUser implements Closeable {
             .buildApi(TroveApi.class);
 
       instanceApi = troveApi.getInstanceApiForZone(ZONE);
-      userApi = troveApi.getUserApiForInstanceInZone(getInstance().getId(), ZONE);
+      userApi = troveApi.getUserApiForZoneAndInstance(ZONE, getInstance().getId());
    }
 
    /**

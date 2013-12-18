@@ -71,7 +71,7 @@ public class CreateDatabase implements Closeable {
             .buildApi(TroveApi.class);
 
       instanceApi = troveApi.getInstanceApiForZone(ZONE);
-      databaseApi = troveApi.getDatabaseApiForInstanceInZone(getInstance().getId(), ZONE);
+      databaseApi = troveApi.getDatabaseApiForZoneAndInstance(ZONE, getInstance().getId());
    }
 
    /**

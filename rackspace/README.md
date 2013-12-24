@@ -71,6 +71,11 @@ The [clouddatabases package](https://github.com/jclouds/jclouds-examples/tree/ma
   * [TestDatabase.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/clouddatabases/TestDatabase.java) - An example of connecting to the database from the public Internet and making a simple request.
   * Other examples include deleting instances, databases, and users, and granting root access.
 
+The [cloudqueues package](https://github.com/jclouds/jclouds-examples/tree/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudqueues) demonstrates how to accomplish common tasks for working with queues in the cloud.
+
+  * [ProducerConsumer.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudqueues/ProducerConsumer.java) - An example of the Producer/Consumer pattern.
+  * [PublishSubscribe.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudqueues/PublishSubscribe.java) - An example of the Publish/Subscribe pattern.
+  * [StreamMessages.java](https://github.com/jclouds/jclouds-examples/blob/master/rackspace/src/main/java/org/jclouds/examples/rackspace/cloudqueues/StreamMessages.java) - An example of streaming messages off of a queue.
 
 ## Command Line
 

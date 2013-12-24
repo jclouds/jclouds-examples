@@ -24,6 +24,9 @@ import org.jclouds.examples.rackspace.cloudblockstorage.*;
 import org.jclouds.examples.rackspace.clouddns.*;
 import org.jclouds.examples.rackspace.cloudfiles.*;
 import org.jclouds.examples.rackspace.cloudloadbalancers.*;
+import org.jclouds.examples.rackspace.cloudqueues.ProducerConsumer;
+import org.jclouds.examples.rackspace.cloudqueues.PublishSubscribe;
+import org.jclouds.examples.rackspace.cloudqueues.StreamMessages;
 import org.jclouds.examples.rackspace.cloudservers.*;
 import org.jclouds.examples.rackspace.clouddatabases.*;
 import org.jclouds.examples.rackspace.autoscale.*;
@@ -111,5 +114,9 @@ public class SmokeTest {
       CreateWebhook.main(args);
       ExecuteWebhook.main(args);
       AutoscaleCleanup.main(args);
+
+      ProducerConsumer.main(args);
+      PublishSubscribe.main(args);
+      StreamMessages.main(args);
    }
 }

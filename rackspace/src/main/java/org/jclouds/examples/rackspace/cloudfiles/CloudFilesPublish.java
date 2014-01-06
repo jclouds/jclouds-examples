@@ -20,14 +20,8 @@ package org.jclouds.examples.rackspace.cloudfiles;
 
 import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.cloudfiles.CloudFilesApiMetadata;
 import org.jclouds.cloudfiles.CloudFilesClient;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.SwiftObject;
-import org.jclouds.rest.RestContext;
 
 import java.io.*;
 import java.net.URI;
@@ -38,8 +32,6 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.*;
  * This example will create a container, put a file in it, and publish it on the internet!
  */
 public class CloudFilesPublish implements Closeable {
-   private final BlobStore blobStore;
-   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
    private final CloudFilesClient cloudFilesClient;
 
    /**
@@ -65,12 +57,9 @@ public class CloudFilesPublish implements Closeable {
    }
 
    public CloudFilesPublish(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+      cloudFilesClient = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      swift = context.unwrap();
-      cloudFilesClient = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
+            .buildApi(CloudFilesClient.class);
    }
 
    /**
@@ -80,7 +69,7 @@ public class CloudFilesPublish implements Closeable {
    private void createContainer() {
       System.out.format("Create Container%n");
 
-      swift.getApi().createContainer(CONTAINER_PUBLISH);
+      cloudFilesClient.createContainer(CONTAINER_PUBLISH);
 
       System.out.format("  %s%n", CONTAINER_PUBLISH);
    }
@@ -98,11 +87,11 @@ public class CloudFilesPublish implements Closeable {
       out.write("Hello Cloud Files");
       out.close();
 
-      SwiftObject object = swift.getApi().newSwiftObject();
+      SwiftObject object = cloudFilesClient.newSwiftObject();
       object.getInfo().setName(FILENAME + SUFFIX);
       object.setPayload(tempFile);
 
-      swift.getApi().putObject(CONTAINER_PUBLISH, object);
+      cloudFilesClient.putObject(CONTAINER_PUBLISH, object);
 
       System.out.format("  %s%s%n", FILENAME, SUFFIX);
    }
@@ -123,6 +112,6 @@ public class CloudFilesPublish implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(blobStore.getContext(), true);
+      Closeables.close(cloudFilesClient, true);
    }
 }

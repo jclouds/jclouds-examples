@@ -56,6 +56,7 @@ public class SmokeTest {
 
       CloudServersPublish.main(args);
       CreateServer.main(args);
+      CreateServerWithKeyPair.main(args);
       ListServersWithFiltering.main(args);
       ServerMetadata.main(args);
       DeleteServer.main(args);

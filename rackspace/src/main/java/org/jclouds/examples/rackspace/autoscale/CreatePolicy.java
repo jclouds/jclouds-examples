@@ -34,9 +34,9 @@ import org.jclouds.rackspace.autoscale.v1.domain.LaunchConfiguration;
 import org.jclouds.rackspace.autoscale.v1.domain.LaunchConfiguration.LaunchConfigurationType;
 import org.jclouds.rackspace.autoscale.v1.domain.LoadBalancer;
 import org.jclouds.rackspace.autoscale.v1.domain.Personality;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyTargetType;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyType;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyTargetType;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyType;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 
 import com.google.common.collect.ImmutableList;
@@ -109,9 +109,9 @@ public class CreatePolicy implements Closeable {
             .type(LaunchConfigurationType.LAUNCH_SERVER)
             .build();
 
-      List<ScalingPolicy> scalingPolicies = Lists.newArrayList();
+      List<CreateScalingPolicy> scalingPolicies = Lists.newArrayList();
 
-      ScalingPolicy scalingPolicy = ScalingPolicy.builder()
+      CreateScalingPolicy scalingPolicy = CreateScalingPolicy.builder()
             .cooldown(0)
             .type(ScalingPolicyType.WEBHOOK)
             .name(NAME)

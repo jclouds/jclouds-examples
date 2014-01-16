@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.autoscale.v1.AutoscaleApi;
-import org.jclouds.rackspace.autoscale.v1.domain.WebhookResponse;
+import org.jclouds.rackspace.autoscale.v1.domain.Webhook;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 import org.jclouds.rackspace.autoscale.v1.features.WebhookApi;
@@ -94,7 +94,7 @@ public class ExecuteWebhook implements Closeable {
 
       System.out.format("Execute Webhook - again, anonymously%n");
 
-      WebhookResponse webhook = webhookApi.list().first().get();
+      Webhook webhook = webhookApi.list().first().get();
       try {
          result = AutoscaleUtils.execute(webhook.getAnonymousExecutionURI().get());
       } catch (IOException e) {

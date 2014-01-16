@@ -29,10 +29,10 @@ import java.util.concurrent.TimeUnit;
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.autoscale.v1.AutoscaleApi;
 import org.jclouds.rackspace.autoscale.v1.domain.GroupState;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyTargetType;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyType;
 import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyTargetType;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyType;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicyResponse;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 
@@ -84,7 +84,7 @@ public class AutoscaleCleanup implements Closeable {
       // Remove ALL policies and groups with that name
       for (GroupState g : groupApi.listGroupStates()) {
          PolicyApi pa = autoscaleApi.getPolicyApiForZoneAndGroup(ZONE, g.getId());
-         for(ScalingPolicyResponse p : pa.list()) {
+         for(ScalingPolicy p : pa.list()) {
             if(p.getName().equals(NAME)) {
                System.out.format("Found matching policy: %s with cooldown %s%n", p.getId(), p.getCooldown());
                String policyId = p.getId();
@@ -93,7 +93,7 @@ public class AutoscaleCleanup implements Closeable {
                   System.out.format("Removing servers %n");
                   
                   // Update policy to 0 servers
-                  ScalingPolicy scalingPolicy = ScalingPolicy.builder()
+                  CreateScalingPolicy scalingPolicy = CreateScalingPolicy.builder()
                         .cooldown(3)
                         .type(ScalingPolicyType.WEBHOOK)
                         .name(NAME)

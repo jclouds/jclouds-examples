@@ -22,7 +22,7 @@ import static org.jclouds.examples.rackspace.autoscale.Constants.NAME;
 
 import org.jclouds.rackspace.autoscale.v1.domain.Group;
 import org.jclouds.rackspace.autoscale.v1.domain.GroupState;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicyResponse;
+import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 
@@ -35,7 +35,7 @@ public class Utils {
    public static String getGroupId(GroupApi groupApi) {
       for ( GroupState state : groupApi.listGroupStates() ) {
          Group g = groupApi.get(state.getId());
-         for ( ScalingPolicyResponse policy : g.getScalingPolicies() ) {
+         for ( ScalingPolicy policy : g.getScalingPolicies() ) {
             if (policy.getName().equals(NAME)) return g.getId();
          }
       }
@@ -44,7 +44,7 @@ public class Utils {
    }
 
    public static String getPolicyId(PolicyApi policyApi) {
-      for ( ScalingPolicyResponse policy : policyApi.list() ) {
+      for ( ScalingPolicy policy : policyApi.list() ) {
          if (policy.getName().equals(NAME)) return policy.getId();
       }
 

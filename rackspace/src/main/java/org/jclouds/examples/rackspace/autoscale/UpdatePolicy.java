@@ -27,9 +27,9 @@ import java.io.IOException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.autoscale.v1.AutoscaleApi;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyTargetType;
-import org.jclouds.rackspace.autoscale.v1.domain.ScalingPolicy.ScalingPolicyType;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyTargetType;
+import org.jclouds.rackspace.autoscale.v1.domain.CreateScalingPolicy.ScalingPolicyType;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 
@@ -81,7 +81,7 @@ public class UpdatePolicy implements Closeable {
 
       String policyId = policyApi.list().first().get().getId();
 
-      ScalingPolicy scalingPolicy = ScalingPolicy.builder()
+      CreateScalingPolicy scalingPolicy = CreateScalingPolicy.builder()
             .cooldown(3)
             .type(ScalingPolicyType.WEBHOOK)
             .name(NAME)

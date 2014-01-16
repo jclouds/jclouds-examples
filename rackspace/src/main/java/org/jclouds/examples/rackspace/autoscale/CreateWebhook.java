@@ -27,7 +27,7 @@ import java.io.IOException;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.rackspace.autoscale.v1.AutoscaleApi;
-import org.jclouds.rackspace.autoscale.v1.domain.WebhookResponse;
+import org.jclouds.rackspace.autoscale.v1.domain.Webhook;
 import org.jclouds.rackspace.autoscale.v1.features.GroupApi;
 import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 import org.jclouds.rackspace.autoscale.v1.features.WebhookApi;
@@ -83,7 +83,7 @@ public class CreateWebhook implements Closeable {
    private void createWebhook() {
       System.out.format("Create Webhook%n");
 
-      FluentIterable<WebhookResponse> result = webhookApi.create(NAME, ImmutableMap.<String, Object>of());
+      FluentIterable<Webhook> result = webhookApi.create(NAME, ImmutableMap.<String, Object>of());
 
       System.out.format("  %s%n", result.first().get());
    }

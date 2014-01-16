@@ -22,7 +22,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <properties>
-    <jclouds.version>1.7.0</jclouds.version>
+    <jclouds.version>1.7.1</jclouds.version>
   </properties>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>rackspace-examples</artifactId>
@@ -113,11 +113,6 @@
     <dependency>
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>rackspace-cloudqueues-uk</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
-      <artifactId>rackspace-autoscale</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>

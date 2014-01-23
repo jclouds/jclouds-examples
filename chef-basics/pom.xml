@@ -22,49 +22,39 @@ under the License.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jclouds.examples</groupId>
+  <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>chef-basics</artifactId>
-  <version>1.6.0-SNAPSHOT</version>
+  <version>1.7.0</version>
   <name>chef-basics</name>
   <description>jclouds chef example that adds a node to a group, then installs an Apache web server on all nodes</description>
   
   <properties>
-    <jclouds.version>1.6.0</jclouds.version>    
+    <jclouds.version>1.7.0</jclouds.version>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>jclouds-snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-compute</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.api</groupId>
+      <groupId>org.apache.jclouds.api</groupId>
       <artifactId>chef</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds</groupId>
+      <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-allcompute</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.labs</groupId>
+      <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>joyentcloud</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.labs</groupId>
+      <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>virtualbox</artifactId>
       <version>${jclouds.version}</version>
     </dependency>      
@@ -73,7 +63,7 @@ under the License.
          like below -->
     <!--
         <dependency>
-        <groupId>org.jclouds.provider</groupId>
+        <groupId>org.apache.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
         <version>${jclouds.version}</version>
         </dependency>
@@ -82,7 +72,7 @@ under the License.
          the abiquo maven repository to get its dependencies.
          See jclouds/labs/abiquo/pom.xml
          <dependency>
-         <groupId>org.jclouds.labs</groupId>
+         <groupId>org.apache.jclouds.labs</groupId>
          <artifactId>abiquo</artifactId>
          <version>${jclouds.version}</version>
          </dependency>
@@ -94,7 +84,7 @@ under the License.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-bouncycastle</artifactId>
       <version>${jclouds.version}</version>
       <exclusions>
@@ -110,12 +100,12 @@ under the License.
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-sshj</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jclouds.driver</groupId>
+      <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-enterprise</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
@@ -142,7 +132,7 @@ under the License.
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.jclouds.examples.chef.basics.MainApp</mainClass>
+              <mainClass>org.apache.jclouds.examples.chef.basics.MainApp</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -156,7 +146,7 @@ under the License.
           </descriptors>
           <archive>
             <manifest>
-              <mainClass>org.jclouds.examples.chef.basics.MainApp</mainClass>
+              <mainClass>org.apache.jclouds.examples.chef.basics.MainApp</mainClass>
             </manifest>
             <manifestEntries>
               <Class-Path>bcprov-jdk16.jar</Class-Path>

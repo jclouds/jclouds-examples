@@ -125,10 +125,5 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.25</version>
     </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    <version>1.9</version>
-</dependency>
   </dependencies>
 </project>

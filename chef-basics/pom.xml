@@ -24,12 +24,12 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>chef-basics</artifactId>
-  <version>1.7.0</version>
+  <version>1.7.2-SNAPSHOT</version>
   <name>chef-basics</name>
   <description>jclouds chef example that adds a node to a group, then installs an Apache web server on all nodes</description>
   
   <properties>
-    <jclouds.version>1.7.0</jclouds.version>
+    <jclouds.version>1.7.1</jclouds.version>
   </properties>
 
   <dependencies>

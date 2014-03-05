@@ -29,7 +29,7 @@ under the License.
   <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
   <properties>
-    <jclouds.version>1.6.1-incubating</jclouds.version>
+    <jclouds.version>1.7.1</jclouds.version>
   </properties>
 
   <dependencies>

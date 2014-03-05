@@ -22,11 +22,11 @@
   <parent>
     <groupId>org.apache.jclouds</groupId>
     <artifactId>jclouds-project</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.7.1</version>
   </parent>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>jclouds-examples</artifactId>
-  <version>1.7.0-SNAPSHOT</version>
+  <version>1.7.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>jclouds examples</name>
 
@@ -38,7 +38,7 @@
   </scm>
 
   <properties>
-    <jclouds.version>1.7.0-SNAPSHOT</jclouds.version>
+    <jclouds.version>1.7.1</jclouds.version>
   </properties>
 
   <repositories>
@@ -64,6 +64,24 @@
     </repository>
   </repositories>
 
+  <modules>
+    <module>blobstore-basics</module>
+    <module>blobstore-largeblob</module>
+    <module>chef-basics</module>
+    <module>compute-basics</module>
+    <module>rackspace</module>
+<!--
+    TODO: These modules have bit-rotted:
+    <module>blobstore-hdfs</module>
+    <module>blobstore-karaf-shell</module>
+    <module>camel-notifications</module>
+    <module>cloudwatch-basics</module>
+    <module>ec2-computeservice-spot</module>
+    <module>ec2-createlamp</module>
+    <module>ec2-windows</module>
+    <module>minecraft-compute</module>
+-->
+  </modules>
   <build>
     <plugins>
       <plugin>

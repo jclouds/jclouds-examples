@@ -35,6 +35,7 @@ import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -68,6 +69,11 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Module;
 
+import org.jclouds.compute.domain.Image;
+import org.jclouds.compute.domain.ComputeMetadata;
+import org.jclouds.compute.domain.OsFamily;
+import org.jclouds.util.Strings2;
+
 /**
  * Demonstrates the use of {@link ComputeService}.
  * <p/>
@@ -81,7 +87,7 @@ import com.google.inject.Module;
 public class MainApp {
 
    public static enum Action {
-      ADD, RUN, EXEC, DESTROY;
+      ADD, RUN, EXEC, DESTROY, LISTIMAGES, LISTNODES;
    }
    
    public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(ComputeServiceContext.class),
@@ -107,7 +113,10 @@ public class MainApp {
       if (action == Action.EXEC && args.length < PARAMETERS + 1)
          throw new IllegalArgumentException("please quote the command to exec as the last parameter");
       String command = (action == Action.EXEC) ? args[5] : "echo hello";
-      
+
+      if (provider.equalsIgnoreCase("google-compute-engine"))
+         credential = getPrivateKeyFromFile(credential); // load the pem file as string
+
       if (action == Action.RUN && args.length < PARAMETERS + 1)
          throw new IllegalArgumentException("please pass the local file to run as the last parameter");
       File file = null;
@@ -135,6 +144,9 @@ public class MainApp {
             // Default template chooses the smallest size on an operating system
             // that tested to work with java, which tends to be Ubuntu or CentOS
             TemplateBuilder templateBuilder = compute.templateBuilder();
+
+            if(provider.equalsIgnoreCase("google-compute-engine"))
+               templateBuilder.osFamily(OsFamily.CENTOS);
             
             // If you want to up the ram and leave everything default, you can 
             // just tweak minRam
@@ -202,6 +214,20 @@ public class MainApp {
                   Predicates.<NodeMetadata> and(not(TERMINATED), inGroup(groupName)));
             System.out.printf("<< destroyed nodes %s%n", destroyed);
             break;
+         case LISTIMAGES:
+            Set<? extends Image> imageList = compute.listImages();
+            System.out.printf(">> No of images %d\n", imageList.size());
+            for (Image img : imageList) {
+               System.out.println(">>>>  " + img);
+            }
+            break;
+         case LISTNODES:
+            Set<? extends ComputeMetadata> nodeList = compute.listNodes();
+            System.out.printf(">> No of nodes/instances %d\n", nodeList.size());
+            for (ComputeMetadata nodeentry : nodeList) {
+               System.out.println(">>>>  " + nodeentry);
+            }
+            break;
          }
       } catch (RunNodesException e) {
          System.err.println("error adding node to group " + groupName + ": " + e.getMessage());
@@ -216,6 +242,16 @@ public class MainApp {
          compute.getContext().close();
          System.exit(error);
       }
+   }
+
+   private static String getPrivateKeyFromFile(String filename) {
+      try {
+         return Strings2.toStringAndClose(new FileInputStream(filename));
+      } catch (java.io.IOException e) {
+         System.err.println("Exception : " + e);
+         e.printStackTrace();
+      }
+      return null;
    }
 
    static int error = 0;

@@ -16,8 +16,11 @@ Invoke the jar, passing the name of the cloud provider you with to access (ex. a
 The 4th parameter represents the **action** you want to run. Supported actions are:
 
 - add
-- exec 
+- exec
+- run
 - destroy
+- listnodes
+- listimages
 
 Noting that **destroy** will destroy all nodes in the group. If the 4th parameter is exec, you must quote a command to execute across the group of nodes.
 
@@ -29,9 +32,22 @@ To execute a command to all nodes of the group *mygroup*:
 
     java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup exec "echo hello"
 
+To run a script file in all nodes of the group *mygroup*
+
+    java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup run /path/to/script-file
+
 To destroy all nodes of the group *mygroup*:
 
     java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup destroy
+
+To list the nodes:  *groupname* parameter is not used
+
+    java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup listnodes
+
+To list the images:  *groupname* parameter is not used
+
+    java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup listimages
+
 
 ### Amazon EC2
 
@@ -72,6 +88,14 @@ To destroy all nodes of the group *mygroup*:
          -Dopenstack-nova-ec2.endpoint=https://novahost/services/Cloud \
          -jar target/compute-basics-jar-with-dependencies.jar \
          openstack-nova-ec2 tenantId:accesskey secretkey mygroup add
+
+### Google Cloud Engine provider
+
+    java -jar target/compute-basics-jar-with-dependencies.jar \
+         google-compute-engine \
+         your-project-service-account-email@developer.gserviceaccount.com \
+         /path/to/private-key.pem \
+         mygroup add
 
 ## License
 

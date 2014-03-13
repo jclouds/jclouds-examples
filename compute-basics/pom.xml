@@ -24,6 +24,9 @@ under the License.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jclouds.examples</groupId>
   <artifactId>compute-basics</artifactId>
+  <properties>
+    <jclouds.version>1.7.1</jclouds.version>
+  </properties>
   <version>1.7.2-SNAPSHOT</version>
   <name>compute-basics</name>
   <description>jclouds compute example that adds a node to a group, then executes "echo hello" on all nodes</description>
@@ -32,23 +35,28 @@ under the License.
     <dependency>
       <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-compute</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-allcompute</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>joyentcloud</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>virtualbox</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>      
+    <dependency>
+      <groupId>org.apache.jclouds.labs</groupId>
+      <artifactId>google-compute-engine</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
     <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
          like below -->
@@ -56,7 +64,7 @@ under the License.
         <dependency>
         <groupId>org.apache.jclouds.provider</groupId>
         <artifactId>gogrid</artifactId>
-        <version>1.7.1</version>
+        <version>${jclouds.version}</version>
         </dependency>
     -->
     <dependency>
@@ -68,7 +76,7 @@ under the License.
     <dependency>
       <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-bouncycastle</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
       <exclusions>
         <!-- bouncy castle is a provider, so
              it must be signed and used as-is.
@@ -84,12 +92,12 @@ under the License.
     <dependency>
       <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-sshj</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-enterprise</artifactId>
-      <version>1.7.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>

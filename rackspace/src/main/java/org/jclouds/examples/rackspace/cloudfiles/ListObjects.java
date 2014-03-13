@@ -18,31 +18,29 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.domain.ObjectInfo;
-import org.jclouds.openstack.swift.options.ListContainerOptions;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Set;
 
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import org.jclouds.ContextBuilder;
+import org.jclouds.cloudfiles.CloudFilesClient;
+import org.jclouds.openstack.swift.CommonSwiftClient;
+import org.jclouds.openstack.swift.domain.ObjectInfo;
+import org.jclouds.openstack.swift.options.ListContainerOptions;
+
+import com.google.common.io.Closeables;
 
 /**
  * List objects in the Cloud Files container from the CreateContainer example.
  *  
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class ListObjects implements Closeable {
-   private final BlobStore blobStore;
-   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final CommonSwiftClient swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -66,17 +64,15 @@ public class ListObjects implements Closeable {
    }
 
    public ListObjects(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+      swift = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      swift = context.unwrap();
+            .buildApi(CloudFilesClient.class);
    }
 
    private void listObjects() {
       System.out.format("List Objects%n");
 
-      Set<ObjectInfo> objects = swift.getApi().listObjects(CONTAINER);
+      Set<ObjectInfo> objects = swift.listObjects(CONTAINER);
 
       for (ObjectInfo objectInfo: objects) {
          System.out.format("  %s%n", objectInfo);
@@ -87,7 +83,7 @@ public class ListObjects implements Closeable {
       System.out.format("List Objects With Filtering%n");
 
       ListContainerOptions filter = ListContainerOptions.Builder.withPrefix("createObjectFromString");
-      Set<ObjectInfo> objects = swift.getApi().listObjects(CONTAINER, filter);
+      Set<ObjectInfo> objects = swift.listObjects(CONTAINER, filter);
 
       for (ObjectInfo objectInfo: objects) {
          System.out.format("  %s%n", objectInfo);
@@ -98,6 +94,6 @@ public class ListObjects implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(blobStore.getContext(), true);
+      Closeables.close(swift, true);
    }
 }

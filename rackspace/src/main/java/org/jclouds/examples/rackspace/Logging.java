@@ -18,20 +18,17 @@
  */
 package org.jclouds.examples.rackspace;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Closeables;
-import com.google.inject.Module;
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.rest.RestContext;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Set;
+
+import org.jclouds.ContextBuilder;
+import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
+import org.jclouds.openstack.nova.v2_0.NovaApi;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
+import com.google.inject.Module;
 
 /**
  * This example shows you how to log what jclouds is doing. This is extremely useful for debugging, submitting bug
@@ -47,10 +44,10 @@ import java.util.Set;
  * and everything received in the response (marked by "<<").
  * 
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class Logging implements Closeable {
-   private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
 
     /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -80,17 +77,15 @@ public class Logging implements Closeable {
       // This module is responsible for enabling logging
       Iterable<Module> modules = ImmutableSet.<Module> of(new SLF4JLoggingModule());
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      nova = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .modules(modules) // don't forget to add the modules to your context!
-            .buildView(ComputeServiceContext.class);
-      computeService = context.getComputeService();
-      nova = context.unwrap();
+            .buildApi(NovaApi.class); 
    }
 
    private void getConfiguredZones() {
        // Calling getConfiguredZones() talks to the cloud which gets logged
-       Set<String> zones = nova.getApi().getConfiguredZones();
+       Set<String> zones = nova.getConfiguredZones();
 
        System.out.format("Zones%n");
 
@@ -103,6 +98,6 @@ public class Logging implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(computeService.getContext(), true);
+      Closeables.close(nova, true);
    }
 }

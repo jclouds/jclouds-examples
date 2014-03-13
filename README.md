@@ -69,7 +69,7 @@ This repository contains various examples of using
   </tbody>
 </table>
 
-![jclouds logo](http://jclouds.apache.org/style/fullsizejcloudslogo.jpg)
+![jclouds logo](http://jclouds.apache.org/img/fullsizelogo.jpg)
 
 ## License
 

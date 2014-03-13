@@ -18,23 +18,21 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.domain.ContainerMetadata;
-import org.jclouds.openstack.swift.options.CreateContainerOptions;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import org.jclouds.ContextBuilder;
+import org.jclouds.cloudfiles.CloudFilesClient;
+import org.jclouds.openstack.swift.CommonSwiftClient;
+import org.jclouds.openstack.swift.domain.ContainerMetadata;
+import org.jclouds.openstack.swift.options.CreateContainerOptions;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Closeables;
 
 /**
  * Create an Cloud Files container with Cross Origin Resource Sharing (CORS) allowed. CORS container headers allow
@@ -43,10 +41,10 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
  * allowed sites list, and whether or not metadata headers can be passed with the objects.
  *  
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class CrossOriginResourceSharingContainer implements Closeable {
-   private final BlobStore blobStore;
-   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final CommonSwiftClient swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -70,11 +68,9 @@ public class CrossOriginResourceSharingContainer implements Closeable {
    }
 
    public CrossOriginResourceSharingContainer(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+      swift = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      swift = context.unwrap();
+            .buildApi(CloudFilesClient.class);
    }
 
    /**
@@ -94,10 +90,10 @@ public class CrossOriginResourceSharingContainer implements Closeable {
             "Access-Control-Allow-Headers", "X-My-Header");
       CreateContainerOptions options = CreateContainerOptions.Builder.withMetadata(corsMetadata);
 
-      swift.getApi().createContainer(CONTAINER, options);
+      swift.createContainer(CONTAINER, options);
       System.out.format("  %s%n", CONTAINER);
       
-      ContainerMetadata containerMetadata = swift.getApi().getContainerMetadata(CONTAINER);
+      ContainerMetadata containerMetadata = swift.getContainerMetadata(CONTAINER);
       System.out.format("    %s%n", containerMetadata.getMetadata());
    }
 
@@ -112,10 +108,10 @@ public class CrossOriginResourceSharingContainer implements Closeable {
             "Access-Control-Max-Age", "60",
             "Access-Control-Allow-Headers", "X-My-Other-Header");
 
-      swift.getApi().setContainerMetadata(CONTAINER, corsMetadata);
+      swift.setContainerMetadata(CONTAINER, corsMetadata);
       System.out.format("  %s%n", CONTAINER);
       
-      ContainerMetadata containerMetadata = swift.getApi().getContainerMetadata(CONTAINER);
+      ContainerMetadata containerMetadata = swift.getContainerMetadata(CONTAINER);
       System.out.format("    %s%n", containerMetadata.getMetadata());
    }   
 
@@ -123,6 +119,6 @@ public class CrossOriginResourceSharingContainer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(blobStore.getContext(), true);
+      Closeables.close(swift, true);
    }
 }

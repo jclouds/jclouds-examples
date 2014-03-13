@@ -18,22 +18,26 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.io.Closeables;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+
+import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
+import org.jclouds.cloudfiles.CloudFilesClient;
 import org.jclouds.openstack.swift.CommonSwiftClient;
 import org.jclouds.openstack.swift.domain.SwiftObject;
-import org.jclouds.rest.RestContext;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import com.google.common.io.Closeables;
 
 /**
  * Upload objects in the Cloud Files container from the CreateContainer example.
@@ -42,7 +46,7 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
  */
 public class UploadObjects implements Closeable {
    private final BlobStore blobStore;
-   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final CommonSwiftClient swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -67,11 +71,10 @@ public class UploadObjects implements Closeable {
    }
 
    public UploadObjects(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
-            .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      swift = context.unwrap();
+      ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
+                                  .credentials(username, apiKey);
+      blobStore = builder.buildView(BlobStoreContext.class).getBlobStore();
+      swift = builder.buildApi(CloudFilesClient.class);
    }
 
    /**
@@ -90,11 +93,11 @@ public class UploadObjects implements Closeable {
       out.write("uploadObjectFromFile");
       out.close();
 
-      SwiftObject object = swift.getApi().newSwiftObject();
+      SwiftObject object = swift.newSwiftObject();
       object.getInfo().setName(filename + suffix);
       object.setPayload(tempFile);
 
-      swift.getApi().putObject(CONTAINER, object);
+      swift.putObject(CONTAINER, object);
 
       System.out.format("  %s%s%n", filename, suffix);
    }
@@ -107,11 +110,11 @@ public class UploadObjects implements Closeable {
 
       String filename = "uploadObjectFromString.txt";
 
-      SwiftObject object = swift.getApi().newSwiftObject();
+      SwiftObject object = swift.newSwiftObject();
       object.getInfo().setName(filename);
       object.setPayload("uploadObjectFromString");
 
-      swift.getApi().putObject(CONTAINER, object);
+      swift.putObject(CONTAINER, object);
 
       System.out.format("  %s%n", filename);
    }
@@ -142,5 +145,6 @@ public class UploadObjects implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(blobStore.getContext(), true);
+      Closeables.close(swift, true);
    }
 }

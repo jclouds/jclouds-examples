@@ -18,33 +18,30 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.openstack.nova.v2_0.domain.Server;
-import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
-import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
-import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
 
 import java.io.Closeable;
 import java.io.IOException;
 
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.nova.v2_0.NovaApi;
+import org.jclouds.openstack.nova.v2_0.domain.Server;
+import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
+import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
+import org.jclouds.openstack.nova.v2_0.features.ServerApi;
+
+import com.google.common.collect.FluentIterable;
+import com.google.common.io.Closeables;
 
 /**
  * This example lists the volume attachments of a server.
  * 
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class ListVolumeAttachments implements Closeable {
-   private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
    private final ServerApi serverApi;
    private final VolumeAttachmentApi volumeAttachmentApi;
 
@@ -75,13 +72,12 @@ public class ListVolumeAttachments implements Closeable {
       // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudservers-uk"
       String provider = System.getProperty("provider.cs", "rackspace-cloudservers-us");
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      nova = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
-            .buildView(ComputeServiceContext.class);
-      computeService = context.getComputeService();
-      nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+            .buildApi(NovaApi.class);
+
+      serverApi = nova.getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getVolumeAttachmentExtensionForZone(ZONE).get();
    }
 
    /**
@@ -111,6 +107,6 @@ public class ListVolumeAttachments implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(computeService.getContext(), true);
+      Closeables.close(nova, true);
    }
 }

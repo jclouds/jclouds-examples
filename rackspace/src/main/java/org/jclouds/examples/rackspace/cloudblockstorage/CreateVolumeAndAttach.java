@@ -18,10 +18,22 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Closeables;
-import com.google.inject.Module;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.DEVICE;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PASSWORD;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.POLL_PERIOD_TWENTY_SECONDS;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import static org.jclouds.scriptbuilder.domain.Statements.exec;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -36,25 +48,17 @@ import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.options.CreateVolumeOptions;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
-import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
-import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
-import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
-import static org.jclouds.scriptbuilder.domain.Statements.exec;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
+import com.google.inject.Module;
 
 /**
  * This example creates a volume, attaches it to a server, putting a filesystem on it, and mounts it for use.
@@ -63,9 +67,8 @@ import static org.jclouds.scriptbuilder.domain.Statements.exec;
  */
 public class CreateVolumeAndAttach implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
    private final VolumeAttachmentApi volumeAttachmentApi;
-
    private final CinderApi cinderApi;
    private final VolumeApi volumeApi;
 
@@ -104,14 +107,14 @@ public class CreateVolumeAndAttach implements Closeable {
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      ContextBuilder builder = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .modules(modules)
-            .overrides(overrides)
-            .buildView(ComputeServiceContext.class);
-      computeService = context.getComputeService();
-      nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+            .overrides(overrides);
+
+      computeService = builder.buildView(ComputeServiceContext.class).getComputeService();
+      nova = builder.buildApi(NovaApi.class);
+      volumeAttachmentApi = nova.getVolumeAttachmentExtensionForZone(ZONE).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
@@ -125,7 +128,7 @@ public class CreateVolumeAndAttach implements Closeable {
       ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .osDescriptionMatches(".*CentOS 6.4.*")
+            .osDescriptionMatches(".*CentOS 6.*")
             .hardwareId(zoneAndId.slashEncode())
             .build();
 
@@ -134,7 +137,7 @@ public class CreateVolumeAndAttach implements Closeable {
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
       // We set the password to something we know so we can login in the DetachVolume example
-      nova.getApi().getServerApiForZone(ZONE)
+      nova.getServerApiForZone(ZONE)
             .changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
 
       System.out.format("  %s%n", nodeMetadata);
@@ -212,6 +215,7 @@ public class CreateVolumeAndAttach implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(cinderApi, true);
+      Closeables.close(nova, true);
       Closeables.close(computeService.getContext(), true);
    }
 }

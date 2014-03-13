@@ -18,10 +18,17 @@
  */
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.io.Closeables;
-import com.google.inject.Module;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PASSWORD;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ROOT;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import static org.jclouds.scriptbuilder.domain.Statements.exec;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
@@ -32,23 +39,19 @@ import org.jclouds.openstack.cinder.v1.domain.Volume;
 import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
-import static org.jclouds.scriptbuilder.domain.Statements.exec;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
+import com.google.inject.Module;
 
 /**
  * This example detaches the volume created in the CreateVolumeAndAttach example.
@@ -57,7 +60,7 @@ import static org.jclouds.scriptbuilder.domain.Statements.exec;
  */
 public class DetachVolume implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
    private final ServerApi serverApi;
    private final VolumeAttachmentApi volumeAttachmentApi;
 
@@ -94,14 +97,13 @@ public class DetachVolume implements Closeable {
 
       Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
 
-      ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+      ContextBuilder builder = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
-            .modules(modules)
-            .buildView(ComputeServiceContext.class);
-      computeService = context.getComputeService();
-      nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+            .modules(modules);
+      computeService = builder.buildView(ComputeServiceContext.class).getComputeService();
+      nova = builder.buildApi(NovaApi.class);
+      serverApi = nova.getServerApiForZone(ZONE);
+      volumeAttachmentApi = nova.getVolumeAttachmentExtensionForZone(ZONE).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
@@ -175,6 +177,7 @@ public class DetachVolume implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(cinderApi, true);
+      Closeables.close(nova, true);
       Closeables.close(computeService.getContext(), true);
    }
 }

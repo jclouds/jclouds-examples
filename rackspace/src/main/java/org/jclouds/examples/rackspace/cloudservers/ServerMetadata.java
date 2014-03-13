@@ -18,34 +18,31 @@
  */
 package org.jclouds.examples.rackspace.cloudservers;
 
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.openstack.nova.v2_0.domain.Server;
-import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.NAME;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.jclouds.examples.rackspace.cloudservers.Constants.NAME;
-import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
+import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.nova.v2_0.NovaApi;
+import org.jclouds.openstack.nova.v2_0.domain.Server;
+import org.jclouds.openstack.nova.v2_0.features.ServerApi;
+
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Closeables;
 
 /**
  * This example sets, gets, updates, and deletes metadata from a server.
  *  
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class ServerMetadata implements Closeable {
-   private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
    private final ServerApi serverApi;
 
    /**
@@ -73,12 +70,10 @@ public class ServerMetadata implements Closeable {
    }
 
    public ServerMetadata(String username, String apiKey) {
-      ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
+      nova = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildView(ComputeServiceContext.class);
-      computeService = context.getComputeService();
-      nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
+            .buildApi(NovaApi.class);
+      serverApi = nova.getServerApiForZone(ZONE);
    }
 
    /**
@@ -135,6 +130,6 @@ public class ServerMetadata implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(computeService.getContext(), true);
+      Closeables.close(nova, true);
    }
 }

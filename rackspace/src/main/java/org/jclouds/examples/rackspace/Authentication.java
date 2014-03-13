@@ -18,19 +18,16 @@
  */
 package org.jclouds.examples.rackspace;
 
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.openstack.keystone.v2_0.config.CredentialTypes;
-import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
-import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
-import org.jclouds.rest.RestContext;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Properties;
+
+import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.keystone.v2_0.config.CredentialTypes;
+import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
+import org.jclouds.openstack.nova.v2_0.NovaApi;
+
+import com.google.common.io.Closeables;
 
 /**
  * To authenticate using jclouds you need to provide your credentials to a Context as in the init() method below. 
@@ -45,10 +42,10 @@ import java.util.Properties;
  * authentication via API key, which is used in the rest of the examples in this package.
  * 
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class Authentication implements Closeable {
-   private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi nova;
 
     /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -86,12 +83,10 @@ public class Authentication implements Closeable {
            overrides.put(KeystoneProperties.CREDENTIAL_TYPE, CredentialTypes.PASSWORD_CREDENTIALS);
        }
 
-       ComputeServiceContext context = ContextBuilder.newBuilder(provider)
+       nova = ContextBuilder.newBuilder(provider)
                .credentials(username, credential)
                .overrides(overrides)
-               .buildView(ComputeServiceContext.class);
-       computeService = context.getComputeService();
-       nova = context.unwrap();
+               .buildApi(NovaApi.class);
    }
 
    /**
@@ -101,7 +96,7 @@ public class Authentication implements Closeable {
    private void authenticateOnCall() {
       System.out.format("Authenticate On Call%n");
 
-      nova.getApi().getConfiguredZones();
+      nova.getConfiguredZones();
 
       System.out.format("  Authenticated%n");
    }
@@ -110,6 +105,6 @@ public class Authentication implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(computeService.getContext(), true);
+      Closeables.close(nova, true);
    }
 }

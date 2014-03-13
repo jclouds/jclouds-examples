@@ -18,30 +18,27 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.openstack.swift.CommonSwiftAsyncClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.options.CreateContainerOptions;
-import org.jclouds.rest.RestContext;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 import java.io.Closeable;
 import java.io.IOException;
 
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import org.jclouds.ContextBuilder;
+import org.jclouds.openstack.swift.CommonSwiftClient;
+import org.jclouds.openstack.swift.options.CreateContainerOptions;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Closeables;
 
 /**
  * Create a Cloud Files container with some metadata associated with it.
  *  
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class CreateContainer implements Closeable {
-   private final BlobStore blobStore;
-   private final RestContext<CommonSwiftClient, CommonSwiftAsyncClient> swift;
+   private final CommonSwiftClient swift;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
@@ -64,11 +61,9 @@ public class CreateContainer implements Closeable {
    }
 
    public CreateContainer(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+      swift = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      swift = context.unwrap();
+            .buildApi(CommonSwiftClient.class);
    }
 
    private void createContainer() {
@@ -77,7 +72,7 @@ public class CreateContainer implements Closeable {
       CreateContainerOptions options = CreateContainerOptions.Builder
             .withMetadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
 
-      swift.getApi().createContainer(CONTAINER, options);
+      swift.createContainer(CONTAINER, options);
 
       System.out.format("  %s%n", CONTAINER);
    }
@@ -86,6 +81,6 @@ public class CreateContainer implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(blobStore.getContext(), true);
+      Closeables.close(swift, true);
    }
 }

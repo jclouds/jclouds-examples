@@ -18,15 +18,9 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
-import com.google.common.util.concurrent.*;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.cloudfiles.CloudFilesApiMetadata;
-import org.jclouds.cloudfiles.CloudFilesClient;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 
 import java.io.Closeable;
 import java.io.File;
@@ -36,9 +30,19 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.concurrent.Executors.newFixedThreadPool;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.cloudfiles.CloudFilesClient;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * Upload an entire directory and all of its sub-directories to a Cloud Files container. The local directory hierarchy
@@ -77,12 +81,10 @@ public class UploadDirectoryToCDN implements Closeable {
    }
 
    public UploadDirectoryToCDN(String username, String apiKey) {
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
-            .credentials(username, apiKey)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
-      // can use context.unwrapApi(CloudFilesClient.class) in jclouds 1.7
-      cloudFilesClient = context.unwrap(CloudFilesApiMetadata.CONTEXT_TOKEN).getApi();
+      ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
+            .credentials(username, apiKey);
+      blobStore = builder.buildView(BlobStoreContext.class).getBlobStore();
+      cloudFilesClient = builder.buildApi(CloudFilesClient.class);
    }
 
    /**
@@ -174,6 +176,7 @@ public class UploadDirectoryToCDN implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(blobStore.getContext(), true);
+      Closeables.close(cloudFilesClient, true);
    }
 
    /**

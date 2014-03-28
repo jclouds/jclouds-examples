@@ -1,6 +1,7 @@
 # blobstore-karaf-shell
 
-This is a simple examples that demonstrates the use of blob store from within Apache Karaf Runtime.
+This is a simple examples that demonstrates the using a [BlobStore](http://jclouds.apache.org/start/blobstore/) provider from within [Apache Karaf](http://karaf.apache.org/) Runtime.
+
 This example adds two osgi shell commands, that read and write to a blobstore. The context of the blobstore can be configured via OSGi Configuration Admin, which allows the switching blobstore contexts (providers, keys etc) "on the fly". 
 ## Build
 
@@ -31,6 +32,6 @@ JCloudsRocks!
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 

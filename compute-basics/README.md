@@ -1,6 +1,6 @@
 # compute-basics
 
-This is a simple example command line client that creates a node in a [ComputeService](http://www.jclouds.org/documentation/userguide/compute/) provider and executes `echo hello` on everything in its group.
+This is a simple example command line client that creates a node in a [ComputeService](http://jclouds.apache.org/start/compute/) provider and executes `echo hello` on everything in its group.
 
 ## Build
 
@@ -99,6 +99,6 @@ To list the images:  *groupname* parameter is not used
 
 ## License
 
-Copyright (C) 2009-2012 jclouds, Inc.
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 

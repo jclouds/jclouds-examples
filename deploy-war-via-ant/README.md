@@ -50,5 +50,6 @@ Note that you should run 'ant destroy' to cleanup cloud nodes after you are fini
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2014 The Apache Software Foundation
 
+Licensed under the Apache License, Version 2.0

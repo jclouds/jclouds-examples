@@ -24,6 +24,6 @@ java -jar target/ec2-createlamp-jar-with-dependencies.jar accesskey secretkey de
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 

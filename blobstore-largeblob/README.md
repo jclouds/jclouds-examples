@@ -1,6 +1,6 @@
 # blobstore-largeblob
 
-This is a simple example command line client that creates a container in a [BlobStore](http://code.google.com/p/jclouds/wiki/BlobStore) provider and uploads a large file
+This is a simple example command line client that creates a container in a [BlobStore](http://jclouds.apache.org/start/blobstore/) provider and uploads a large file.
 
 ## Build
 
@@ -20,6 +20,6 @@ The inputfile size has to be at least 32Mbytes size to be used multipart upload.
 
 ## License
 
-Copyright (C) 2009-2012 jclouds, Inc.
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0

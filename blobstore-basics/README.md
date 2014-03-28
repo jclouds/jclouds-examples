@@ -1,6 +1,6 @@
 # blobstore-basics
 
-This is a simple example command line client that creates a container in a [BlobStore](http://code.google.com/p/jclouds/wiki/BlobStore) provider and lists the size of all the other containers.
+This is a simple example command line client that creates a container in a [BlobStore](http://jclouds.apache.org/start/blobstore/) provider and lists the size of all the other containers.
 
 ## Build
 
@@ -21,6 +21,6 @@ java -jar target/blobstore-basics-jar-with-dependencies.jar cloudfiles-us userna
 
 ## License
 
-Copyright (C) 2009-2012 jclouds, Inc.
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 

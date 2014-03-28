@@ -30,6 +30,6 @@ The hdfs input file size has to be at least 32Mbytes size to be used multipart u
 
 ## License
 
-Copyright (C) 2011 Cloud Conscious, LLC. <info@cloudconscious.com>
+Copyright (C) 2009-2014 The Apache Software Foundation
 
-Licensed under the Apache License, Version 2.0 
+Licensed under the Apache License, Version 2.0

@@ -1,6 +1,6 @@
 # chef-basics
 
-This is a simple example command line client that creates a node in a [ComputeService](http://code.google.com/p/jclouds/wiki/ComputeGuide) provider and installs an Apache web server on everything in its group using Chef.
+This is a simple example command line client that creates a node in a [ComputeService](http://jclouds.apache.org/start/compute/) provider and installs an Apache web server on everything in its group using Chef.
 
 ## Build
 
@@ -53,6 +53,6 @@ java -Dopenstack-nova-ec2.image-id=nova/ami-00000009 -Dopenstack-nova-ec2.login-
 
 ## License
 
-Copyright (C) 2009-2012 jclouds, Inc.
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0 

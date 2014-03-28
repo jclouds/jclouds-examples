@@ -141,10 +141,6 @@
             <exclude>**/README.txt</exclude>
             <exclude>**/header.txt</exclude>
           </excludes>
-          <properties>
-            <year>2011</year>
-            <copyrightHolder>jclouds, Inc.</copyrightHolder>
-          </properties>
         </configuration>
       </plugin>
     </plugins>

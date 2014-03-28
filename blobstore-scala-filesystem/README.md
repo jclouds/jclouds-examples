@@ -1,6 +1,6 @@
 # blobstore-scala-filesystem
 
-This is a simple example command line client that creates a container and test blob in a filesystem [BlobStore](http://jclouds.incubator.apache.org/documentation/userguide/blobstore-guide/) using Scala. This example uses [scala-arm](https://github.com/jsuereth/scala-arm) to manage the [BlobStoreContext](http://javadocs.jclouds.cloudbees.net/org/jclouds/blobstore/BlobStoreContext.html)
+This is a simple example command line client that creates a container and test blob in a filesystem [BlobStore](http://jclouds.apache.org/start/blobstore/) using Scala. This example uses [scala-arm](https://github.com/jsuereth/scala-arm) to manage the [BlobStoreContext](http://javadocs.jclouds.cloudbees.net/org/jclouds/blobstore/BlobStoreContext.html)
 
 ## Build
 
@@ -18,5 +18,7 @@ run /home/blobstore mycontainer myblob
 ```
 
 ## License
+
+Copyright (C) 2009-2014 The Apache Software Foundation
 
 Licensed under the Apache License, Version 2.0

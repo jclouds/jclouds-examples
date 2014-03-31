@@ -133,15 +133,15 @@ Click Run and watch the Console for the output!
 
 ## Next Steps
 
-Some suggestions.
+Here are some suggestions on how to continue working with jclouds:
 
 1. Change the examples to do different things that you want to do.
 1. After running some examples, compare the output with what you see in the [Cloud Control Panel](https://mycloud.rackspace.com/).
-1. Browse the [documentation](http://www.jclouds.org/documentation/) and have a look at the [Javadoc](http://demobox.github.com/jclouds-maven-site/latest/apidocs).
-1. Return to the [Installation Guide](http://www.jclouds.org/documentation/userguide/installation-guide/) and have a look at the different ways to integrate jclouds with your project.
-1. Join the [jclouds mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds) or maybe even the [jclouds developer mailing list](https://groups.google.com/forum/?fromgroups#!forum/jclouds-dev).
+1. Browse the [JavaDocs](http://javadocs.jclouds.cloudbees.net/).
+1. Return to the [Installation Guide](http://jclouds.apache.org/start/install/) and have a look at the different ways to integrate jclouds with your project.
+1. Join the [user mailing list](http://www.mail-archive.com/user@jclouds.apache.org/) or [developer mailing list](http://www.mail-archive.com/dev@jclouds.apache.org/).
 
-Welcome to the jclouds [community](http://www.jclouds.org/documentation/community/)!
+Welcome to the jclouds [community](http://jclouds.apache.org/community/)!
 
 ## Support and Feedback
 

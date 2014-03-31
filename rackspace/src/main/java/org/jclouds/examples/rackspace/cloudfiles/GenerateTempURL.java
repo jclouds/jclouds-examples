@@ -19,8 +19,10 @@
 package org.jclouds.examples.rackspace.cloudfiles;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
@@ -28,6 +30,8 @@ import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.http.HttpRequest;
 import org.jclouds.http.HttpResponse;
 import org.jclouds.http.HttpResponseException;
+import org.jclouds.io.Payload;
+import org.jclouds.io.Payloads;
 import org.jclouds.util.Strings2;
 
 import java.io.Closeable;
@@ -62,7 +66,7 @@ public class GenerateTempURL implements Closeable {
    private final BlobStoreContext blobStoreContext;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -92,8 +96,13 @@ public class GenerateTempURL implements Closeable {
    
    private void generatePutTempURL() throws IOException {
       System.out.format("Generate PUT Temp URL%n");
-
-      String payload = "This object will be public for 10 minutes.";
+      
+      // Create the Payload
+      String data = "This object will be public for 10 minutes.";
+      ByteSource source = ByteSource.wrap(data.getBytes());
+      Payload payload = Payloads.newByteSourcePayload(source);
+      
+      // Create the Blob
       Blob blob = blobStore.blobBuilder(FILENAME).payload(payload).contentType("text/plain").build();
       HttpRequest request = blobStoreContext.getSigner().signPutBlob(CONTAINER, blob, TEN_MINUTES);
       

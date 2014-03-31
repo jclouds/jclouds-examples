@@ -20,22 +20,23 @@ package org.jclouds.examples.rackspace.cloudfiles;
 
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Map;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.cloudfiles.CloudFilesClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.domain.ContainerMetadata;
-import org.jclouds.openstack.swift.options.CreateContainerOptions;
+import org.jclouds.openstack.swift.v1.domain.Container;
+import org.jclouds.openstack.swift.v1.features.ContainerApi;
+import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Closeables;
 
 /**
- * Create an Cloud Files container with Cross Origin Resource Sharing (CORS) allowed. CORS container headers allow
+ * Create a Cloud Files container with Cross Origin Resource Sharing (CORS) allowed. CORS container headers allow
  * users to upload files from one website--or origin--to your Cloud Files account. When you set the CORS headers on 
  * your container, you tell Cloud Files which sites may post to your account, how often your container checks its 
  * allowed sites list, and whether or not metadata headers can be passed with the objects.
@@ -44,10 +45,11 @@ import com.google.common.io.Closeables;
  * @author Jeremy Daggett
  */
 public class CrossOriginResourceSharingContainer implements Closeable {
-   private final CommonSwiftClient swift;
+   private final CloudFilesApi cloudFiles;
+   private final ContainerApi containerApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -68,9 +70,10 @@ public class CrossOriginResourceSharingContainer implements Closeable {
    }
 
    public CrossOriginResourceSharingContainer(String username, String apiKey) {
-      swift = ContextBuilder.newBuilder(PROVIDER)
+      cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildApi(CloudFilesClient.class);
+            .buildApi(CloudFilesApi.class);
+      containerApi = cloudFiles.containerApiInRegion(REGION);
    }
 
    /**
@@ -88,13 +91,13 @@ public class CrossOriginResourceSharingContainer implements Closeable {
             "Access-Control-Allow-Origin", "*",
             "Access-Control-Max-Age", "600",
             "Access-Control-Allow-Headers", "X-My-Header");
-      CreateContainerOptions options = CreateContainerOptions.Builder.withMetadata(corsMetadata);
+      CreateContainerOptions options = CreateContainerOptions.Builder.metadata(corsMetadata);
 
-      swift.createContainer(CONTAINER, options);
+      containerApi.createIfAbsent(CONTAINER, options);
       System.out.format("  %s%n", CONTAINER);
-      
-      ContainerMetadata containerMetadata = swift.getContainerMetadata(CONTAINER);
-      System.out.format("    %s%n", containerMetadata.getMetadata());
+
+      Container container = containerApi.get(CONTAINER);
+      System.out.format("    %s%n", container.getMetadata());
    }
 
    /**
@@ -108,17 +111,17 @@ public class CrossOriginResourceSharingContainer implements Closeable {
             "Access-Control-Max-Age", "60",
             "Access-Control-Allow-Headers", "X-My-Other-Header");
 
-      swift.setContainerMetadata(CONTAINER, corsMetadata);
+      containerApi.updateMetadata(CONTAINER, corsMetadata);
       System.out.format("  %s%n", CONTAINER);
-      
-      ContainerMetadata containerMetadata = swift.getContainerMetadata(CONTAINER);
-      System.out.format("    %s%n", containerMetadata.getMetadata());
+
+      Container container = containerApi.get(CONTAINER);
+      System.out.format("    %s%n", container.getMetadata());
    }   
 
    /**
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(swift, true);
+      Closeables.close(cloudFiles, true);
    }
 }

@@ -26,19 +26,22 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
+import org.jclouds.http.options.GetOptions;
+import org.jclouds.openstack.swift.v1.domain.SwiftObject;
+import org.jclouds.openstack.swift.v1.features.ObjectApi;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Closeables;
 
 /**
- * Create a Cloud Files container with some metadata associated with it.
+ * Gets an object from a container and displays the results.
+ * 
+ * NOTE: Run the {@link UploadObjects} example prior to running this example.
  *  
  * @author Everett Toews
  * @author Jeremy Daggett
  */
-public class CreateContainer implements Closeable {
+public class GetObject implements Closeable {
    private final CloudFilesApi cloudFiles;
 
    /**
@@ -48,34 +51,33 @@ public class CreateContainer implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      CreateContainer createContainer = new CreateContainer(args[0], args[1]);
+      GetObject getObject = new GetObject(args[0], args[1]);
 
       try {
-         createContainer.createContainer();
+         getObject.getObject();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
       finally {
-         createContainer.close();
+         getObject.close();
       }
    }
 
-   public CreateContainer(String username, String apiKey) {
+   public GetObject(String username, String apiKey) {
       cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudFilesApi.class);
+      
    }
 
-   private void createContainer() {
-      System.out.format("Create Container%n");
+   private void getObject() {
+      System.out.format("Get Object%n");
 
-      CreateContainerOptions options = CreateContainerOptions.Builder
-            .metadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
+      ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER);
+      SwiftObject object = objectApi.get("uploadObjectFromFile.txt", GetOptions.NONE);
 
-      cloudFiles.containerApiInRegion(REGION).createIfAbsent(CONTAINER, options);
-
-      System.out.format("  %s%n", CONTAINER);
+      System.out.format("  %s%n", object);
    }
 
    /**

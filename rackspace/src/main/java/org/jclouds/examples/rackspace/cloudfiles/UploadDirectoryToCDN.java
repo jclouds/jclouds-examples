@@ -21,6 +21,7 @@ package org.jclouds.examples.rackspace.cloudfiles;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.File;
@@ -34,10 +35,15 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.cloudfiles.CloudFilesClient;
+import org.jclouds.io.Payloads;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
+import org.jclouds.rackspace.cloudfiles.v1.features.CDNApi;
+import org.jclouds.rackspace.cloudfiles.v1.options.UpdateCDNContainerOptions;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -50,15 +56,16 @@ import com.google.common.util.concurrent.MoreExecutors;
  * way to upload content for a static website (http://j.mp/rax-static).     
  * 
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class UploadDirectoryToCDN implements Closeable {
    private static final int THREADS = Integer.getInteger("upload.threadpool.size", 10);
 
    private final BlobStore blobStore;
-   private final CloudFilesClient cloudFilesClient;
+   private final CloudFilesApi cloudFiles;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -84,7 +91,7 @@ public class UploadDirectoryToCDN implements Closeable {
       ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey);
       blobStore = builder.buildView(BlobStoreContext.class).getBlobStore();
-      cloudFilesClient = builder.buildApi(CloudFilesClient.class);
+      cloudFiles = blobStore.getContext().unwrapApi(CloudFilesApi.class);
    }
 
    /**
@@ -140,7 +147,7 @@ public class UploadDirectoryToCDN implements Closeable {
 
          ListenableFuture<List<BlobDetail>> future = Futures.successfulAsList(blobUploaderFutures);
          List<BlobDetail> uploadedBlobDetails = future.get(); // begin the upload
-         
+
          System.out.format("%n");
 
          for (int i = 0; i < uploadedBlobDetails.size(); i++) {
@@ -165,8 +172,10 @@ public class UploadDirectoryToCDN implements Closeable {
    private void enableCdnContainer(String container) {
       System.out.format("Enable CDN%n");
 
-      URI cdnURI = cloudFilesClient.enableCDN(container);
-      cloudFilesClient.setCDNStaticWebsiteIndex(container, "index.html");
+      CDNApi cdnApi = cloudFiles.cdnApiInRegion(REGION);
+      URI cdnURI = cdnApi.enable(container);
+
+      cdnApi.update(container, UpdateCDNContainerOptions.Builder.staticWebsiteIndexPage("index.html"));
 
       System.out.format("  Go to %s/%n", cdnURI);
    }
@@ -176,7 +185,6 @@ public class UploadDirectoryToCDN implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(blobStore.getContext(), true);
-      Closeables.close(cloudFilesClient, true);
    }
 
    /**
@@ -186,7 +194,7 @@ public class UploadDirectoryToCDN implements Closeable {
    private class BlobUploader implements Callable<BlobDetail> {
       private final String container;
       private final BlobDetail toBeUploadedBlobDetail;
-      
+
       protected BlobUploader(String container, BlobDetail toBeUploadedBlobDetail) {
          this.container = container;
          this.toBeUploadedBlobDetail = toBeUploadedBlobDetail;
@@ -194,14 +202,16 @@ public class UploadDirectoryToCDN implements Closeable {
 
       @Override
       public BlobDetail call() throws Exception {
+         ByteSource byteSource = Files.asByteSource(toBeUploadedBlobDetail.getLocalFile());
+
          Blob blob = blobStore.blobBuilder(toBeUploadedBlobDetail.getRemoteBlobName())
-               .payload(toBeUploadedBlobDetail.getLocalFile())
+               .payload(Payloads.newByteSourcePayload(byteSource))
                .contentType("") // allows Cloud Files to determine the content type
                .build();
          String eTag = blobStore.putBlob(container, blob);
          BlobDetail uploadedBlobDetail = new BlobDetail(
                toBeUploadedBlobDetail.getRemoteBlobName(), toBeUploadedBlobDetail.getLocalFile(), eTag);
-         
+
          return uploadedBlobDetail;
       }
    }

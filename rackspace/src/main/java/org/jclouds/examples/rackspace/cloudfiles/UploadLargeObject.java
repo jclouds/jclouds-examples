@@ -18,11 +18,10 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.File;
@@ -30,20 +29,28 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.io.Payload;
+import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
+
+import com.google.common.io.ByteSource;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 
 /**
  * Upload a large object in the Cloud Files container from the CreateContainer example.
- *  
+ * 
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class UploadLargeObject implements Closeable {
    private BlobStore blobStore;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -70,25 +77,32 @@ public class UploadLargeObject implements Closeable {
       // This property controls the size (in bytes) of parts being uploaded in parallel, the default is 33554432 bytes = 32 MB
       overrides.setProperty("jclouds.mpu.parts.size", "67108864"); // 64 MB
 
-      BlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+      RegionScopedBlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .overrides(overrides)
-            .buildView(BlobStoreContext.class);
-      blobStore = context.getBlobStore();
+            .buildView(RegionScopedBlobStoreContext.class);
+      blobStore = context.blobStoreInRegion(REGION);
    }
 
    /**
-    * Upload a large object from a File using the Swift API. 
+    * Upload a large object from a File using the BlobStore API.
+    * 
     * @throws ExecutionException 
     * @throws InterruptedException 
     */
    private void uploadLargeObjectFromFile(File largeFile) throws InterruptedException, ExecutionException {
       System.out.format("Upload Large Object From File%n");
 
+      ByteSource source = Files.asByteSource(largeFile);
+      // create the payload and set the content length
+      Payload payload = Payloads.newByteSourcePayload(source);
+      payload.getContentMetadata().setContentLength(largeFile.length());
+
       Blob blob = blobStore.blobBuilder(largeFile.getName())
-            .payload(largeFile)
+            .payload(payload)
             .build();
-      
+
+      // configure the blobstore to use multipart uploading of the file
       String eTag = blobStore.putBlob(CONTAINER, blob, multipart());
 
       System.out.format("  Uploaded %s eTag=%s", largeFile.getName(), eTag);

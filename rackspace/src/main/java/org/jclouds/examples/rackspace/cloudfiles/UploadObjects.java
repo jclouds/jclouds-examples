@@ -20,6 +20,7 @@ package org.jclouds.examples.rackspace.cloudfiles;
 
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
@@ -31,25 +32,29 @@ import java.util.Map;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.cloudfiles.CloudFilesClient;
-import org.jclouds.openstack.swift.CommonSwiftClient;
-import org.jclouds.openstack.swift.domain.SwiftObject;
+import org.jclouds.io.Payload;
+import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 
 /**
  * Upload objects in the Cloud Files container from the CreateContainer example.
  *  
  * @author Everett Toews
+ * @author Jeremy Daggett
  */
 public class UploadObjects implements Closeable {
    private final BlobStore blobStore;
-   private final CommonSwiftClient swift;
+   private final CloudFilesApi cloudFiles;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -73,8 +78,8 @@ public class UploadObjects implements Closeable {
    public UploadObjects(String username, String apiKey) {
       ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
                                   .credentials(username, apiKey);
-      blobStore = builder.buildView(BlobStoreContext.class).getBlobStore();
-      swift = builder.buildApi(CloudFilesClient.class);
+      blobStore = builder.buildView(RegionScopedBlobStoreContext.class).blobStoreInRegion(REGION);
+      cloudFiles = blobStore.getContext().unwrapApi(CloudFilesApi.class);
    }
 
    /**
@@ -93,11 +98,11 @@ public class UploadObjects implements Closeable {
       out.write("uploadObjectFromFile");
       out.close();
 
-      SwiftObject object = swift.newSwiftObject();
-      object.getInfo().setName(filename + suffix);
-      object.setPayload(tempFile);
-
-      swift.putObject(CONTAINER, object);
+      ByteSource byteSource = Files.asByteSource(tempFile);
+      Payload payload = Payloads.newByteSourcePayload(byteSource); 
+      
+      cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
+         .replace(filename + suffix, payload, ImmutableMap.<String, String> of());
 
       System.out.format("  %s%s%n", filename, suffix);
    }
@@ -110,11 +115,11 @@ public class UploadObjects implements Closeable {
 
       String filename = "uploadObjectFromString.txt";
 
-      SwiftObject object = swift.newSwiftObject();
-      object.getInfo().setName(filename);
-      object.setPayload("uploadObjectFromString");
+      ByteSource source = ByteSource.wrap("uploadObjectFromString".getBytes());
+      Payload payload = Payloads.newByteSourcePayload(source);
 
-      swift.putObject(CONTAINER, object);
+      cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
+         .replace(filename, payload, ImmutableMap.<String, String>of());
 
       System.out.format("  %s%n", filename);
    }
@@ -130,8 +135,10 @@ public class UploadObjects implements Closeable {
       Map<String, String> userMetadata = new HashMap<String, String>();
       userMetadata.put("key1", "value1");
 
+      ByteSource source = ByteSource.wrap("uploadObjectFromString".getBytes());
+
       Blob blob = blobStore.blobBuilder(filename)
-            .payload("uploadObjectFromStringWithMetadata")
+            .payload(Payloads.newByteSourcePayload(source))
             .userMetadata(userMetadata)
             .build();
 
@@ -145,6 +152,5 @@ public class UploadObjects implements Closeable {
     */
    public void close() throws IOException {
       Closeables.close(blobStore.getContext(), true);
-      Closeables.close(swift, true);
    }
 }

@@ -22,12 +22,12 @@ package org.jclouds.examples.rackspace.cloudfiles;
  * Constants used by the Rackspace Examples.
  * 
  * @author Everett Toews
- * @authot Jeremy Daggett
+ * @author Jeremy Daggett
  */
 public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)
-   // To use the Rackspace Cloud (UK) set the system property or default value to "cloudfiles-uk"
-   public static final String PROVIDER = System.getProperty("provider.cf", "cloudfiles-us");
+   // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudfiles-uk"
+   public static final String PROVIDER = System.getProperty("provider.cf", "rackspace-cloudfiles-us");
    public static final String REGION = System.getProperty("region", "IAD");
 
    public static final String CONTAINER_PUBLISH = "jclouds-example-publish";

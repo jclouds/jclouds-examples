@@ -18,24 +18,40 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import com.google.common.io.Closeables;
-import org.jclouds.ContextBuilder;
-import org.jclouds.cloudfiles.CloudFilesClient;
-import org.jclouds.openstack.swift.domain.SwiftObject;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER_PUBLISH;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.FILENAME;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.SUFFIX;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.*;
+import org.jclouds.ContextBuilder;
+import org.jclouds.io.Payload;
+import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.features.ObjectApi;
+import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
+import org.jclouds.rackspace.cloudfiles.v1.features.CDNApi;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
 
 /**
  * This example will create a container, put a file in it, and publish it on the internet!
  */
 public class CloudFilesPublish implements Closeable {
-   private final CloudFilesClient cloudFilesClient;
+   private final CloudFilesApi cloudFiles;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     * 
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -57,9 +73,9 @@ public class CloudFilesPublish implements Closeable {
    }
 
    public CloudFilesPublish(String username, String apiKey) {
-      cloudFilesClient = ContextBuilder.newBuilder(PROVIDER)
+      cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
-            .buildApi(CloudFilesClient.class);
+            .buildApi(CloudFilesApi.class);
    }
 
    /**
@@ -69,7 +85,7 @@ public class CloudFilesPublish implements Closeable {
    private void createContainer() {
       System.out.format("Create Container%n");
 
-      cloudFilesClient.createContainer(CONTAINER_PUBLISH);
+      cloudFiles.containerApiInRegion(REGION).createIfAbsent(CONTAINER_PUBLISH, CreateContainerOptions.NONE);
 
       System.out.format("  %s%n", CONTAINER_PUBLISH);
    }
@@ -86,12 +102,13 @@ public class CloudFilesPublish implements Closeable {
       BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
       out.write("Hello Cloud Files");
       out.close();
+      
+      ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
 
-      SwiftObject object = cloudFilesClient.newSwiftObject();
-      object.getInfo().setName(FILENAME + SUFFIX);
-      object.setPayload(tempFile);
+      ByteSource byteSource = Files.asByteSource(tempFile);
+      Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-      cloudFilesClient.putObject(CONTAINER_PUBLISH, object);
+      objectApi.replace(FILENAME + SUFFIX, payload, ImmutableMap.<String, String>of());
 
       System.out.format("  %s%s%n", FILENAME, SUFFIX);
    }
@@ -102,8 +119,9 @@ public class CloudFilesPublish implements Closeable {
     */
    private void enableCdnContainer() {
       System.out.format("Enable CDN Container%n");
-
-      URI cdnURI = cloudFilesClient.enableCDN(CONTAINER_PUBLISH);
+      
+      CDNApi cdnApi = cloudFiles.cdnApiInRegion(REGION);
+      URI cdnURI = cdnApi.enable(CONTAINER_PUBLISH);
 
       System.out.format("  Go to %s/%s%s%n", cdnURI, FILENAME, SUFFIX);
    }
@@ -112,6 +130,6 @@ public class CloudFilesPublish implements Closeable {
     * Always close your service when you're done with it.
     */
    public void close() throws IOException {
-      Closeables.close(cloudFilesClient, true);
+      Closeables.close(cloudFiles, true);
    }
 }

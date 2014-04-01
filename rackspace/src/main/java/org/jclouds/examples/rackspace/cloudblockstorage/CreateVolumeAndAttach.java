@@ -131,7 +131,7 @@ public class CreateVolumeAndAttach implements Closeable {
       ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .osDescriptionMatches(".*CentOS 6.*")
+            .osDescriptionMatches(".*Ubuntu 12.04.*")
             .hardwareId(zoneAndId.slashEncode())
             .build();
 
@@ -153,6 +153,7 @@ public class CreateVolumeAndAttach implements Closeable {
    private Volume createVolume() throws TimeoutException {
       CreateVolumeOptions options = CreateVolumeOptions.Builder
             .name(NAME)
+            .volumeType("SSD")
             .metadata(ImmutableMap.<String, String> of("key1", "value1"));
 
       System.out.format("Create Volume%n");

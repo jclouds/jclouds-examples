@@ -116,7 +116,7 @@ public class CloudServersPublish implements Closeable {
       ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .osDescriptionMatches(".*CentOS 6.4.*")
+            .osDescriptionMatches(".*Ubuntu 12.04.*")
             .hardwareId(zoneAndId.slashEncode())
             .build();
 
@@ -147,10 +147,10 @@ public class CloudServersPublish implements Closeable {
          .append(" in ").append(nodeMetadata.getLocation().getParent().getId())
          .toString();
 
-         String script = new ScriptBuilder().addStatement(exec("yum -y install httpd"))
-               .addStatement(exec("/usr/sbin/apachectl start"))
-               .addStatement(exec("iptables -I INPUT -p tcp --dport 80 -j ACCEPT"))
-               .addStatement(exec("echo '" + message + "' > /var/www/html/index.html"))
+         String script = new ScriptBuilder()
+               .addStatement(exec("apt-get -q -y update"))
+               .addStatement(exec("apt-get -q -y install apache2"))
+               .addStatement(exec("echo '" + message + "' > /var/www/index.html"))
                .render(OsFamily.UNIX);
 
          RunScriptOptions options = RunScriptOptions.Builder.blockOnComplete(true);

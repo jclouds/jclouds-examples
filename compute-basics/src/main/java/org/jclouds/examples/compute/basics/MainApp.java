@@ -110,12 +110,15 @@ public class MainApp {
       String credential = args[2];
       String groupName = args[3];
       Action action = Action.valueOf(args[4].toUpperCase());
+      boolean providerIsGCE = provider.equalsIgnoreCase("google-compute-engine");
+
       if (action == Action.EXEC && args.length < PARAMETERS + 1)
          throw new IllegalArgumentException("please quote the command to exec as the last parameter");
       String command = (action == Action.EXEC) ? args[5] : "echo hello";
 
-      if (provider.equalsIgnoreCase("google-compute-engine"))
-         credential = getPrivateKeyFromFile(credential); // load the pem file as string
+      // For GCE, the credential parameter is the path to the private key file
+      if (providerIsGCE)
+         credential = getPrivateKeyFromFile(credential);
 
       if (action == Action.RUN && args.length < PARAMETERS + 1)
          throw new IllegalArgumentException("please pass the local file to run as the last parameter");
@@ -145,7 +148,7 @@ public class MainApp {
             // that tested to work with java, which tends to be Ubuntu or CentOS
             TemplateBuilder templateBuilder = compute.templateBuilder();
 
-            if(provider.equalsIgnoreCase("google-compute-engine"))
+            if (providerIsGCE)
                templateBuilder.osFamily(OsFamily.CENTOS);
             
             // If you want to up the ram and leave everything default, you can 
@@ -215,17 +218,17 @@ public class MainApp {
             System.out.printf("<< destroyed nodes %s%n", destroyed);
             break;
          case LISTIMAGES:
-            Set<? extends Image> imageList = compute.listImages();
-            System.out.printf(">> No of images %d\n", imageList.size());
-            for (Image img : imageList) {
+            Set<? extends Image> images = compute.listImages();
+            System.out.printf(">> No of images %d%n", images.size());
+            for (Image img : images) {
                System.out.println(">>>>  " + img);
             }
             break;
          case LISTNODES:
-            Set<? extends ComputeMetadata> nodeList = compute.listNodes();
-            System.out.printf(">> No of nodes/instances %d\n", nodeList.size());
-            for (ComputeMetadata nodeentry : nodeList) {
-               System.out.println(">>>>  " + nodeentry);
+            Set<? extends ComputeMetadata> nodes = compute.listNodes();
+            System.out.printf(">> No of nodes/instances %d%n", nodes.size());
+            for (ComputeMetadata nodeData : nodes) {
+               System.out.println(">>>>  " + nodeData);
             }
             break;
          }
@@ -248,10 +251,11 @@ public class MainApp {
       try {
          return Strings2.toStringAndClose(new FileInputStream(filename));
       } catch (java.io.IOException e) {
-         System.err.println("Exception : " + e);
+         System.err.println("Exception reading private key from '%s': " + filename);
          e.printStackTrace();
+         System.exit(1);
+         return null;
       }
-      return null;
    }
 
    static int error = 0;

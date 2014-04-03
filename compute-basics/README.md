@@ -40,11 +40,11 @@ To destroy all nodes of the group *mygroup*:
 
     java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup destroy
 
-To list the nodes:  *groupname* parameter is not used
+To list all nodes (the *groupname* parameter is not used):
 
     java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup listnodes
 
-To list the images:  *groupname* parameter is not used
+To list all images (the *groupname* parameter is not used):
 
     java -jar target/compute-basics-jar-with-dependencies.jar provider identity credential mygroup listimages
 
@@ -89,7 +89,7 @@ To list the images:  *groupname* parameter is not used
          -jar target/compute-basics-jar-with-dependencies.jar \
          openstack-nova-ec2 tenantId:accesskey secretkey mygroup add
 
-### Google Cloud Engine provider
+### Google Compute Engine provider
 
     java -jar target/compute-basics-jar-with-dependencies.jar \
          google-compute-engine \

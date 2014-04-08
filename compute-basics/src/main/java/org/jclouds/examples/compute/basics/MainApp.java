@@ -35,7 +35,7 @@ import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -72,7 +72,6 @@ import com.google.inject.Module;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.OsFamily;
-import org.jclouds.util.Strings2;
 
 /**
  * Demonstrates the use of {@link ComputeService}.
@@ -249,8 +248,8 @@ public class MainApp {
 
    private static String getPrivateKeyFromFile(String filename) {
       try {
-         return Strings2.toStringAndClose(new FileInputStream(filename));
-      } catch (java.io.IOException e) {
+         return Files.toString(new File(filename), Charsets.UTF_8);
+      } catch (IOException e) {
          System.err.println("Exception reading private key from '%s': " + filename);
          e.printStackTrace();
          System.exit(1);

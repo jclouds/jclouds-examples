@@ -118,18 +118,22 @@ public class MainApp {
          // Use Provider API
          if (context.getBackendType().getRawType().equals(RestContext.class)) {
             RestContext<?, ?> rest = context.unwrap();
+            Object object = null;
             if (rest.getApi() instanceof S3Client) {
                RestContext<S3Client, S3AsyncClient> providerContext = context.unwrap();
-               providerContext.getApi().getBucketLogging(containerName);
+               object = providerContext.getApi().headObject(containerName, blobName);
             } else if (rest.getApi() instanceof SwiftClient) {
                RestContext<SwiftClient, SwiftAsyncClient> providerContext = context.unwrap();
-               providerContext.getApi().getObjectInfo(containerName, "test");
+               object = providerContext.getApi().getObjectInfo(containerName, blobName);
             } else if (rest.getApi() instanceof AzureBlobClient) {
                RestContext<AzureBlobClient, AzureBlobAsyncClient> providerContext = context.unwrap();
-               providerContext.getApi().getBlobProperties(containerName, "test");
+               object = providerContext.getApi().getBlobProperties(containerName, blobName);
             } else if (rest.getApi() instanceof AtmosClient) {
                RestContext<AtmosClient, AtmosAsyncClient> providerContext = context.unwrap();
-               providerContext.getApi().getSystemMetadata(containerName + "/test");
+               object = providerContext.getApi().headFile(containerName + "/" + blobName);
+            }
+            if (object != null) {
+               System.out.println(object);
             }
          }
          

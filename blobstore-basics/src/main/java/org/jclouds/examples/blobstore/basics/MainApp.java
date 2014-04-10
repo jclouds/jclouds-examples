@@ -43,9 +43,11 @@ import org.jclouds.rest.RestContext;
 import org.jclouds.s3.S3AsyncClient;
 import org.jclouds.s3.S3Client;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteSource;
 import com.google.inject.Module;
 
 /**
@@ -95,9 +97,14 @@ public class MainApp {
          // Create Container
          BlobStore blobStore = context.getBlobStore();
          blobStore.createContainerInLocation(null, containerName);
+         String blobName = "test";
+         ByteSource payload = ByteSource.wrap("testdata".getBytes(Charsets.UTF_8));
 
          // Add Blob
-         Blob blob = blobStore.blobBuilder("test").payload("testdata").build();
+         Blob blob = blobStore.blobBuilder(blobName)
+            .payload(payload)
+            .contentLength(payload.size())
+            .build();
          blobStore.putBlob(containerName, blob);
 
          // List Container

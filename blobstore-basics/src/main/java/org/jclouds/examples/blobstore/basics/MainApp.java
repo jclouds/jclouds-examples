@@ -34,7 +34,6 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
-import org.jclouds.blobstore.domain.StorageType;
 import org.jclouds.openstack.swift.SwiftAsyncClient;
 import org.jclouds.openstack.swift.SwiftClient;
 import org.jclouds.providers.ProviderMetadata;
@@ -109,10 +108,7 @@ public class MainApp {
 
          // List Container
          for (StorageMetadata resourceMd : blobStore.list()) {
-            if (resourceMd.getType() == StorageType.CONTAINER || resourceMd.getType() == StorageType.FOLDER) {
-               String name = resourceMd.getName();
-               System.out.printf("  %s: %s entries%n", name, context.getBlobStore().countBlobs(name));
-            }
+            System.out.println(resourceMd);
          }
 
          // Use Provider API

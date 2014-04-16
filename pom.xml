@@ -22,11 +22,11 @@
   <parent>
     <groupId>org.apache.jclouds</groupId>
     <artifactId>jclouds-project</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.3-SNAPSHOT</version>
   </parent>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>jclouds-examples</artifactId>
-  <version>1.7.2-SNAPSHOT</version>
+  <version>1.7.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>jclouds examples</name>
 
@@ -38,7 +38,7 @@
   </scm>
 
   <properties>
-    <jclouds.version>1.7.1</jclouds.version>
+    <jclouds.version>1.7.2</jclouds.version>
   </properties>
 
   <repositories>

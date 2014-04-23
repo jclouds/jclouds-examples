@@ -30,6 +30,7 @@
   </properties>
 
   <dependencies>
+    <!-- jclouds dependencies -->
     <dependency>
       <groupId>org.apache.jclouds.driver</groupId>
       <artifactId>jclouds-slf4j</artifactId>
@@ -40,12 +41,7 @@
       <artifactId>jclouds-sshj</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.0.13</version>
-    </dependency>
-    <!-- US -->
+    <!-- Rackspace US dependencies -->
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudservers-us</artifactId>
@@ -63,7 +59,12 @@
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>rackspace-clouddns-us</artifactId>
+      <artifactId>rackspace-clouddatabases-us</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jclouds.labs</groupId>
+      <artifactId>rackspace-cloudqueues-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
@@ -73,15 +74,10 @@
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>rackspace-clouddatabases-us</artifactId>
+      <artifactId>rackspace-clouddns-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
-      <artifactId>rackspace-cloudqueues-us</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <!-- UK -->
+    <!-- Rackspace UK dependencies -->
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudservers-uk</artifactId>
@@ -99,16 +95,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>rackspace-clouddns-uk</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>rackspace-cloudloadbalancers-uk</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-clouddatabases-uk</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
@@ -121,6 +107,22 @@
       <groupId>org.apache.jclouds.labs</groupId>
       <artifactId>rackspace-autoscale-us</artifactId>
       <version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jclouds.provider</groupId>
+      <artifactId>rackspace-cloudloadbalancers-uk</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jclouds.provider</groupId>
+      <artifactId>rackspace-clouddns-uk</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
+    <!-- 3rd party dependencies -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.13</version>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>

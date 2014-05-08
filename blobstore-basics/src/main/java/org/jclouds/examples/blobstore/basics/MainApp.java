@@ -99,17 +99,19 @@ public class MainApp {
          String blobName = "test";
          ByteSource payload = ByteSource.wrap("testdata".getBytes(Charsets.UTF_8));
 
+         // List Container Metadata
+         for (StorageMetadata resourceMd : blobStore.list()) {
+            if (containerName.equals(resourceMd.getName())) {
+               System.out.println(resourceMd);
+            }
+         }
+
          // Add Blob
          Blob blob = blobStore.blobBuilder(blobName)
             .payload(payload)
             .contentLength(payload.size())
             .build();
          blobStore.putBlob(containerName, blob);
-
-         // List Container
-         for (StorageMetadata resourceMd : blobStore.list()) {
-            System.out.println(resourceMd);
-         }
 
          // Use Provider API
          if (context.getBackendType().getRawType().equals(RestContext.class)) {

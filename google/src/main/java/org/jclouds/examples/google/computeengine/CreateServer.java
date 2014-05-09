@@ -134,7 +134,7 @@ public class CreateServer implements Closeable {
       Set<? extends Hardware> profiles = computeService.listHardwareProfiles();
       Hardware result = null;
 
-      for (Hardware profile: profiles) {
+      for (Hardware profile : profiles) {
          System.out.format("    %s%n", profile);
          if (profile.getId().equals(ZONE + "/f1-micro")) {
             result = profile;
@@ -142,8 +142,9 @@ public class CreateServer implements Closeable {
       }
 
       if (result == null) {
-         System.err.println("f1-micro flavor not found. Using first flavor found.%n");
+         System.err.println("f1-micro flavor not found. Using first flavor found:");
          result = profiles.iterator().next();
+         System.err.format("-> %s%n", result);
       }
       return result;
    }
@@ -159,7 +160,7 @@ public class CreateServer implements Closeable {
       Set<? extends Image> images = computeService.listImages();
       Image result = null;
 
-      for (Image image: images) {
+      for (Image image : images) {
          System.out.format("    %s%n", image);
          if (image.getOperatingSystem().getVersion().equals("debian.7.wheezy")) {
             result = image;
@@ -167,8 +168,9 @@ public class CreateServer implements Closeable {
       }
 
       if (result == null) {
-         System.err.println("Image with Debian Wheezy operating system not found. Using first image found.%n");
+         System.err.println("Image with Debian Wheezy operating system not found. Using first image found:");
          result = images.iterator().next();
+         System.err.format("-> %s%n", result);
       }
 
       return result;

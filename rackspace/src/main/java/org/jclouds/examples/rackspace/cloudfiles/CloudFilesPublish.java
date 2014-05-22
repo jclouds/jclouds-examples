@@ -24,10 +24,8 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.SUFFIX;
 
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 
@@ -39,6 +37,7 @@ import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 import org.jclouds.rackspace.cloudfiles.v1.features.CDNApi;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
@@ -99,9 +98,7 @@ public class CloudFilesPublish implements Closeable {
       File tempFile = File.createTempFile(FILENAME, SUFFIX);
       tempFile.deleteOnExit();
 
-      BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-      out.write("Hello Cloud Files");
-      out.close();
+      Files.asCharSink(tempFile, Charsets.UTF_8).write("Hello Cloud Files");
       
       ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
 

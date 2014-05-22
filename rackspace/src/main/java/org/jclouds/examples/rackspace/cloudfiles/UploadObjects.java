@@ -22,10 +22,8 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +36,7 @@ import org.jclouds.io.Payloads;
 import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
@@ -94,9 +93,7 @@ public class UploadObjects implements Closeable {
       File tempFile = File.createTempFile(filename, suffix);
       tempFile.deleteOnExit();
 
-      BufferedWriter out = new BufferedWriter(new FileWriter(tempFile));
-      out.write("uploadObjectFromFile");
-      out.close();
+      Files.asCharSink(tempFile, Charsets.UTF_8).write("uploadObjectFromFile");
 
       ByteSource byteSource = Files.asByteSource(tempFile);
       Payload payload = Payloads.newByteSourcePayload(byteSource); 

@@ -98,7 +98,7 @@ public class CloudFilesPublish implements Closeable {
       File tempFile = File.createTempFile(FILENAME, SUFFIX);
       tempFile.deleteOnExit();
 
-      Files.asCharSink(tempFile, Charsets.UTF_8).write("Hello Cloud Files");
+      Files.write("Hello Cloud Files", tempFile, Charsets.UTF_8);
       
       ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
 

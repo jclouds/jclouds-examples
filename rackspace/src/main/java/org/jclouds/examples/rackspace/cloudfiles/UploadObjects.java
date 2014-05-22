@@ -93,7 +93,7 @@ public class UploadObjects implements Closeable {
       File tempFile = File.createTempFile(filename, suffix);
       tempFile.deleteOnExit();
 
-      Files.asCharSink(tempFile, Charsets.UTF_8).write("uploadObjectFromFile");
+      Files.write("uploadObjectFromFile", tempFile, Charsets.UTF_8);
 
       ByteSource byteSource = Files.asByteSource(tempFile);
       Payload payload = Payloads.newByteSourcePayload(byteSource); 

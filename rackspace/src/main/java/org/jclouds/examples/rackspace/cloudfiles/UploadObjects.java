@@ -91,17 +91,20 @@ public class UploadObjects implements Closeable {
       String suffix = ".txt";
 
       File tempFile = File.createTempFile(filename, suffix);
-      tempFile.deleteOnExit();
 
-      Files.write("uploadObjectFromFile", tempFile, Charsets.UTF_8);
+      try {
+         Files.write("uploadObjectFromFile", tempFile, Charsets.UTF_8);
 
-      ByteSource byteSource = Files.asByteSource(tempFile);
-      Payload payload = Payloads.newByteSourcePayload(byteSource); 
-      
-      cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
-         .replace(filename + suffix, payload, ImmutableMap.<String, String> of());
+         ByteSource byteSource = Files.asByteSource(tempFile);
+         Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-      System.out.format("  %s%s%n", filename, suffix);
+         cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
+            .replace(filename + suffix, payload, ImmutableMap.<String, String> of());
+
+         System.out.format("  %s%s%n", filename, suffix);
+      } finally {
+         tempFile.delete();
+      }
    }
 
    /**

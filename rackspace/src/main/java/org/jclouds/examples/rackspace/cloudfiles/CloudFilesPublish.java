@@ -96,18 +96,21 @@ public class CloudFilesPublish implements Closeable {
       System.out.format("Create Object From File%n");
 
       File tempFile = File.createTempFile(FILENAME, SUFFIX);
-      tempFile.deleteOnExit();
 
-      Files.write("Hello Cloud Files", tempFile, Charsets.UTF_8);
-      
-      ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
+      try {
+         Files.write("Hello Cloud Files", tempFile, Charsets.UTF_8);
 
-      ByteSource byteSource = Files.asByteSource(tempFile);
-      Payload payload = Payloads.newByteSourcePayload(byteSource);
+         ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
 
-      objectApi.replace(FILENAME + SUFFIX, payload, ImmutableMap.<String, String>of());
+         ByteSource byteSource = Files.asByteSource(tempFile);
+         Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-      System.out.format("  %s%s%n", FILENAME, SUFFIX);
+         objectApi.replace(FILENAME + SUFFIX, payload, ImmutableMap.<String, String>of());
+
+         System.out.format("  %s%s%n", FILENAME, SUFFIX);
+      } finally {
+         tempFile.delete();
+      }
    }
 
    /**

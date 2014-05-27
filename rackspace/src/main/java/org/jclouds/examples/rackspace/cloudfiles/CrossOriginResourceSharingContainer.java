@@ -33,6 +33,8 @@ import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Closeables;
 
 /**
@@ -71,7 +73,7 @@ public class CrossOriginResourceSharingContainer implements Closeable {
       cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudFilesApi.class);
-      containerApi = cloudFiles.containerApiInRegion(REGION);
+      containerApi = cloudFiles.getContainerApiForRegion(REGION);
    }
 
    /**
@@ -85,13 +87,13 @@ public class CrossOriginResourceSharingContainer implements Closeable {
    private void createCorsContainer() {
       System.out.format("Create Cross Origin Resource Sharing Container%n");
 
-      Map<String, String> corsMetadata = ImmutableMap.of(
+      Multimap<String, String> headers = ImmutableMultimap.of(
             "Access-Control-Allow-Origin", "*",
             "Access-Control-Max-Age", "600",
             "Access-Control-Allow-Headers", "X-My-Header");
-      CreateContainerOptions options = CreateContainerOptions.Builder.metadata(corsMetadata);
+      CreateContainerOptions options = CreateContainerOptions.Builder.headers(headers);
 
-      containerApi.createIfAbsent(CONTAINER, options);
+      containerApi.create(CONTAINER, options);
       System.out.format("  %s%n", CONTAINER);
 
       Container container = containerApi.get(CONTAINER);

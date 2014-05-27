@@ -36,11 +36,13 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.options.UpdateContainerOptions;
+import org.jclouds.openstack.swift.v1.reference.SwiftHeaders;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
-import org.jclouds.rackspace.cloudfiles.v1.features.CDNApi;
-import org.jclouds.rackspace.cloudfiles.v1.options.UpdateCDNContainerOptions;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -168,12 +170,15 @@ public class UploadDirectoryToCDN implements Closeable {
     */
    private void enableCdnContainer(String container) {
       System.out.format("Enable CDN%n");
+      Multimap<String, String> enableStaticWebHeaders =
+            ImmutableMultimap.of(SwiftHeaders.STATIC_WEB_INDEX, "index.html",
+                                 SwiftHeaders.STATIC_WEB_ERROR, "error.html");
 
-      CDNApi cdnApi = cloudFiles.cdnApiInRegion(REGION);
-      URI cdnURI = cdnApi.enable(container);
+      UpdateContainerOptions opts = new UpdateContainerOptions().headers(enableStaticWebHeaders);
+      cloudFiles.getContainerApiForRegion(REGION).update(container, opts);
 
-      cdnApi.update(container, UpdateCDNContainerOptions.Builder.staticWebsiteIndexPage("index.html"));
-
+      // enable the CDN container
+      URI cdnURI = cloudFiles.getCDNApiForRegion(REGION).enable(container);
       System.out.format("  Go to %s/%n", cdnURI);
    }
 
@@ -197,7 +202,6 @@ public class UploadDirectoryToCDN implements Closeable {
          this.toBeUploadedBlobDetail = toBeUploadedBlobDetail;
       }
 
-      @Override
       public BlobDetail call() throws Exception {
          ByteSource byteSource = Files.asByteSource(toBeUploadedBlobDetail.getLocalFile());
 
@@ -218,12 +222,11 @@ public class UploadDirectoryToCDN implements Closeable {
     * the user of upload progress.
     */
    private class BlobUploaderCallback implements FutureCallback<BlobDetail> {
-      @Override
+      
       public void onSuccess(BlobDetail result) {
          System.out.format(".");
       }
 
-      @Override
       public void onFailure(Throwable t) {
          System.out.format("X %s", t);
       }

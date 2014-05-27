@@ -18,12 +18,12 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.swift.v1.domain.Container;
@@ -32,10 +32,12 @@ import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 import com.google.common.io.Closeables;
 
 /**
- * List the Cloud Files containers associated with your account.
+ * Create a Cloud Files container with some metadata associated with it.
  *  
+ * @author Everett Toews
+ * @author Jeremy Daggett
  */
-public class ListContainers implements Closeable {
+public class GetContainer implements Closeable {
    private final CloudFilesApi cloudFiles;
 
    /**
@@ -45,32 +47,30 @@ public class ListContainers implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      ListContainers listContainers = new ListContainers(args[0], args[1]);
+      GetContainer getContainer = new GetContainer(args[0], args[1]);
 
       try {
-         listContainers.listContainers();
+         getContainer.getContainer();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
       finally {
-         listContainers.close();
+         getContainer.close();
       }
    }
 
-   public ListContainers(String username, String apiKey) {
+   public GetContainer(String username, String apiKey) {
       cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudFilesApi.class);
    }
 
-   private void listContainers() {
-      System.out.format("List Containers%n");
+   private void getContainer() {
+      System.out.format("Get Container%n");
 
-      List<Container> containers = cloudFiles.getContainerApiForRegion(REGION).list().toList();
-      for (Container container: containers) {
-         System.out.format("  %s%n", container);
-      }
+      Container container = cloudFiles.getContainerApiForRegion(REGION).get(CONTAINER);
+      System.out.format("  %s%n", container);
    }
 
    /**

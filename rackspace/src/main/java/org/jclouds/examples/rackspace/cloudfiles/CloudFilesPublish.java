@@ -34,11 +34,13 @@ import org.jclouds.io.Payload;
 import org.jclouds.io.Payloads;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
 import org.jclouds.openstack.swift.v1.options.CreateContainerOptions;
+import org.jclouds.openstack.swift.v1.reference.SwiftHeaders;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 import org.jclouds.rackspace.cloudfiles.v1.features.CDNApi;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -83,8 +85,13 @@ public class CloudFilesPublish implements Closeable {
     */
    private void createContainer() {
       System.out.format("Create Container%n");
-
-      cloudFiles.containerApiInRegion(REGION).createIfAbsent(CONTAINER_PUBLISH, CreateContainerOptions.NONE);
+      // create a Multimap for the static web headers
+      Multimap<String, String> enableStaticWebHeaders =
+            ImmutableMultimap.of(SwiftHeaders.STATIC_WEB_INDEX, FILENAME + SUFFIX,
+                                 SwiftHeaders.STATIC_WEB_ERROR, "error.html");
+      
+      CreateContainerOptions opts = new CreateContainerOptions().headers(enableStaticWebHeaders);
+      cloudFiles.getContainerApiForRegion(REGION).create(CONTAINER_PUBLISH, opts);
 
       System.out.format("  %s%n", CONTAINER_PUBLISH);
    }
@@ -100,14 +107,12 @@ public class CloudFilesPublish implements Closeable {
       try {
          Files.write("Hello Cloud Files", tempFile, Charsets.UTF_8);
 
-         ObjectApi objectApi = cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER_PUBLISH);
+         ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER_PUBLISH);
 
          ByteSource byteSource = Files.asByteSource(tempFile);
          Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-         objectApi.replace(FILENAME + SUFFIX, payload, ImmutableMap.<String, String>of());
-
-         System.out.format("  %s%s%n", FILENAME, SUFFIX);
+         objectApi.put(FILENAME + SUFFIX, payload);
       } finally {
          tempFile.delete();
       }
@@ -119,8 +124,8 @@ public class CloudFilesPublish implements Closeable {
     */
    private void enableCdnContainer() {
       System.out.format("Enable CDN Container%n");
-      
-      CDNApi cdnApi = cloudFiles.cdnApiInRegion(REGION);
+
+      CDNApi cdnApi = cloudFiles.getCDNApiForRegion(REGION);
       URI cdnURI = cdnApi.enable(CONTAINER_PUBLISH);
 
       System.out.format("  Go to %s/%s%s%n", cdnURI, FILENAME, SUFFIX);

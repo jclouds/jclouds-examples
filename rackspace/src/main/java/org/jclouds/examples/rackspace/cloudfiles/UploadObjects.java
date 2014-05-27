@@ -37,7 +37,6 @@ import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;
@@ -96,8 +95,8 @@ public class UploadObjects implements Closeable {
          ByteSource byteSource = Files.asByteSource(tempFile);
          Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-         cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
-            .replace(filename + suffix, payload, ImmutableMap.<String, String> of());
+         cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER)
+            .put(filename + suffix, payload);
 
          System.out.format("  %s%s%n", filename, suffix);
       } finally {
@@ -116,8 +115,7 @@ public class UploadObjects implements Closeable {
       ByteSource source = ByteSource.wrap("uploadObjectFromString".getBytes());
       Payload payload = Payloads.newByteSourcePayload(source);
 
-      cloudFiles.objectApiInRegionForContainer(REGION, CONTAINER)
-         .replace(filename, payload, ImmutableMap.<String, String>of());
+      cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER).put(filename, payload);
 
       System.out.format("  %s%n", filename);
    }

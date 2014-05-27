@@ -128,10 +128,14 @@ public class GenerateTempURL implements Closeable {
       
       // GET the file using jclouds
       File file = File.createTempFile(FILENAME, ".tmp");
-      String content = Strings2.toString(blobStoreContext.utils().http().invoke(request).getPayload());
-      Files.write(content, file, Charsets.UTF_8);
-      
-      System.out.format("  GET Success (%s)%n", file.getAbsolutePath());
+      try {
+         String content = Strings2.toString(blobStoreContext.utils().http().invoke(request).getPayload());
+         Files.write(content, file, Charsets.UTF_8);
+         
+         System.out.format("  GET Success (%s)%n", file.getAbsolutePath());
+      } finally {
+         file.delete();
+      }
    }
 
    private void generateDeleteTempURL() throws IOException {

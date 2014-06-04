@@ -107,7 +107,7 @@ public class PublishSubscribe implements Closeable {
    }
 
    private void publishAndSubscribe() throws ExecutionException, InterruptedException {
-      System.out.format("Publisher Subcriber%n");
+      System.out.format("Publisher Subscriber%n");
 
       ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
 

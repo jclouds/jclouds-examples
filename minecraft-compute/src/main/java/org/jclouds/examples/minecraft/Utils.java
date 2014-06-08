@@ -36,10 +36,6 @@ import com.google.common.base.Function;
 import com.google.common.io.Files;
 import com.google.common.net.HostAndPort;
 
-/**
- * 
- * @author Adrian Cole
- */
 public class Utils {
    public static Function<ExecResponse, String> getStdout() {
       return new Function<ExecResponse, String>() {

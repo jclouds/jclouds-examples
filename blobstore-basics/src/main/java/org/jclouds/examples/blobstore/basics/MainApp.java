@@ -53,9 +53,6 @@ import com.google.inject.Module;
  * Demonstrates the use of {@link BlobStore}.
  * 
  * Usage is: java MainApp \"provider\" \"identity\" \"credential\" \"containerName\"
- * 
- * @author Carlos Fernandes
- * @author Adrian Cole
  */
 public class MainApp {
    

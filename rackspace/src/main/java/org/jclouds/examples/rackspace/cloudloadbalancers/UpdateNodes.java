@@ -41,7 +41,6 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNo
 /**
  * This example updates Nodes in a Load Balancer. 
  *  
- * @author Everett Toews
  */
 public class UpdateNodes implements Closeable {
    private final CloudLoadBalancersApi clbApi;

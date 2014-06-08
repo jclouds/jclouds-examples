@@ -34,8 +34,6 @@ import com.google.common.io.Closeables;
 /**
  * List the Cloud Files containers associated with your account.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class ListContainers implements Closeable {
    private final CloudFilesApi cloudFiles;

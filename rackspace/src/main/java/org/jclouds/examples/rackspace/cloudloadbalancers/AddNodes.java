@@ -43,7 +43,6 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNo
 /**
  * This example adds a Node to a Load Balancer. 
  *  
- * @author Everett Toews
  */
 public class AddNodes implements Closeable {
    private final CloudLoadBalancersApi clbApi;

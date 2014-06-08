@@ -41,7 +41,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example updates the records on a domain. 
  *  
- * @author Everett Toews
  */
 public class UpdateRecords implements Closeable {
    private final CloudDNSApi dnsApi;

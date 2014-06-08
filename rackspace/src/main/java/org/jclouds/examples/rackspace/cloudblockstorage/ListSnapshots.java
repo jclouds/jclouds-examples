@@ -31,8 +31,6 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDE
 
 /**
  * This example lists all of your snapshots.
- * 
- * @author Everett Toews
  */
 public class ListSnapshots implements Closeable {
    private final CinderApi cinderApi;

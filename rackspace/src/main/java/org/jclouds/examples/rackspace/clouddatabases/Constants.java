@@ -20,8 +20,6 @@ package org.jclouds.examples.rackspace.clouddatabases;
 
 /**
  * Constants used by the Rackspace Examples.
- * 
- * @author Zack Shoylev
  */
 public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)

@@ -28,8 +28,6 @@ import org.jclouds.rackspace.autoscale.v1.features.PolicyApi;
 
 /**
  * Helper methods for autoscale examples
- * 
- * @author Zack Shoylev
  */
 public class Utils {
    public static String getGroupId(GroupApi groupApi) {

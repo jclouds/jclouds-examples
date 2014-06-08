@@ -19,9 +19,6 @@ package org.jclouds.examples.blobstore.osgi.shell;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-/**
- * @author: iocanel
- */
 @Command(scope = "jclouds", name = "blobstore-write", description = "Writes data from the blobstore")
 public class WriteCommand extends BlobStoreCommandSupport {
 

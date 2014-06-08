@@ -30,9 +30,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 
-/**
- * @author: iocanel
- */
 public class BlobStoreServiceImpl implements BlobStoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(BlobStoreServiceImpl.class);

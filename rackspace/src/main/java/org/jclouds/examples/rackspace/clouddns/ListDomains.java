@@ -32,7 +32,6 @@ import static org.jclouds.examples.rackspace.clouddns.Constants.*;
 /**
  * This example lists domains. 
  *  
- * @author Everett Toews
  */
 public class ListDomains implements Closeable {
    private final CloudDNSApi dnsApi;

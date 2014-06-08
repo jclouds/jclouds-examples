@@ -41,7 +41,6 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNo
 /**
  * This example creates a Load Balancer with existing Cloud Servers on the Rackspace Cloud. 
  *  
- * @author Everett Toews
  */
 public class CreateLoadBalancerWithExistingServers implements Closeable {
    private final CloudLoadBalancersApi clbApi;

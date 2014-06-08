@@ -33,8 +33,6 @@ import org.jclouds.examples.rackspace.autoscale.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
- *
- * @author Everett Toews
  */
 public class SmokeTest {
 

@@ -52,8 +52,6 @@ import com.google.inject.Module;
  * \"containerName\" \"objectName\" plainhttp threadcount
  * 
  * \"plainhttp\" and \"threadcound\" is optional if all the rest of parameters are omitted
- * 
- * @author Tibor Kiss
  */
 public class MainApp extends Configured {
 

@@ -37,7 +37,6 @@ import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 /**
  * This example destroys the server created in the CreateServer example. 
  *  
- * @author Everett Toews
  */
 public class DeleteServer implements Closeable {
    private ComputeService computeService;

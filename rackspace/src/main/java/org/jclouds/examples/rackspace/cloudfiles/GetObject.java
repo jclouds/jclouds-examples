@@ -38,8 +38,6 @@ import com.google.common.io.Closeables;
  * 
  * NOTE: Run the {@link UploadObjects} example prior to running this example.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class GetObject implements Closeable {
    private final CloudFilesApi cloudFiles;

@@ -41,8 +41,6 @@ import com.google.common.io.Files;
  * creating a small spot server.
  * 
  * Usage is: java MainApp accesskeyid secretkey group command where command in create destroy
- * 
- * @author Adrian Cole
  */
 public class MainApp {
 

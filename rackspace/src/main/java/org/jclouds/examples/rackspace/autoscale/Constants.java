@@ -20,8 +20,6 @@ package org.jclouds.examples.rackspace.autoscale;
 
 /**
  * Constants used by the Rackspace Examples.
- * 
- * @author Zack Shoylev
  */
 public interface Constants {
    // The provider configures jclouds to use the Rackspace Cloud (US).

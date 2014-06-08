@@ -38,8 +38,6 @@ import com.google.common.io.Closeables;
 
 /**
  * This example creates a webhook for the Scaling Policy.
- *
- * @author Zack Shoylev
  */
 public class CreateWebhook implements Closeable {
    private final AutoscaleApi autoscaleApi;

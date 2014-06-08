@@ -38,7 +38,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example deletes the records on a domain. 
  *  
- * @author Everett Toews
  */
 public class DeleteRecords implements Closeable {
    private final CloudDNSApi dnsApi;

@@ -34,7 +34,6 @@ import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
 /**
  * This example deletes Load Balancers. 
  *  
- * @author Everett Toews
  */
 public class DeleteLoadBalancers implements Closeable {
    private final CloudLoadBalancersApi clbApi;

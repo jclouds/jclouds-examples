@@ -56,9 +56,6 @@ import org.jclouds.scriptbuilder.statements.login.AdminAccess;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 
-/**
- * @author Adrian Cole
- */
 @Singleton
 public class NodeManager {
    @Resource

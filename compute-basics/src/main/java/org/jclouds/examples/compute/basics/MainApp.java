@@ -81,7 +81,6 @@ import org.jclouds.compute.domain.OsFamily;
  * if {@code exec} is used, the following parameter is a command, which should
  * be passed in quotes
  * if {@code run} is used, the following parameter is a file to execute.
- * @author Adrian Cole
  */
 public class MainApp {
 

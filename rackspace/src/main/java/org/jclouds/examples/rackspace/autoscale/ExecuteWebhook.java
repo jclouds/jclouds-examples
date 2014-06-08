@@ -40,8 +40,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
  * This example executes a scaling policy in two ways: 
  * - Authenticated API call using jclouds.
  * - Anonymously using just the webhook URL.
- *
- * @author Zack Shoylev
  */
 public class ExecuteWebhook implements Closeable {
    private final AutoscaleApi autoscaleApi;

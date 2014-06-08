@@ -24,8 +24,6 @@ import org.kohsuke.args4j.Option;
 
 /**
  * A javabean that represents the application's command line arguments.
- *
- * @author Richard Downer
  */
 public class Arguments {
    private String identity;

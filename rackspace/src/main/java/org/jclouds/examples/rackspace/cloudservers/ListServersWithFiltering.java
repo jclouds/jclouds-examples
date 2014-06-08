@@ -38,7 +38,6 @@ import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
 /**
  * This example lists servers filtered by Predicates. Run the CreateServer example before this to get some results.
  *  
- * @author Everett Toews
  */
 public class ListServersWithFiltering implements Closeable {
    private final ComputeService computeService;

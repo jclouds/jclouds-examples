@@ -44,8 +44,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * FIXME
- *
- * @author Richard Downer
  */
 public class WindowsInstanceStarter {
    private final Arguments arguments;

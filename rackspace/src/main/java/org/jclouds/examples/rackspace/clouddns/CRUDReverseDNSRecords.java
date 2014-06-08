@@ -43,7 +43,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example creates reverse DNS records on an existing domain for a Cloud Server. 
  *  
- * @author Everett Toews
  */
 public class CRUDReverseDNSRecords implements Closeable {
    private final CloudDNSApi dnsApi;

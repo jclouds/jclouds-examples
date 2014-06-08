@@ -40,8 +40,6 @@ import com.google.common.io.Closeables;
  * Delete the objects from the CreateObjects example and delete the Cloud Files container from the
  * CreateContainer example.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class DeleteObjectsAndContainer implements Closeable {
    private final CloudFilesApi cloudFiles;

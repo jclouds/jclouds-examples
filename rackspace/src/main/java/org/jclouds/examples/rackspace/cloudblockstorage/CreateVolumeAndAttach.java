@@ -64,8 +64,6 @@ import com.google.inject.Module;
 
 /**
  * This example creates a volume, attaches it to a server, putting a filesystem on it, and mounts it for use.
- * 
- * @author Everett Toews
  */
 public class CreateVolumeAndAttach implements Closeable {
    private final ComputeService computeService;

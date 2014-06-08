@@ -34,8 +34,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
 
 /**
  * This example will create a User on the database created in the CreateDatabase example.
- * 
- * @author Zack Shoylev
  */
 public class CreateUser implements Closeable {
    private final TroveApi troveApi;

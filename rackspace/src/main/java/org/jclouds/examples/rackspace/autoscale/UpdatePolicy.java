@@ -37,8 +37,6 @@ import com.google.common.io.Closeables;
 
 /**
  * This example updates a Scaling Policy in a Scaling Group.
- *
- * @author Zack Shoylev
  */
 public class UpdatePolicy implements Closeable {
    private final AutoscaleApi autoscaleApi;

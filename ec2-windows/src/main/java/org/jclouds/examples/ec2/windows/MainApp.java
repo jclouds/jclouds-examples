@@ -43,8 +43,6 @@ import java.util.Set;
  * The main application. This will parse and validate the command line
  * arguments, initialize a jclouds context, and then jump to {@link
  * WindowsInstanceStarter}.
- *
- * @author Richard Downer
  */
 public class MainApp {
 

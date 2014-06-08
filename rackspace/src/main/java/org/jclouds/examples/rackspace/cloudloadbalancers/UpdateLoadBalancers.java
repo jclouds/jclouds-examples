@@ -36,7 +36,6 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseLo
 /**
  * This example updates a Load Balancer. 
  *  
- * @author Everett Toews
  */
 public class UpdateLoadBalancers implements Closeable {
    private final CloudLoadBalancersApi clbApi;

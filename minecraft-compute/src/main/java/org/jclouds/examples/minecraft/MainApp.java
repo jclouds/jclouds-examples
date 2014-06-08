@@ -57,8 +57,6 @@ import com.google.inject.Module;
  * <p/>
  * Usage is:
  * {@code java MainApp provider identity credential groupName (add|list|tail|pids|destroy)}
- * 
- * @author Adrian Cole
  */
 public class MainApp {
    public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(

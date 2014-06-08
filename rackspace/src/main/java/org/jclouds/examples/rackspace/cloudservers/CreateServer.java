@@ -41,7 +41,6 @@ import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 /**
  * This example creates an Ubuntu 12.04 server with 1024 MB of RAM on the Rackspace Cloud.
  *  
- * @author Everett Toews
  */
 public class CreateServer implements Closeable {
    private final ComputeService computeService;

@@ -40,8 +40,6 @@ import static org.jclouds.examples.google.computeengine.Constants.*;
 
 /**
  * This example destroys the server created in the CreateServer example.
- *
- * @author Marek Wieczorek (based on code by Everett Toews)
  */
 public class DeleteServer implements Closeable {
    private ComputeService computeService;

@@ -42,8 +42,6 @@ import com.google.common.io.Closeables;
 /**
  * This example sets, gets, updates, and deletes metadata from a server.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class ServerMetadata implements Closeable {
    private final ComputeService computeService;

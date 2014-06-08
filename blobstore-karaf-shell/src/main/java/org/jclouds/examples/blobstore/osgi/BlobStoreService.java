@@ -18,9 +18,6 @@ package org.jclouds.examples.blobstore.osgi;
 
 import java.io.IOException;
 
-/**
- * @author: iocanel
- */
 public interface BlobStoreService {
 
     /**

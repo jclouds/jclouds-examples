@@ -36,8 +36,6 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example creates a snapshot of a volume.
- *
- * @author Everett Toews
  */
 public class CreateSnapshot implements Closeable {
    private final CinderApi cinderApi;

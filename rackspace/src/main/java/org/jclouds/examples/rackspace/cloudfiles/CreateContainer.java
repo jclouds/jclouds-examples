@@ -35,8 +35,6 @@ import com.google.common.io.Closeables;
 /**
  * Create a Cloud Files container with some metadata associated with it.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class CreateContainer implements Closeable {
    private final CloudFilesApi cloudFiles;

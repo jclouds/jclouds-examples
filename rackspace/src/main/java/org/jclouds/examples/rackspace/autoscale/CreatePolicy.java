@@ -50,8 +50,6 @@ import com.google.common.io.Closeables;
  * The scaling group contains a set of scaling policies.
  * Each scaling policy can have webhooks associated to it.
  * Webhooks can be used to execute scaling policies.
- *
- * @author Zack Shoylev
  */
 public class CreatePolicy implements Closeable {
    private final AutoscaleApi autoscaleApi;

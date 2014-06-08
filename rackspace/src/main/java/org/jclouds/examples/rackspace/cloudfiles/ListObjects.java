@@ -37,8 +37,6 @@ import com.google.common.io.Closeables;
 /**
  * List objects in the Cloud Files container from the CreateContainer example.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class ListObjects implements Closeable {
    private final CloudFilesApi cloudFiles;

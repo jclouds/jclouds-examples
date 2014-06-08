@@ -86,9 +86,6 @@ import com.google.inject.Module;
  * Usage is: {@code java MainApp provider identity credential groupName (add|chef|destroy)} if
  * {@code chef} is used, the following parameter is a list of recipes to be installed in the node
  * separated by commas.
- * 
- * @author Adrian Cole
- * @author Ignasi Barrera
  */
 public class MainApp
 {

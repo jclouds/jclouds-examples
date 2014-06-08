@@ -34,8 +34,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
 
 /**
  * This example will delete the instance created in the CreateInstance example.
- * 
- * @author Zack Shoylev
  */
 public class DeleteInstance implements Closeable {
    private final TroveApi troveApi;

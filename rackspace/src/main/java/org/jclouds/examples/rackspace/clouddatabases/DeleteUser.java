@@ -34,8 +34,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
 
 /**
  * This example will delete the User created in the CreateUser example.
- * 
- * @author Zack Shoylev
  */
 public class DeleteUser implements Closeable {
    private final TroveApi troveApi;

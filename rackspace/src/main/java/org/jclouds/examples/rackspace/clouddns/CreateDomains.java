@@ -40,7 +40,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example creates a domain with subdomains and records. 
  *  
- * @author Everett Toews
  */
 public class CreateDomains implements Closeable {
    private final CloudDNSApi dnsApi;

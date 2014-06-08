@@ -36,8 +36,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
  * This example creates a MySQL database on a Cloud Databases instance.
  * The instance is created in the CreateInstance example.
  * Think of the instance as a type of server. Multiple databases can run on the same instance.
- *
- * @author Zack Shoylev
  */
 public class CreateDatabase implements Closeable {
    private final TroveApi troveApi;

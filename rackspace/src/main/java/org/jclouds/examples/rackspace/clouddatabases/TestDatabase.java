@@ -56,8 +56,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
  * The load balancer is only needed for public access - it is not needed when accessing the database from the rackspace network. 
  * For more information: http://www.rackspace.com/knowledge_center/article/public-vs-private-access
  * The example connects to the database using JDBC over the load balancer and executes a simple command to confirm that the database is online.
- * 
- * @author Zack Shoylev
  */
 public class TestDatabase implements Closeable {
    // If you want to log instead of print, uncomment the line below

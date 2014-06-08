@@ -57,8 +57,6 @@ import com.google.inject.Module;
 
 /**
  * This example detaches the volume created in the CreateVolumeAndAttach example.
- * 
- * @author Everett Toews
  */
 public class DetachVolume implements Closeable {
    private final ComputeService computeService;

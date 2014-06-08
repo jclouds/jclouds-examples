@@ -33,7 +33,6 @@ import static org.jclouds.examples.rackspace.clouddns.Constants.PROVIDER;
 /**
  * This example lists records. 
  *  
- * @author Everett Toews
  */
 public class ListRecords implements Closeable {
    private final CloudDNSApi dnsApi;

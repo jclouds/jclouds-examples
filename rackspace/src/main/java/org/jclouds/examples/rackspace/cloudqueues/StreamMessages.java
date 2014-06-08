@@ -52,8 +52,6 @@ import static org.jclouds.openstack.marconi.v1.options.StreamMessagesOptions.Bui
  * indefinitely.
  *
  * You can also resume where you left off by remembering the marker.
- *
- * @author Everett Toews
  */
 public class StreamMessages implements Closeable {
    private final MarconiApi marconiApi;

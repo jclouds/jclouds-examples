@@ -19,9 +19,6 @@ package org.jclouds.examples.blobstore.osgi.shell;
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
-/**
- * @author: iocanel
- */
 @Command(scope = "jclouds", name = "blobstore-read", description = "Reads data from the blobstore")
 public class ReadCommand extends BlobStoreCommandSupport {
 

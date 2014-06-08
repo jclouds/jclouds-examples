@@ -50,8 +50,6 @@ import com.google.common.net.HostAndPort;
  * small lamp server.
  * 
  * Usage is: java MainApp accesskeyid secretkey command name where command in create destroy
- * 
- * @author Adrian Cole
  */
 public class MainApp {
 

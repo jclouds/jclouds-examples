@@ -38,7 +38,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example creates records on an existing domain. 
  *  
- * @author Everett Toews
  */
 public class CreateRecords implements Closeable {
    private final CloudDNSApi dnsApi;

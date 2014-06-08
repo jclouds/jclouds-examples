@@ -22,8 +22,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Constants used by the Google Compute Engine Examples.
- * 
- * @author Mikolaj Zalewski (based on code by Everett Toews)
  */
 public interface Constants {
    public static final String PROVIDER = System.getProperty("provider.cs", "google-compute-engine");

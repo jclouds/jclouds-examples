@@ -37,8 +37,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
 /**
  * This example creates a Cloud Databases instance. 
  * This instance will be used to run a database later on in the Create Database example.
- * 
- * @author Zack Shoylev
  */
 public class CreateInstance implements Closeable {
    private final TroveApi troveApi;

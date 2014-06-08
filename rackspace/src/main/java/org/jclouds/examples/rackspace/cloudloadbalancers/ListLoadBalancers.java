@@ -32,7 +32,6 @@ import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.PROVID
 /**
  * This example lists all Load Balancers. 
  *  
- * @author Everett Toews
  */
 public class ListLoadBalancers implements Closeable {
    private final CloudLoadBalancersApi clbApi;

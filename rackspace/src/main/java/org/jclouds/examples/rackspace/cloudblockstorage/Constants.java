@@ -22,8 +22,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Constants used by the Rackspace Examples.
- *
- * @author Everett Toews
  */
 public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)

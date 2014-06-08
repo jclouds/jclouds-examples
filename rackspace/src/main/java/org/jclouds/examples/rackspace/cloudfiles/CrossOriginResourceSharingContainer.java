@@ -41,8 +41,6 @@ import com.google.common.io.Closeables;
  * your container, you tell Cloud Files which sites may post to your account, how often your container checks its 
  * allowed sites list, and whether or not metadata headers can be passed with the objects.
  *  
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class CrossOriginResourceSharingContainer implements Closeable {
    private final CloudFilesApi cloudFiles;

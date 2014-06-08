@@ -56,7 +56,6 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
  * Additionally, you need not worry about time running out when someone downloads a large object. If the time expires 
  * while a file is being retrieved, the download will continue until it is finished. Only the link will expire.
  *  
- * @author Everett Toews
  */
 public class GenerateTempURL implements Closeable {
    private static final String FILENAME = "object.txt";

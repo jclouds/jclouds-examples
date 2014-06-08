@@ -33,8 +33,6 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example deletes a volume.
- * 
- * @author Everett Toews
  */
 public class DeleteVolume implements Closeable {
    private final CinderApi cinderApi;

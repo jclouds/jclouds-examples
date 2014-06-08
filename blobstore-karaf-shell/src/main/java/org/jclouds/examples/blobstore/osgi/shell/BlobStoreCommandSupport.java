@@ -19,9 +19,6 @@ package org.jclouds.examples.blobstore.osgi.shell;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 import org.jclouds.examples.blobstore.osgi.BlobStoreService;
 
-/**
- * @author: iocanel
- */
 public abstract class BlobStoreCommandSupport extends OsgiCommandSupport {
 
     protected BlobStoreService blobStoreService;

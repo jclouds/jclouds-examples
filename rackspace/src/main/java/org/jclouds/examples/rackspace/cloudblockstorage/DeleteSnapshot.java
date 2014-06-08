@@ -33,8 +33,6 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.*;
 
 /**
  * This example deletes a snapshot.
- * 
- * @author Everett Toews
  */
 public class DeleteSnapshot implements Closeable {
    private final CinderApi cinderApi;

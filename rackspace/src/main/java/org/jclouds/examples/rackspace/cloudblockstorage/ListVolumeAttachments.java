@@ -36,9 +36,6 @@ import com.google.common.io.Closeables;
 
 /**
  * This example lists the volume attachments of a server.
- * 
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class ListVolumeAttachments implements Closeable {
    private final NovaApi nova;

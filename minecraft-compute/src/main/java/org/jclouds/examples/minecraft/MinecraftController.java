@@ -42,9 +42,6 @@ import org.jclouds.scriptbuilder.InitScript;
 
 import com.google.common.net.HostAndPort;
 
-/**
- * @author Adrian Cole
- */
 @Singleton
 public class MinecraftController implements Closeable {
 

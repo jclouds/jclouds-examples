@@ -45,8 +45,6 @@ import static org.jclouds.examples.google.computeengine.Constants.*;
 /**
  * This example creates a Debian Wheezy server on a f1-micro instance on the
  * Google Compute Engine.
- *
- * @author Mikolaj Zalewski (based on code by Everett Toews)
  */
 public class CreateServer implements Closeable {
    private final ComputeService computeService;

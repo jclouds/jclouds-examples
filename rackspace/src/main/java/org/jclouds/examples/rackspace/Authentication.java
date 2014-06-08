@@ -40,9 +40,6 @@ import com.google.common.io.Closeables;
  * 
  * This example demostrates how you would authenticate via username and password or API key. The default is
  * authentication via API key, which is used in the rest of the examples in this package.
- * 
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class Authentication implements Closeable {
    private final NovaApi nova;

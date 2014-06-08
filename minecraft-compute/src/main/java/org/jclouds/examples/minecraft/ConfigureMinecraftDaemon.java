@@ -32,10 +32,6 @@ import org.jclouds.scriptbuilder.InitScript;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
-/**
- * 
- * @author Adrian Cole
- */
 public class ConfigureMinecraftDaemon extends AbstractModule {
    
    @Override

@@ -31,8 +31,6 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDE
 
 /**
  * This example lists all volume types.
- * 
- * @author Everett Toews
  */
 public class ListVolumeTypes implements Closeable {
    private final CinderApi cinderApi;

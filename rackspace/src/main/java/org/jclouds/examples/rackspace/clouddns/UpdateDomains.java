@@ -35,7 +35,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example updates a domain. 
  *  
- * @author Everett Toews
  */
 public class UpdateDomains implements Closeable {
    private final CloudDNSApi dnsApi;

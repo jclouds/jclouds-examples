@@ -60,8 +60,6 @@ import static org.jclouds.openstack.marconi.v1.options.StreamMessagesOptions.Bui
  * 4. TTL deletes messages eventually.
  *
  * Ideal for notification of events to multiple listeners at once.
- *
- * @author Everett Toews
  */
 public class PublishSubscribe implements Closeable {
    private final MarconiApi marconiApi;

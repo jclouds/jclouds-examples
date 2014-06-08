@@ -54,9 +54,6 @@ import com.google.common.util.concurrent.MoreExecutors;
  * Upload an entire directory and all of its sub-directories to a Cloud Files container. The local directory hierarchy
  * will be mimicked as pseudo-hierarchical directories (http://j.mp/rax-hier) within the container. This is a great
  * way to upload content for a static website (http://j.mp/rax-static).     
- * 
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class UploadDirectoryToCDN implements Closeable {
    private static final int THREADS = Integer.getInteger("upload.threadpool.size", 10);

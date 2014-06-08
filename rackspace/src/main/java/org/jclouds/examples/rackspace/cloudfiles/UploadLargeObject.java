@@ -42,9 +42,6 @@ import com.google.common.io.Files;
 
 /**
  * Upload a large object in the Cloud Files container from the CreateContainer example.
- * 
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class UploadLargeObject implements Closeable {
    private BlobStore blobStore;

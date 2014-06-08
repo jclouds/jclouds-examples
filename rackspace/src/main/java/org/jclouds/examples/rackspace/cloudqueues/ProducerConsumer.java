@@ -61,8 +61,6 @@ import static org.jclouds.examples.rackspace.cloudqueues.Constants.ZONE;
  * 4. Ideal for dispatching jobs to multiple processors.
  *
  * This mode is ideal for dispatching jobs to multiple processors.
- *
- * @author Everett Toews
  */
 public class ProducerConsumer implements Closeable {
    private final MarconiApi marconiApi;

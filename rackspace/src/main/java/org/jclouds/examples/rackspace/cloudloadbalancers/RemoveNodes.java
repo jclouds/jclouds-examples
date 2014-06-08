@@ -40,7 +40,6 @@ import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.*;
 /**
  * This example removes a Node from a Load Balancer. 
  *  
- * @author Everett Toews
  */
 public class RemoveNodes implements Closeable {
    private final CloudLoadBalancersApi clbApi;

@@ -35,7 +35,6 @@ import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitCo
 /**
  * This example deletes all domains. 
  *  
- * @author Everett Toews
  */
 public class DeleteDomains implements Closeable {
    private final CloudDNSApi dnsApi;

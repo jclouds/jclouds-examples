@@ -33,8 +33,6 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
 
 /**
  * This example grants root permissions to the instance created in the CreateInstance example.
- * 
- * @author Zack Shoylev
  */
 public class GrantRootAccess implements Closeable {
    private final TroveApi troveApi;

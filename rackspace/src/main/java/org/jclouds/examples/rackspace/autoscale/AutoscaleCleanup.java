@@ -42,8 +42,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 /**
  * This code cleans up the autoscale examples and can be used as an example for cleanup and delete.
  * Note that you need to cleanup the group before you can delete it.
- *
- * @author Zack Shoylev
  */
 public class AutoscaleCleanup implements Closeable {
    private final AutoscaleApi autoscaleApi;

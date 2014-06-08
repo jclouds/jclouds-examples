@@ -48,8 +48,6 @@ import java.util.Set;
 
 /**
  * Demonstrates the use of {@link org.jclouds.cloudwatch.features.MetricClient}.
- *
- * @author Jeremy Whitlock
  */
 public class MainApp {
 

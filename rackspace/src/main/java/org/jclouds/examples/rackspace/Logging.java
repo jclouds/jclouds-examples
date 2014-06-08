@@ -42,9 +42,6 @@ import com.google.inject.Module;
  * the logging. As it is configured right now it will log wire input/output and headers to standard out (STDOUT).
  * This means that you will be able to see on your console everything that is sent in the request (marked by ">>")
  * and everything received in the response (marked by "<<").
- * 
- * @author Everett Toews
- * @author Jeremy Daggett
  */
 public class Logging implements Closeable {
    private final NovaApi nova;

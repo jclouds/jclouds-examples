@@ -18,29 +18,8 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.concurrent.Executors.newFixedThreadPool;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
-
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
-import org.jclouds.ContextBuilder;
-import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
-import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.io.Payloads;
-import org.jclouds.openstack.swift.v1.options.UpdateContainerOptions;
-import org.jclouds.openstack.swift.v1.reference.SwiftHeaders;
-import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
-
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteSource;
@@ -51,6 +30,30 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobStore;
+import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.domain.Location;
+import org.jclouds.io.Payloads;
+import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
+import org.jclouds.openstack.swift.v1.options.UpdateContainerOptions;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Iterables.getOnlyElement;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
+import static org.jclouds.openstack.swift.v1.reference.SwiftHeaders.STATIC_WEB_ERROR;
+import static org.jclouds.openstack.swift.v1.reference.SwiftHeaders.STATIC_WEB_INDEX;
 
 /**
  * Upload an entire directory and all of its sub-directories to a Cloud Files container. The local directory hierarchy
@@ -87,9 +90,10 @@ public class UploadDirectoryToCDN implements Closeable {
    }
 
    public UploadDirectoryToCDN(String username, String apiKey) {
-      ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
-            .credentials(username, apiKey);
-      blobStore = builder.buildView(BlobStoreContext.class).getBlobStore();
+      RegionScopedBlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
+            .credentials(username, apiKey)
+            .buildView(RegionScopedBlobStoreContext.class);
+      blobStore = context.blobStoreInRegion(REGION);
       cloudFiles = blobStore.getContext().unwrapApi(CloudFilesApi.class);
    }
 
@@ -99,10 +103,12 @@ public class UploadDirectoryToCDN implements Closeable {
    private void uploadDirectory(String dirPath, String container) throws InterruptedException, ExecutionException {
       File dir = new File(dirPath);
       checkArgument(dir.isDirectory(), "%s is not a directory", dirPath);
-      
+
       System.out.format("Uploading %s to %s", dirPath, container);
 
-      blobStore.createContainerInLocation(null, container);
+      // There is only one assignable location because we are using the RegionScopedBlobStoreContext
+      Location location = getOnlyElement(blobStore.listAssignableLocations());
+      blobStore.createContainerInLocation(location, container);
 
       List<BlobDetail> blobDetails = Lists.newArrayList();
       generateFileList(dir, "", blobDetails);
@@ -171,8 +177,8 @@ public class UploadDirectoryToCDN implements Closeable {
    private void enableCdnContainer(String container) {
       System.out.format("Enable CDN%n");
       Multimap<String, String> enableStaticWebHeaders =
-            ImmutableMultimap.of(SwiftHeaders.STATIC_WEB_INDEX, "index.html",
-                                 SwiftHeaders.STATIC_WEB_ERROR, "error.html");
+            ImmutableMultimap.of(STATIC_WEB_INDEX, "index.html",
+                                 STATIC_WEB_ERROR, "error.html");
 
       UpdateContainerOptions opts = new UpdateContainerOptions().headers(enableStaticWebHeaders);
       cloudFiles.getContainerApiForRegion(REGION).update(container, opts);

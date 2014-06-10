@@ -62,6 +62,7 @@ public class SmokeTest {
       CloudFilesPublish.main(args);
       CreateContainer.main(args);
       ListContainers.main(args);
+      GenerateTempURL.main(args);
       UploadObjects.main(args);
       ListObjects.main(args);
       CrossOriginResourceSharingContainer.main(args);

@@ -23,6 +23,8 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.FILENAME;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.SUFFIX;
+import static org.jclouds.openstack.swift.v1.reference.SwiftHeaders.STATIC_WEB_ERROR;
+import static org.jclouds.openstack.swift.v1.reference.SwiftHeaders.STATIC_WEB_INDEX;
 
 import java.io.Closeable;
 import java.io.File;
@@ -85,10 +87,10 @@ public class CloudFilesPublish implements Closeable {
     */
    private void createContainer() {
       System.out.format("Create Container%n");
-      // create a Multimap for the static web headers
+
       Multimap<String, String> enableStaticWebHeaders =
-            ImmutableMultimap.of(SwiftHeaders.STATIC_WEB_INDEX, FILENAME + SUFFIX,
-                                 SwiftHeaders.STATIC_WEB_ERROR, "error.html");
+            ImmutableMultimap.of(STATIC_WEB_INDEX, FILENAME + SUFFIX,
+                                 STATIC_WEB_ERROR, "error.html");
       
       CreateContainerOptions opts = new CreateContainerOptions().headers(enableStaticWebHeaders);
       cloudFiles.getContainerApiForRegion(REGION).create(CONTAINER_PUBLISH, opts);

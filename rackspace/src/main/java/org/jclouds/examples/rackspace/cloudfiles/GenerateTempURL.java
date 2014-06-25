@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,31 +41,31 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 /**
- * The Temporary URL feature (TempURL) allows you to create limited-time Internet addresses which allow you to grant 
- * limited access to your Cloud Files account. Using TempURL, you may allow others to retrieve or place objects in 
- * your Cloud Files account for as long or as short a time as you wish. Access to the TempURL is independent of 
- * whether or not your account is CDN-enabled. And even if you don't CDN-enable a directory, you can still grant 
+ * The Temporary URL feature (TempURL) allows you to create limited-time Internet addresses which allow you to grant
+ * limited access to your Cloud Files account. Using TempURL, you may allow others to retrieve or place objects in
+ * your Cloud Files account for as long or as short a time as you wish. Access to the TempURL is independent of
+ * whether or not your account is CDN-enabled. And even if you don't CDN-enable a directory, you can still grant
  * temporary public access through a TempURL.
- * 
+ *
  * This feature is useful if you want to allow a limited audience to download a file from your Cloud Files account or
- * website. You can give out the TempURL and know that after a specified time, no one will be able to access your 
- * object through the address. Or, if you want to allow your audience to upload objects into your Cloud Files account, 
+ * website. You can give out the TempURL and know that after a specified time, no one will be able to access your
+ * object through the address. Or, if you want to allow your audience to upload objects into your Cloud Files account,
  * you can give them a TempURL. After the specified time expires, no one will be able to upload to the address.
- * 
- * Additionally, you need not worry about time running out when someone downloads a large object. If the time expires 
+ *
+ * Additionally, you need not worry about time running out when someone downloads a large object. If the time expires
  * while a file is being retrieved, the download will continue until it is finished. Only the link will expire.
- *  
+ *
  */
 public class GenerateTempURL implements Closeable {
    private static final String FILENAME = "object.txt";
    private static final int TEN_MINUTES = 10 * 60;
-   
+
    private final BlobStore blobStore;
    private final RegionScopedBlobStoreContext blobStoreContext;
 
    /**
     * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -91,25 +91,25 @@ public class GenerateTempURL implements Closeable {
             .buildView(RegionScopedBlobStoreContext.class);
       blobStore = blobStoreContext.blobStoreInRegion(REGION);
    }
-   
+
    private void generatePutTempURL() throws IOException {
       System.out.format("Generate PUT Temp URL%n");
-      
+
       // Create the Payload
       String data = "This object will be public for 10 minutes.";
       ByteSource source = ByteSource.wrap(data.getBytes());
       Payload payload = Payloads.newByteSourcePayload(source);
-      
+
       // Create the Blob
       Blob blob = blobStore.blobBuilder(FILENAME).payload(payload).contentType("text/plain").build();
       HttpRequest request = blobStoreContext.getSigner().signPutBlob(CONTAINER, blob, TEN_MINUTES);
-      
+
       System.out.format("  %s %s%n", request.getMethod(), request.getEndpoint());
-      
+
       // PUT the file using jclouds
       HttpResponse response = blobStoreContext.utils().http().invoke(request);
       int statusCode = response.getStatusCode();
-      
+
       if (statusCode >= 200 && statusCode < 299) {
          System.out.format("  PUT Success (%s)%n", statusCode);
       }
@@ -120,11 +120,11 @@ public class GenerateTempURL implements Closeable {
 
    private void generateGetTempURL() throws IOException {
       System.out.format("Generate GET Temp URL%n");
-      
+
       HttpRequest request = blobStoreContext.getSigner().signGetBlob(CONTAINER, FILENAME, TEN_MINUTES);
-      
+
       System.out.format("  %s %s%n", request.getMethod(), request.getEndpoint());
-      
+
       // GET the file using jclouds
       File file = File.createTempFile(FILENAME, ".tmp");
       Payload payload = blobStoreContext.utils().http().invoke(request).getPayload();
@@ -141,15 +141,15 @@ public class GenerateTempURL implements Closeable {
 
    private void generateDeleteTempURL() throws IOException {
       System.out.format("Generate DELETE Temp URL%n");
-      
+
       HttpRequest request = blobStoreContext.getSigner().signRemoveBlob(CONTAINER, FILENAME);
-      
+
       System.out.format("  %s %s%n", request.getMethod(), request.getEndpoint());
-      
+
       // DELETE the file using jclouds
       HttpResponse response = blobStoreContext.utils().http().invoke(request);
       int statusCode = response.getStatusCode();
-      
+
       if (statusCode >= 200 && statusCode < 299) {
          System.out.format("  DELETE Success (%s)", statusCode);
       }

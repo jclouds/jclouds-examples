@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -53,41 +53,41 @@ import static org.jclouds.examples.rackspace.clouddatabases.Constants.*;
  * This example uses the already created database instance, database user, and database from the examples:
  * CreateInstance, CreateDatabase, CreateUser
  * This example will create a load balancer to allow public access to the database.
- * The load balancer is only needed for public access - it is not needed when accessing the database from the rackspace network. 
+ * The load balancer is only needed for public access - it is not needed when accessing the database from the rackspace network.
  * For more information: http://www.rackspace.com/knowledge_center/article/public-vs-private-access
  * The example connects to the database using JDBC over the load balancer and executes a simple command to confirm that the database is online.
  */
 public class TestDatabase implements Closeable {
    // If you want to log instead of print, uncomment the line below
-   // private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestDatabase.class); 
+   // private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestDatabase.class);
    private final CloudLoadBalancersApi clbApi;
    private final LoadBalancerApi lbApi;
    private final TroveApi troveApi;
    private final InstanceApi instanceApi;
 
    /**
-    * To get a username and API key see 
+    * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument  (args[0]) must be your username.
     * The second argument (args[1]) must be your API key.
-    */   
-   public static void main(String[] args) throws IOException {      
+    */
+   public static void main(String[] args) throws IOException {
       TestDatabase testDatabase = new TestDatabase(args[0], args[1]);
 
       try {
          Set<AddNode> addNodes = testDatabase.addNodesOfDatabaseInstances();
          testDatabase.createLoadBalancer(addNodes);
-         
+
          boolean success;
          do{
             success = testDatabase.testDatabase();
             Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
          } while(!success);
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          testDatabase.close();
       }
@@ -121,7 +121,7 @@ public class TestDatabase implements Closeable {
 
       throw new RuntimeException(NAME + " not found. Run the CreateInstance example first.");
    }
-   
+
    /**
     * @return Returns a set of a single cloud load balancer node that can be used to connect to the database from the public Internet
     */
@@ -131,13 +131,13 @@ public class TestDatabase implements Closeable {
                                  .condition(Node.Condition.ENABLED)
                                  .port(3306)
                                  .build();
-      
-      return Sets.newHashSet(addNode01);      
+
+      return Sets.newHashSet(addNode01);
    }
-   
+
    /**
     * Builds and executes the request to create a load balancer service using a set of nodes.
-    * 
+    *
     * @param addNodes The set of cloud load balancer nodes.
     */
    private void createLoadBalancer(Set<AddNode> addNodes) throws TimeoutException {
@@ -158,32 +158,32 @@ public class TestDatabase implements Closeable {
       do {
          loadBalancer = lbApi.create(createLB);
          Uninterruptibles.sleepUninterruptibly(30, TimeUnit.SECONDS);
-      } 
+      }
       while(loadBalancer == null);
 
-      
+
       // Wait for the Load Balancer to become Active before moving on.
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       // Even when the load balancer returns active, it might take a while before connections to the database are possible.
       if (!LoadBalancerPredicates.awaitAvailable(lbApi).apply(loadBalancer)) {
-         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
+         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);
       }
-      
+
       System.out.format("  %s%n", loadBalancer);
    }
-   
+
    private String getVirtualIPv4(Set<VirtualIPWithId> set) {
       for (VirtualIPWithId virtualIP: set) {
-         if (virtualIP.getType().equals(VirtualIP.Type.PUBLIC) && 
+         if (virtualIP.getType().equals(VirtualIP.Type.PUBLIC) &&
              virtualIP.getIpVersion().equals(VirtualIP.IPVersion.IPV4)) {
             return virtualIP.getAddress();
          }
       }
-      
+
       throw new RuntimeException("Public IPv4 address not found.");
    }
-   
+
    /**
     * @return LoadBalancer The LoadBalancer created in this example.
     */
@@ -200,15 +200,15 @@ public class TestDatabase implements Closeable {
    /**
     * Connects to the database using JDBC over the load balancer and executes a simple query without creating a database table.
     * This will verify that the database engine is running on the remote instance.
-    * 
+    *
     * @return true if connection successful and database engine responsive.
     */
    private boolean testDatabase() throws TimeoutException {
       System.out.format("Connect to database%n");
-      
+
       // See http://dev.mysql.com/doc/refman/5.6/en/connector-j-examples.html
       Connection conn;
-      
+
       try {
          StringBuilder connString = new StringBuilder();
          connString.append("jdbc:mysql://"); // Begin building the JDBC connection string by specifying the database type.
@@ -219,9 +219,9 @@ public class TestDatabase implements Closeable {
          connString.append(NAME); // User name
          connString.append("&password=");
          connString.append(PASSWORD); // Database user password
-         
+
          System.out.format("  Connecting to %s%n", connString); // remove this in your code, never echo credentials
-         
+
          conn = DriverManager.getConnection(connString.toString());
 
          Statement stmt = null;
@@ -233,18 +233,18 @@ public class TestDatabase implements Closeable {
             rs.first();
 
             System.out.format("  3+5 is %s%n", rs.getInt(1));
-         } 
+         }
          catch (SQLException e){
             System.out.format("SQLException: %s%n", e.getMessage());
             System.out.format("SQLState: %s%n", e.getSQLState());
             System.out.format("VendorError: %s%n", e.getErrorCode());
             e.printStackTrace();
-            
+
             return false;
-         } 
-         finally {            
+         }
+         finally {
             // Release resources in reverse order of creation.
-            
+
             if (rs != null) {
                try {
                   rs.close();
@@ -262,7 +262,7 @@ public class TestDatabase implements Closeable {
                   // Ignore - you might get an exception if closing out of order.
                }
             }
-             
+
             if(conn != null) {
                try {
                   conn.close();
@@ -272,13 +272,13 @@ public class TestDatabase implements Closeable {
                }
             }
          }
-      } 
+      }
       catch (SQLException e) {
          System.out.format("SQLException: %s%n", e.getMessage());
          System.out.format("SQLState: %s%n", e.getSQLState());
          System.out.format("VendorError: %s%n", e.getErrorCode());
          e.printStackTrace();
-         
+
          return false;
       }
 

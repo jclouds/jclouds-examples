@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -48,7 +48,7 @@ public class UploadLargeObject implements Closeable {
 
    /**
     * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     * The third argument (args[2]) must be the absolute path to a large file
@@ -83,9 +83,9 @@ public class UploadLargeObject implements Closeable {
 
    /**
     * Upload a large object from a File using the BlobStore API.
-    * 
-    * @throws ExecutionException 
-    * @throws InterruptedException 
+    *
+    * @throws ExecutionException
+    * @throws InterruptedException
     */
    private void uploadLargeObjectFromFile(File largeFile) throws InterruptedException, ExecutionException {
       System.out.format("Upload Large Object From File%n");

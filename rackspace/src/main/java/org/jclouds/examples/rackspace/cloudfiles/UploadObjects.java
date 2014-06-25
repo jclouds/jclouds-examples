@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -43,7 +43,7 @@ import com.google.common.io.Files;
 
 /**
  * Upload objects in the Cloud Files container from the CreateContainer example.
- *  
+ *
  */
 public class UploadObjects implements Closeable {
    private final BlobStore blobStore;
@@ -51,7 +51,7 @@ public class UploadObjects implements Closeable {
 
    /**
     * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -79,7 +79,7 @@ public class UploadObjects implements Closeable {
    }
 
    /**
-    * Upload an object from a File using the Swift API. 
+    * Upload an object from a File using the Swift API.
     */
    private void uploadObjectFromFile() throws IOException {
       System.out.format("Upload Object From File%n");
@@ -105,7 +105,7 @@ public class UploadObjects implements Closeable {
    }
 
    /**
-    * Upload an object from a String using the Swift API. 
+    * Upload an object from a String using the Swift API.
     */
    private void uploadObjectFromString() {
       System.out.format("Upload Object From String%n");
@@ -121,7 +121,7 @@ public class UploadObjects implements Closeable {
    }
 
    /**
-    * Upload an object from a String with metadata using the BlobStore API. 
+    * Upload an object from a String with metadata using the BlobStore API.
     */
    private void uploadObjectFromStringWithMetadata() {
       System.out.format("Upload Object From String With Metadata%n");

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,7 +41,7 @@ import com.google.common.io.Closeables;
 
 /**
  * This example sets, gets, updates, and deletes metadata from a server.
- *  
+ *
  */
 public class ServerMetadata implements Closeable {
    private final ComputeService computeService;
@@ -50,7 +50,7 @@ public class ServerMetadata implements Closeable {
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -100,8 +100,8 @@ public class ServerMetadata implements Closeable {
       System.out.format("Set Metadata%n");
 
       ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of(
-            "key1", "value1", 
-            "key2", "value2", 
+            "key1", "value1",
+            "key2", "value2",
             "key3", "value3");
       Map<String, String> responseMetadata = serverApi.setMetadata(server.getId(), metadata);
 

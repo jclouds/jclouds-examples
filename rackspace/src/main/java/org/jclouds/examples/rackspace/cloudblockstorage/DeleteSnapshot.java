@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,8 +41,8 @@ public class DeleteSnapshot implements Closeable {
    /**
     * To get a username and API key see
     * http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
-    * The first argument (args[0]) must be your username 
+    *
+    * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
@@ -51,10 +51,10 @@ public class DeleteSnapshot implements Closeable {
       try {
          Snapshot snapshot = deleteSnapshot.getSnapshot();
          deleteSnapshot.deleteSnapshot(snapshot);
-      } 
+      }
       catch (Exception e) {
          e.printStackTrace();
-      } 
+      }
       finally {
          deleteSnapshot.close();
       }
@@ -82,7 +82,7 @@ public class DeleteSnapshot implements Closeable {
 
    private void deleteSnapshot(Snapshot snapshot) throws TimeoutException {
       System.out.format("Delete Snapshot%n");
-      
+
       boolean result = snapshotApi.delete(snapshot.getId());
 
       // Wait for the snapshot to be deleted before moving on

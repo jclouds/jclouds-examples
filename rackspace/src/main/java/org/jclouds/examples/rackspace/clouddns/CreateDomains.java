@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,15 +38,15 @@ import static org.jclouds.examples.rackspace.clouddns.Constants.*;
 import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
 
 /**
- * This example creates a domain with subdomains and records. 
- *  
+ * This example creates a domain with subdomains and records.
+ *
  */
 public class CreateDomains implements Closeable {
    private final CloudDNSApi dnsApi;
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -72,34 +72,34 @@ public class CreateDomains implements Closeable {
 
    private void createDomains() throws TimeoutException {
       System.out.format("Create Domains%n");
-      
+
       Record createMXRecord = Record.builder()
             .name(NAME)
             .type("MX")
             .data("mail." + NAME)
             .priority(11235)
             .build();
-      
+
       Record createARecord = Record.builder()
             .name(NAME)
             .type("A")
             .data("10.0.0.1")
             .build();
-      
+
       Set<Record> createRecords = ImmutableSet.of(createMXRecord, createARecord);
-      
+
       CreateSubdomain createSubdomain1 = CreateSubdomain.builder()
             .name("dev." + NAME)
             .email("jclouds@" + NAME)
             .comment("Hello dev subdomain")
             .build();
-      
+
       CreateSubdomain createSubdomain2 = CreateSubdomain.builder()
             .name("test." + NAME)
             .email("jclouds@" + NAME)
             .comment("Hello test subdomain")
             .build();
-      
+
       Set<CreateSubdomain> createSubdomains = ImmutableSet.of(createSubdomain1, createSubdomain2);
 
       CreateDomain createDomain1 = CreateDomain.builder()
@@ -120,15 +120,15 @@ public class CreateDomains implements Closeable {
 
       Set<CreateDomain> createDomains = ImmutableSet.of(createDomain1, createDomain2);
       Map<String, Domain> domains = DomainFunctions.toDomainMap(awaitComplete(dnsApi, dnsApi.getDomainApi().create(createDomains)));
-      
+
       System.out.format("  %s%n", domains.get(NAME));
       System.out.format("  %s%n", domains.get(ALT_NAME));
    }
 
    /**
     * Always close your service when you're done with it.
-    * 
-    * Note that closing quietly like this is not necessary in Java 7. 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
     */
    public void close() throws IOException {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,10 +39,10 @@ import com.google.common.io.Closeables;
 
 /**
  * Create a Cloud Files container with Cross Origin Resource Sharing (CORS) allowed. CORS container headers allow
- * users to upload files from one website--or origin--to your Cloud Files account. When you set the CORS headers on 
- * your container, you tell Cloud Files which sites may post to your account, how often your container checks its 
+ * users to upload files from one website--or origin--to your Cloud Files account. When you set the CORS headers on
+ * your container, you tell Cloud Files which sites may post to your account, how often your container checks its
  * allowed sites list, and whether or not metadata headers can be passed with the objects.
- *  
+ *
  */
 public class CrossOriginResourceSharingContainer implements Closeable {
    private final CloudFilesApi cloudFiles;
@@ -50,7 +50,7 @@ public class CrossOriginResourceSharingContainer implements Closeable {
 
    /**
     * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -78,8 +78,8 @@ public class CrossOriginResourceSharingContainer implements Closeable {
 
    /**
     * Create a Cross Origin Resource Sharing container.
-    * 
-    * Access-Control-Allow-Origin:  Which URLs can make Cross Origin Requests. Format is http://www.example.com. 
+    *
+    * Access-Control-Allow-Origin:  Which URLs can make Cross Origin Requests. Format is http://www.example.com.
     *                               Separate URLs with a space. An asterisk (*) allows all.
     * Access-Control-Max-Age:       The maximum age for the browser to cache the options request, in seconds.
     * Access-Control-Allow-Headers: Which custom metadata headers you allow to be assigned to objects in this container.
@@ -116,7 +116,7 @@ public class CrossOriginResourceSharingContainer implements Closeable {
 
       Container container = containerApi.get(CONTAINER);
       System.out.format("    %s%n", container.getMetadata());
-   }   
+   }
 
    /**
     * Always close your service when you're done with it.

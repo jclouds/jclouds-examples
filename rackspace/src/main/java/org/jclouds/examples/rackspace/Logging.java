@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,11 +33,11 @@ import com.google.inject.Module;
 /**
  * This example shows you how to log what jclouds is doing. This is extremely useful for debugging, submitting bug
  * reports, getting help, and figuring exactly what the HTTP requests and resonses look like.
- * 
+ *
  * In this example we use the Simple Logging Facade for Java (SLF4J). The implementation of SLF4J that we'll use is
  * Logback so you'll need to download the Logback JARs from http://logback.qos.ch/download.html and put them on your
  * classpath.
- * 
+ *
  * The last key ingredient is the file /jclouds-examples/rackspace/src/main/resources/logback.xml which configures
  * the logging. As it is configured right now it will log wire input/output and headers to standard out (STDOUT).
  * This means that you will be able to see on your console everything that is sent in the request (marked by ">>")
@@ -48,7 +48,7 @@ public class Logging implements Closeable {
 
     /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -77,7 +77,7 @@ public class Logging implements Closeable {
       nova = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .modules(modules) // don't forget to add the modules to your context!
-            .buildApi(NovaApi.class); 
+            .buildApi(NovaApi.class);
    }
 
    private void getConfiguredZones() {

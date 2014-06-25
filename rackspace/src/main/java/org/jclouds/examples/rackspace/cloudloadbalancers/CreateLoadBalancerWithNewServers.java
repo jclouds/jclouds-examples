@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,8 +41,8 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseLo
 import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
 /**
- * This example creates a Load Balancer with new Cloud Servers on the Rackspace Cloud. 
- *  
+ * This example creates a Load Balancer with new Cloud Servers on the Rackspace Cloud.
+ *
  */
 public class CreateLoadBalancerWithNewServers implements Closeable {
    private final CloudLoadBalancersApi clbApi;
@@ -50,7 +50,7 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -85,29 +85,29 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
     */
    private Set<AddNode> createNodeRequests(Set<? extends NodeMetadata> nodes) {
       Set<AddNode> addNodes = Sets.newHashSet();
-      
+
       for (NodeMetadata node: nodes) {
          String privateAddress = node.getPrivateAddresses().iterator().next();
-         
+
          AddNode addNode = AddNode.builder()
                .address(privateAddress)
                .condition(ENABLED)
                .port(80)
                .weight(20)
                .build();
-         
+
          addNodes.add(addNode);
       }
-      
+
       return addNodes;
    }
 
    /**
     * Create a Load Balancer that randomly distributes requests to its nodes. Normally you will want to use a
     * different algorithm for your Load Balancers (see LoadBalancer.Algorithm) but random nicely demonstrates
-    * how requests are sent to diffent nodes when you reload the "Go to" URL printed out in the terminal.   
-    * 
-    * To see an example of creating a Load Balancer with existing Cloud Servers see  
+    * how requests are sent to diffent nodes when you reload the "Go to" URL printed out in the terminal.
+    *
+    * To see an example of creating a Load Balancer with existing Cloud Servers see
     * CreateLoadBalancerWithExistingServers.
     */
    private void createLoadBalancer(Set<AddNode> addNodes) throws TimeoutException {
@@ -121,20 +121,20 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
             .nodes(addNodes)
             .virtualIPType(PUBLIC)
             .build();
-      
+
       LoadBalancer loadBalancer = lbApi.create(createLB);
-      
+
       // Wait for the Load Balancer to become Active before moving on
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!LoadBalancerPredicates.awaitAvailable(lbApi).apply(loadBalancer)) {
-         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
+         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);
       }
 
       System.out.format("  %s%n", loadBalancer);
       System.out.format("  Go to http://%s%n", getVirtualIPv4(loadBalancer.getVirtualIPs()));
    }
-   
+
    private String getVirtualIPv4(Set<VirtualIPWithId> set) {
       for (VirtualIPWithId virtualIP: set) {
          if (virtualIP.getType().equals(PUBLIC) &&
@@ -142,14 +142,14 @@ public class CreateLoadBalancerWithNewServers implements Closeable {
             return virtualIP.getAddress();
          }
       }
-      
+
       throw new RuntimeException("Public IPv4 address not found.");
    }
 
    /**
     * Always close your service when you're done with it.
-    * 
-    * Note that closing quietly like this is not necessary in Java 7. 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
     */
    public void close() throws IOException {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -89,7 +89,7 @@ public class AutoscaleCleanup implements Closeable {
 
                if (!(p.getTarget().equals("0") && p.getTargetType().equals(ScalingPolicyTargetType.DESIRED_CAPACITY))) {
                   System.out.format("Removing servers %n");
-                  
+
                   // Update policy to 0 servers
                   CreateScalingPolicy scalingPolicy = CreateScalingPolicy.builder()
                         .cooldown(3)
@@ -98,10 +98,10 @@ public class AutoscaleCleanup implements Closeable {
                         .targetType(ScalingPolicyTargetType.DESIRED_CAPACITY)
                         .target("0")
                         .build();
-   
+
                   pa.update(policyId, scalingPolicy);
                   Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
-   
+
                   try {
                      pa.execute(policyId);
                   } catch (Exception e) {
@@ -116,7 +116,7 @@ public class AutoscaleCleanup implements Closeable {
             }
          }
       }
-      
+
    }
 
    /**

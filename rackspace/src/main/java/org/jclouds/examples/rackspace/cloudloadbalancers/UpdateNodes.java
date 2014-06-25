@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -39,8 +39,8 @@ import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNo
 import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
 /**
- * This example updates Nodes in a Load Balancer. 
- *  
+ * This example updates Nodes in a Load Balancer.
+ *
  */
 public class UpdateNodes implements Closeable {
    private final CloudLoadBalancersApi clbApi;
@@ -48,7 +48,7 @@ public class UpdateNodes implements Closeable {
 
    /**
     * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
-    * 
+    *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
     */
@@ -81,20 +81,20 @@ public class UpdateNodes implements Closeable {
             return loadBalancer;
          }
       }
-      
+
       throw new RuntimeException(NAME + " not found. Run a CreateLoadBalancer* example first.");
    }
-   
+
    private Set<Node> getNodes(LoadBalancer loadBalancer) {
       NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
       Set<Node> nodes = Sets.newHashSet();
-      
+
       for (Node node: nodeApi.list().concat()) {
          if (node.getCondition().equals(DISABLED)) {
             nodes.add(node);
          }
       }
-      
+
       return nodes;
    }
 
@@ -107,7 +107,7 @@ public class UpdateNodes implements Closeable {
             .weight(20)
             .build();
 
-      for (Node node: nodes) {         
+      for (Node node: nodes) {
          nodeApi.update(node.getId(), updateNode);
          System.out.format("  %s %s%n", node.getId(), updateNode);
       }
@@ -116,14 +116,14 @@ public class UpdateNodes implements Closeable {
       // If you want to know what's happening during the polling, enable logging. See
       // /jclouds-example/rackspace/src/main/java/org/jclouds/examples/rackspace/Logging.java
       if (!LoadBalancerPredicates.awaitAvailable(lbApi).apply(loadBalancer)) {
-         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);     
+         throw new TimeoutException("Timeout on loadBalancer: " + loadBalancer);
       }
    }
 
    /**
     * Always close your service when you're done with it.
-    * 
-    * Note that closing quietly like this is not necessary in Java 7. 
+    *
+    * Note that closing quietly like this is not necessary in Java 7.
     * You would use try-with-resources in the main method instead.
     */
    public void close() throws IOException {

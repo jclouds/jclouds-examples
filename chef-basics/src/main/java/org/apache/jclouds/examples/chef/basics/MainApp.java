@@ -87,32 +87,28 @@ import com.google.inject.Module;
  * {@code chef} is used, the following parameter is a list of recipes to be installed in the node
  * separated by commas.
  */
-public class MainApp
-{
+public class MainApp {
 
-    public static enum Action
-    {
+    public static enum Action {
         ADD, CHEF, SOLO, DESTROY;
     }
 
     public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(
-        Apis.viewableAs(ComputeServiceContext.class), Apis.idFunction());
+            Apis.viewableAs(ComputeServiceContext.class), Apis.idFunction());
 
     public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(
-        Providers.viewableAs(ComputeServiceContext.class), Providers.idFunction());
+            Providers.viewableAs(ComputeServiceContext.class), Providers.idFunction());
 
     public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(
-        appProviders.keySet(), allApis.keySet()));
+            appProviders.keySet(), allApis.keySet()));
 
     public static int PARAMETERS = 5;
 
     public static String INVALID_SYNTAX =
-        "Invalid number of parameters. Syntax is: provider identity credential groupName (add|chef|solo|destroy)";
+            "Invalid number of parameters. Syntax is: provider identity credential groupName (add|chef|solo|destroy)";
 
-    public static void main(final String[] args)
-    {
-        if (args.length < PARAMETERS)
-        {
+    public static void main(final String[] args) {
+        if (args.length < PARAMETERS) {
             throw new IllegalArgumentException(INVALID_SYNTAX);
         }
 
@@ -121,8 +117,7 @@ public class MainApp
         String credential = args[2];
         String groupName = args[3];
         Action action = Action.valueOf(args[4].toUpperCase());
-        if ((action == Action.CHEF || action == Action.SOLO) && args.length < PARAMETERS + 1)
-        {
+        if ((action == Action.CHEF || action == Action.SOLO) && args.length < PARAMETERS + 1) {
             throw new IllegalArgumentException("please provide the list of recipes to install, separated by commas");
         }
         String recipes = action == Action.CHEF || action == Action.SOLO ? args[5] : "apache2";
@@ -131,17 +126,15 @@ public class MainApp
 
         // note that you can check if a provider is present ahead of time
         checkArgument(contains(allKeys, provider), "provider %s not in supported list: %s",
-            provider, allKeys);
+                provider, allKeys);
 
         LoginCredentials login =
-            action != Action.DESTROY ? getLoginForCommandExecution(action) : null;
+                action != Action.DESTROY ? getLoginForCommandExecution(action) : null;
 
         ComputeService compute = initComputeService(provider, identity, credential);
 
-        try
-        {
-            switch (action)
-            {
+        try {
+            switch (action) {
                 case ADD:
                     System.out.printf(">> adding node to group %s%n", groupName);
 
@@ -152,8 +145,7 @@ public class MainApp
 
                     // If you want to up the ram and leave everything default, you
                     // can just tweak minRam
-                    if (minRam != null)
-                    {
+                    if (minRam != null) {
                         templateBuilder.minRam(Integer.parseInt(minRam));
                     }
 
@@ -166,34 +158,33 @@ public class MainApp
                     templateBuilder.options(runScript(bootInstructions));
 
                     NodeMetadata node =
-                        getOnlyElement(compute.createNodesInGroup(groupName, 1,
-                            templateBuilder.build()));
+                            getOnlyElement(compute.createNodesInGroup(groupName, 1,
+                                    templateBuilder.build()));
                     System.out.printf("<< node %s: %s%n", node.getId(),
-                        concat(node.getPrivateAddresses(), node.getPublicAddresses()));
+                            concat(node.getPrivateAddresses(), node.getPublicAddresses()));
 
                 case SOLO:
                     System.out.printf(">> installing [%s] on group %s as %s%n", recipes, groupName,
-                        login.identity);
+                            login.identity);
 
                     Iterable<String> recipeList = Splitter.on(',').split(recipes);
                     ImmutableList.Builder<Statement> bootstrapBuilder = ImmutableList.builder();
                     bootstrapBuilder.add(new InstallGit());
 
                     // Clone community cookbooks into the node
-                    for (String recipe : recipeList)
-                    {
+                    for (String recipe : recipeList) {
                         bootstrapBuilder.add(CloneGitRepo.builder()
-                            .repository("git://github.com/opscode-cookbooks/" + recipe + ".git")
-                            .directory("/var/chef/cookbooks/" + recipe) //
-                            .build());
+                                .repository("git://github.com/opscode-cookbooks/" + recipe + ".git")
+                                .directory("/var/chef/cookbooks/" + recipe) //
+                                .build());
                     }
 
                     // Configure Chef Solo to bootstrap the selected recipes
                     bootstrapBuilder.add(new InstallChefUsingOmnibus());
                     bootstrapBuilder.add(ChefSolo.builder() //
-                        .cookbookPath("/var/chef/cookbooks") //
-                        .runlist(RunList.builder().recipes(recipeList).build()) //
-                        .build());
+                            .cookbookPath("/var/chef/cookbooks") //
+                            .runlist(RunList.builder().recipes(recipeList).build()) //
+                            .build());
 
                     // Build the statement that will perform all the operations above
                     StatementList bootstrap = new StatementList(bootstrapBuilder.build());
@@ -204,50 +195,42 @@ public class MainApp
                 case CHEF:
                     // Create the connection to the Chef server
                     ChefService chef =
-                        initChefService(System.getProperty("chef.client"),
-                            System.getProperty("chef.validator"));
+                            initChefService(System.getProperty("chef.client"),
+                                    System.getProperty("chef.validator"));
 
                     // Build the runlist for the deployed nodes
                     System.out.println("Configuring node runlist in the Chef server...");
                     List<String> runlist =
-                        new RunListBuilder().addRecipes(recipes.split(",")).build();
+                            new RunListBuilder().addRecipes(recipes.split(",")).build();
                     BootstrapConfig config = BootstrapConfig.builder().runList(runlist).build();
                     chef.updateBootstrapConfigForGroup(groupName, config);
                     Statement chefServerBootstrap = chef.createBootstrapScriptForGroup(groupName);
 
                     // Run the script in the nodes of the group
                     System.out.printf(">> installing [%s] on group %s as %s%n", recipes, groupName,
-                        login.identity);
+                            login.identity);
                     runScriptOnGroup(compute, login, groupName, chefServerBootstrap);
                     break;
                 case DESTROY:
                     System.out.printf(">> destroying nodes in group %s%n", groupName);
                     // you can use predicates to select which nodes you wish to
                     // destroy.
-                    Set< ? extends NodeMetadata> destroyed = compute.destroyNodesMatching(//
-                        Predicates.<NodeMetadata> and(not(TERMINATED), inGroup(groupName)));
+                    Set<? extends NodeMetadata> destroyed = compute.destroyNodesMatching(//
+                            Predicates.<NodeMetadata>and(not(TERMINATED), inGroup(groupName)));
                     System.out.printf("<< destroyed nodes %s%n", destroyed);
                     break;
             }
-        }
-        catch (RunNodesException e)
-        {
+        } catch (RunNodesException e) {
             System.err.println("error adding node to group " + groupName + ": " + e.getMessage());
             error = 1;
-        }
-        catch (RunScriptOnNodesException e)
-        {
+        } catch (RunScriptOnNodesException e) {
             System.err.println("error installing " + recipes + " on group " + groupName + ": "
-                + e.getMessage());
+                    + e.getMessage());
             error = 1;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println("error: " + e.getMessage());
             error = 1;
-        }
-        finally
-        {
+        } finally {
             compute.getContext().close();
             System.exit(error);
         }
@@ -256,32 +239,30 @@ public class MainApp
     static int error = 0;
 
     private static void runScriptOnGroup(final ComputeService compute,
-        final LoginCredentials login, final String groupName, final Statement command)
-        throws RunScriptOnNodesException
-    {
+                                         final LoginCredentials login, final String groupName, final Statement command)
+            throws RunScriptOnNodesException {
         // when you run commands, you can pass options to decide whether
         // to run it as root, supply or own credentials vs from cache,
         // and wrap in an init script vs directly invoke
-        Map< ? extends NodeMetadata, ExecResponse> execResponses =
-            compute.runScriptOnNodesMatching(//
-                inGroup(groupName), // predicate used to select nodes
-                command, // what you actually intend to run
-                overrideLoginCredentials(login)); // use the local user & ssh key
+        Map<? extends NodeMetadata, ExecResponse> execResponses =
+                compute.runScriptOnNodesMatching(//
+                        inGroup(groupName), // predicate used to select nodes
+                        command, // what you actually intend to run
+                        overrideLoginCredentials(login)); // use the local user & ssh key
 
-        for (Entry< ? extends NodeMetadata, ExecResponse> response : execResponses.entrySet())
-        {
+        for (Entry<? extends NodeMetadata, ExecResponse> response : execResponses.entrySet()) {
             System.out.printf(
-                "<< node %s: %s%n",
-                response.getKey().getId(),
-                concat(response.getKey().getPrivateAddresses(), response.getKey()
-                    .getPublicAddresses()));
+                    "<< node %s: %s%n",
+                    response.getKey().getId(),
+                    concat(response.getKey().getPrivateAddresses(), response.getKey()
+                            .getPublicAddresses())
+            );
             System.out.printf("<<     %s%n", response.getValue());
         }
     }
 
     private static ComputeService initComputeService(final String provider, final String identity,
-        final String credential)
-    {
+                                                     final String credential) {
         // example of specific properties, in this case optimizing image list to
         // only amazon supplied
         Properties properties = new Properties();
@@ -290,65 +271,56 @@ public class MainApp
 
         // example of injecting a ssh implementation
         Iterable<Module> modules =
-            ImmutableSet.<Module> of(new SshjSshClientModule(), new SLF4JLoggingModule(),
-                new EnterpriseConfigurationModule());
+                ImmutableSet.<Module>of(new SshjSshClientModule(), new SLF4JLoggingModule(),
+                        new EnterpriseConfigurationModule());
 
         ContextBuilder builder =
-            ContextBuilder.newBuilder(provider).credentials(identity, credential).modules(modules)
-                .overrides(properties);
+                ContextBuilder.newBuilder(provider).credentials(identity, credential).modules(modules)
+                        .overrides(properties);
 
         System.out.printf(">> initializing %s%n", builder.getApiMetadata());
 
         return builder.buildView(ComputeServiceContext.class).getComputeService();
     }
 
-    private static ChefService initChefService(final String client, final String validator)
-    {
-        try
-        {
+    private static ChefService initChefService(final String client, final String validator) {
+        try {
             Properties chefConfig = new Properties();
             chefConfig.put(ChefProperties.CHEF_VALIDATOR_NAME, validator);
             chefConfig
-                .put(ChefProperties.CHEF_VALIDATOR_CREDENTIAL, credentialForClient(validator));
+                    .put(ChefProperties.CHEF_VALIDATOR_CREDENTIAL, credentialForClient(validator));
 
             ContextBuilder builder = ContextBuilder.newBuilder(new ChefApiMetadata()) //
-                .credentials(client, credentialForClient(client)) //
-                .modules(ImmutableSet.<Module> of(new SLF4JLoggingModule())) //
-                .overrides(chefConfig); //
+                    .credentials(client, credentialForClient(client)) //
+                    .modules(ImmutableSet.<Module>of(new SLF4JLoggingModule())) //
+                    .overrides(chefConfig); //
 
             System.out.printf(">> initializing %s%n", builder.getApiMetadata());
 
-            ChefContext context = builder.build();
+            ChefContext context = builder.buildView(ChefContext.class);
             return context.getChefService();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println("error reading private key " + e.getMessage());
             System.exit(1);
             return null;
         }
     }
 
-    private static LoginCredentials getLoginForCommandExecution(final Action action)
-    {
-        try
-        {
+    private static LoginCredentials getLoginForCommandExecution(final Action action) {
+        try {
             String user = System.getProperty("user.name");
             String privateKey =
-                Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8);
+                    Files.toString(new File(System.getProperty("user.home") + "/.ssh/id_rsa"), UTF_8);
             return LoginCredentials.builder().user(user).privateKey(privateKey)
-                .authenticateSudo(true).build();
-        }
-        catch (Exception e)
-        {
+                    .authenticateSudo(true).build();
+        } catch (Exception e) {
             System.err.println("error reading ssh key " + e.getMessage());
             System.exit(1);
             return null;
         }
     }
 
-    private static String credentialForClient(final String client) throws Exception
-    {
+    private static String credentialForClient(final String client) throws Exception {
         String pemFile = System.getProperty("user.home") + "/.chef/" + client + ".pem";
         return Files.toString(new File(pemFile), UTF_8);
     }

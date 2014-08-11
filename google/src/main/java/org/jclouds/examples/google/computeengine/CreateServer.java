@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,17 +18,12 @@
  */
 package org.jclouds.examples.google.computeengine;
 
-import com.google.common.io.Closeables;
-import com.google.common.io.Files;
-
-import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
-import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.compute.RunNodesException;
-import org.jclouds.compute.domain.Hardware;
-import org.jclouds.compute.domain.Image;
-import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.compute.domain.Template;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
+import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
+import static org.jclouds.examples.google.computeengine.Constants.NAME;
+import static org.jclouds.examples.google.computeengine.Constants.POLL_PERIOD_TWENTY_SECONDS;
+import static org.jclouds.examples.google.computeengine.Constants.PROVIDER;
+import static org.jclouds.examples.google.computeengine.Constants.ZONE;
 
 import java.io.Closeable;
 import java.io.File;
@@ -38,9 +33,21 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
-import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
-import static org.jclouds.examples.google.computeengine.Constants.*;
+import org.jclouds.ContextBuilder;
+import org.jclouds.compute.ComputeService;
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.domain.Hardware;
+import org.jclouds.compute.domain.Image;
+import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
+import org.jclouds.domain.LoginCredentials;
+import org.jclouds.sshj.config.SshjSshClientModule;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Closeables;
+import com.google.common.io.Files;
+import com.google.inject.Module;
 
 /**
  * This example creates a Debian Wheezy server on a f1-micro instance on the
@@ -52,35 +59,58 @@ public class CreateServer implements Closeable {
    /**
     * To get a service account and its private key see [TODO: write some
     * documentation on the website and put a link to it]
-    * 
-    * The first argument (args[0]) must be your service account email address
-    * The second argument (args[1]) must a path to your service account
-    *     private key PEM file (without a password).
+    *
+    * The first argument (args[0]) is your service account email address
+    *    (https://developers.google.com/console/help/new/#serviceaccounts).
+    * The second argument (args[1]) is a path to your service account private key PEM file without a password. It is
+    *    used for server-to-server interactions (https://developers.google.com/console/help/new/#serviceaccounts).
+    *    The key is not transmitted anywhere.
+    * The third argument (args[2]) is your Google user name.
+    * The fourth argument (args[3]) is a path to the file containing your SSH public key
+    *    (https://developers.google.com/compute/docs/instances#sshkeys). The key is needed to authorize your access to
+    *    the machine.
+    * The fifth argument (args[4]) is a path to the file containing your SSH private key, which is required to perform
+    *    any operations on your machine via SSH (https://developers.google.com/compute/docs/instances#sshkeys).
+    *    The key is not transmitted anywhere.
+    *
+    * Example:
+    *
+    * java org.jclouds.examples.google.computeengine.CreateServer \
+    *    somecrypticname@developer.gserviceaccount.com \
+    *    /home/planetnik/Work/Cloud/OSS/certificate/gcp-oss.pem \
+    *    planetnik \
+    *    /home/planetnik/.ssh/google_compute_engine.pub
+    *    /home/planetnik/.ssh/google_compute_engine
     */
-   public static void main(String[] args) throws IOException {
-      String key = Files.toString(new File(args[1]), Charset.defaultCharset());
-	   
-      CreateServer createServer = new CreateServer(args[0], key);
+   public static void main(final String[] args) throws IOException {
+      String serviceAccountEmailAddress = args[0];
+      String serviceAccountKey = Files.toString(new File(args[1]), Charset.defaultCharset());
+      String googleUserName = args[2];
+      String sshPublicKey = Files.toString(new File(args[3]), Charset.defaultCharset());
+      String sshPrivateKey = Files.toString(new File(args[4]), Charset.defaultCharset());
+
+      CreateServer createServer = new CreateServer(serviceAccountEmailAddress, serviceAccountKey);
 
       try {
-         createServer.createServer();
-      }
-      catch (Exception e) {
+         createServer.createServer(googleUserName, sshPublicKey, sshPrivateKey);
+      } catch (Exception e) {
          e.printStackTrace();
-      }
-      finally {
+      } finally {
          createServer.close();
       }
    }
 
-   public CreateServer(String serviceAccountEmailAddress, String serviceAccountKey) {
+   public CreateServer(final String serviceAccountEmailAddress, final String serviceAccountKey) {
       // These properties control how often jclouds polls for a status update
       Properties overrides = new Properties();
       overrides.setProperty(POLL_INITIAL_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
       overrides.setProperty(POLL_MAX_PERIOD, POLL_PERIOD_TWENTY_SECONDS);
 
+      Iterable<Module> modules = ImmutableSet.<Module> of(new SshjSshClientModule());
+
       ComputeServiceContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(serviceAccountEmailAddress, serviceAccountKey)
+            .modules(modules)
             .overrides(overrides)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
@@ -90,7 +120,7 @@ public class CreateServer implements Closeable {
     * Create a server based on a Template. This method uses Template.hardwareId() and Template.imageId() to
     * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
     * using the following Template.
-    * 
+    *
     * Template template = computeService.templateBuilder()
     *     .locationId(getLocationId())
     *     .osFamily(OsFamily.CENTOS)
@@ -98,7 +128,8 @@ public class CreateServer implements Closeable {
     *     .minRam(28*1024)
     *     .build();
     */
-   private void createServer() throws RunNodesException, TimeoutException {
+   private void createServer(final String googleUserName, final String sshPublicKey, final String sshPrivateKey)
+      throws RunNodesException, TimeoutException, IOException {
       System.out.format("Create Server%n");
 
       // TODO: make fromHardware(...) and fromImage(...) work as well. Currently,
@@ -109,7 +140,14 @@ public class CreateServer implements Closeable {
             .hardwareId(getHardware().getId())
             .imageId(getImage().getId())
             .build();
-      
+      // Authorize googleUserName to use the instance with their SSH key.
+      template.getOptions()
+            .overrideLoginCredentials((new LoginCredentials.Builder())
+                  .user(googleUserName)
+                  .privateKey(sshPrivateKey)
+                  .build())
+            .authorizePublicKey(sshPublicKey);
+
       // This method will continue to poll for the server status and won't
       // return until this server is ACTIVE.
       // TODO: does GCE also log what's happening during the polling, like for
@@ -125,7 +163,7 @@ public class CreateServer implements Closeable {
 
    /**
     * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
-    * 
+    *
     * @return The Hardware for a f1-micro instance.
     */
    private Hardware getHardware() {
@@ -151,8 +189,8 @@ public class CreateServer implements Closeable {
 
    /**
     * This method uses the generic ComputeService.listImages() to find the image.
-    * 
-    * @return A Debian Wheezy Image 
+    *
+    * @return A Debian Wheezy Image
     */
    private Image getImage() {
       System.out.format("  Images%n");
@@ -179,7 +217,7 @@ public class CreateServer implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
-   public void close() throws IOException {
+   public final void close() throws IOException {
       Closeables.close(computeService.getContext(), true);
    }
 }

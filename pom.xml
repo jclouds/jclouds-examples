@@ -116,28 +116,6 @@
           </excludes>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>com.mycila.maven-license-plugin</groupId>
-        <artifactId>maven-license-plugin</artifactId>
-        <version>1.9.0</version>
-        <configuration>
-          <strictCheck>true</strictCheck>
-          <encoding>${sourceEncoding}</encoding>
-          <aggregate>true</aggregate>
-          <header>project/src/etc/header.txt</header>
-          <mapping>
-            <clj>SEMICOLON_STYLE</clj>
-          </mapping>
-          <excludes>
-            <exclude>**/src/**/resources/**</exclude>
-            <exclude>**/LICENSE.txt</exclude>
-            <exclude>**/NOTICE.txt</exclude>
-            <exclude>**/README.md</exclude>
-            <exclude>**/README.txt</exclude>
-            <exclude>**/header.txt</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
 

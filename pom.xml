@@ -65,6 +65,7 @@
     <module>chef-basics</module>
     <module>compute-basics</module>
     <module>rackspace</module>
+    <module>google</module>
 <!--
     TODO: These modules have bit-rotted:
     <module>blobstore-hdfs</module>

@@ -39,13 +39,11 @@ import org.jclouds.openstack.cinder.v1.domain.Volume;
 import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
@@ -60,7 +58,7 @@ import com.google.inject.Module;
  */
 public class DetachVolume implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi novaApi;
    private final ServerApi serverApi;
    private final VolumeAttachmentApi volumeAttachmentApi;
 
@@ -102,9 +100,9 @@ public class DetachVolume implements Closeable {
             .modules(modules)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
-      nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+      novaApi = context.unwrapApi(NovaApi.class);
+      serverApi = novaApi.getServerApiForZone(ZONE);
+      volumeAttachmentApi = novaApi.getVolumeAttachmentExtensionForZone(ZONE).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)

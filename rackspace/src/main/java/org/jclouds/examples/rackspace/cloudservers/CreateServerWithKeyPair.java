@@ -42,12 +42,10 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
-import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
@@ -68,7 +66,7 @@ import com.google.inject.Module;
  */
 public class CreateServerWithKeyPair implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> novaContext;
+   private final NovaApi novaApi;
 
    private final File keyPairFile = new File(NAME + ".pem");
 
@@ -115,7 +113,7 @@ public class CreateServerWithKeyPair implements Closeable {
             .buildView(ComputeServiceContext.class);
 
       computeService = context.getComputeService();
-      novaContext = context.unwrap();
+      novaApi = context.unwrapApi(NovaApi.class);
    }
 
    /**
@@ -124,7 +122,7 @@ public class CreateServerWithKeyPair implements Closeable {
     * This method is not necessary and is here for demonstration purposes only.
     */
    private void detectKeyPairExtension() {
-      Optional<? extends KeyPairApi> keyPairApiExtension = novaContext.getApi().getKeyPairExtensionForZone(ZONE);
+      Optional<? extends KeyPairApi> keyPairApiExtension = novaApi.getKeyPairExtensionForZone(ZONE);
 
       if (keyPairApiExtension.isPresent()) {
          System.out.format("  Key Pair Extension Present%n");
@@ -143,7 +141,7 @@ public class CreateServerWithKeyPair implements Closeable {
    private KeyPair createKeyPair() throws IOException {
       System.out.format("  Create Key Pair%n");
 
-      KeyPairApi keyPairApi = novaContext.getApi().getKeyPairExtensionForZone(ZONE).get();
+      KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(ZONE).get();
       KeyPair keyPair = keyPairApi.create(NAME);
 
       Files.write(keyPair.getPrivateKey(), keyPairFile, UTF_8);
@@ -211,7 +209,7 @@ public class CreateServerWithKeyPair implements Closeable {
    private void deleteKeyPair(KeyPair keyPair) {
       System.out.format("  Delete Key Pair%n");
 
-      KeyPairApi keyPairApi = novaContext.getApi().getKeyPairExtensionForZone(ZONE).get();
+      KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(ZONE).get();
       keyPairApi.delete(keyPair.getName());
 
       if (keyPairFile.delete()) {

@@ -30,10 +30,8 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
-import org.jclouds.rest.RestContext;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
@@ -45,7 +43,7 @@ import com.google.common.io.Closeables;
  */
 public class ServerMetadata implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi novaApi;
    private final ServerApi serverApi;
 
    /**
@@ -77,8 +75,8 @@ public class ServerMetadata implements Closeable {
             .credentials(username, apiKey)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
-      nova = context.unwrap();
-      serverApi = nova.getApi().getServerApiForZone(ZONE);
+      novaApi = context.unwrapApi(NovaApi.class);
+      serverApi = novaApi.getServerApiForZone(ZONE);
    }
 
    /**
@@ -99,7 +97,7 @@ public class ServerMetadata implements Closeable {
    private void setMetadata(Server server) {
       System.out.format("Set Metadata%n");
 
-      ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of(
+      ImmutableMap<String, String> metadata = ImmutableMap.of(
             "key1", "value1",
             "key2", "value2",
             "key3", "value3");
@@ -111,7 +109,7 @@ public class ServerMetadata implements Closeable {
    private void updateMetadata(Server server) {
       System.out.format("Udpate Metadata%n");
 
-      ImmutableMap<String, String> metadata = ImmutableMap.<String, String> of("key2", "new-value2");
+      ImmutableMap<String, String> metadata = ImmutableMap.of("key2", "new-value2");
       Map<String, String> responseMetadata = serverApi.updateMetadata(server.getId(), metadata);
 
       System.out.format("  %s%n", responseMetadata);

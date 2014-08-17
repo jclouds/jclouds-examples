@@ -23,7 +23,6 @@ import com.google.common.io.Closeables;
 import com.google.common.io.Files;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
-import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.http.HttpRequest;
 import org.jclouds.http.HttpResponse;
@@ -89,7 +88,7 @@ public class GenerateTempURL implements Closeable {
       blobStoreContext = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(RegionScopedBlobStoreContext.class);
-      blobStore = blobStoreContext.blobStoreInRegion(REGION);
+      blobStore = blobStoreContext.getBlobStore(REGION);
    }
 
    private void generatePutTempURL() throws IOException {

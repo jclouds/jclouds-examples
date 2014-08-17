@@ -74,7 +74,7 @@ public class UploadObjects implements Closeable {
    public UploadObjects(String username, String apiKey) {
       ContextBuilder builder = ContextBuilder.newBuilder(PROVIDER)
                                   .credentials(username, apiKey);
-      blobStore = builder.buildView(RegionScopedBlobStoreContext.class).blobStoreInRegion(REGION);
+      blobStore = builder.buildView(RegionScopedBlobStoreContext.class).getBlobStore(REGION);
       cloudFiles = blobStore.getContext().unwrapApi(CloudFilesApi.class);
    }
 

@@ -48,11 +48,9 @@ import org.jclouds.openstack.cinder.v1.features.VolumeApi;
 import org.jclouds.openstack.cinder.v1.options.CreateVolumeOptions;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
-import org.jclouds.openstack.nova.v2_0.NovaAsyncApi;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
-import org.jclouds.rest.RestContext;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
 import org.jclouds.sshj.config.SshjSshClientModule;
@@ -67,7 +65,7 @@ import com.google.inject.Module;
  */
 public class CreateVolumeAndAttach implements Closeable {
    private final ComputeService computeService;
-   private final RestContext<NovaApi, NovaAsyncApi> nova;
+   private final NovaApi novaApi;
    private final VolumeAttachmentApi volumeAttachmentApi;
 
    private final CinderApi cinderApi;
@@ -114,8 +112,8 @@ public class CreateVolumeAndAttach implements Closeable {
             .overrides(overrides)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
-      nova = context.unwrap();
-      volumeAttachmentApi = nova.getApi().getVolumeAttachmentExtensionForZone(ZONE).get();
+      novaApi = context.unwrapApi(NovaApi.class);
+      volumeAttachmentApi = novaApi.getVolumeAttachmentExtensionForZone(ZONE).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
@@ -138,8 +136,7 @@ public class CreateVolumeAndAttach implements Closeable {
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
       // We set the password to something we know so we can login in the DetachVolume example
-      nova.getApi().getServerApiForZone(ZONE)
-            .changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
+      novaApi.getServerApiForZone(ZONE).changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
 
       System.out.format("  %s%n", nodeMetadata);
       System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
@@ -152,7 +149,7 @@ public class CreateVolumeAndAttach implements Closeable {
       CreateVolumeOptions options = CreateVolumeOptions.Builder
             .name(NAME)
             .volumeType("SSD")
-            .metadata(ImmutableMap.<String, String> of("key1", "value1"));
+            .metadata(ImmutableMap.of("key1", "value1"));
 
       System.out.format("Create Volume%n");
 

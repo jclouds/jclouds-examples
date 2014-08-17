@@ -93,7 +93,7 @@ public class UploadDirectoryToCDN implements Closeable {
       RegionScopedBlobStoreContext context = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildView(RegionScopedBlobStoreContext.class);
-      blobStore = context.blobStoreInRegion(REGION);
+      blobStore = context.getBlobStore(REGION);
       cloudFiles = blobStore.getContext().unwrapApi(CloudFilesApi.class);
    }
 

@@ -78,7 +78,7 @@ public class UploadLargeObject implements Closeable {
             .credentials(username, apiKey)
             .overrides(overrides)
             .buildView(RegionScopedBlobStoreContext.class);
-      blobStore = context.blobStoreInRegion(REGION);
+      blobStore = context.getBlobStore(REGION);
    }
 
    /**

@@ -11,8 +11,8 @@ atlassian-ide-plugin.xml
 *.ipr
 *.iws
 *.class
-rackspace/lib/
-rackspace/bin/
+lib/
+bin/
 lein
 project.clj
 .lein-deps-sum

@@ -67,9 +67,6 @@ public class ExecuteCommand implements Closeable {
     *    (https://developers.google.com/compute/docs/instances#start_vm).
     * The fourth argument (args[3]) is the zone where your instance is located
     *    (https://developers.google.com/compute/docs/zones).
-    * The fifth argument (args[4]) is your Google user name.
-    * The sixth argument (args[5]) is a path to the file containing your SSH private key
-    *    (https://developers.google.com/compute/docs/instances#sshkeys).
     *
     * Example:
     *
@@ -77,17 +74,32 @@ public class ExecuteCommand implements Closeable {
     *    somecrypticname@developer.gserviceaccount.com \
     *    /home/planetnik/Work/Cloud/OSS/certificate/gcp-oss.pem \
     *    planetnik-main \
-    *    europe-west1-a \
-    *    planetnik \
-    *    /home/planetnik/.ssh/google_compute_engine
+    *    europe-west1-a
     */
-   public static void main(final String[] args) throws IOException {
+   public static void main(final String[] args) {
       String serviceAccountEmailAddress = args[0];
-      String serviceAccountKey = Files.toString(new File(args[1]), Charset.defaultCharset());
+      String serviceAccountKey = null;
+      try {
+         serviceAccountKey = Files.toString(new File(args[1]), Charset.defaultCharset());
+      } catch (IOException e) {
+         System.err.println("Cannot open service account private key PEM file: " + args[1] + "\n" + e.getMessage());
+         System.exit(1);
+      }
       String instanceName = args[2];
       String zone = args[3];
-      String googleUserName = args[4];
-      String sshPrivateKey = Files.toString(new File(args[5]), Charset.defaultCharset());
+      String userName = System.getProperty("user.name");
+      String sshPrivateKeyFileName = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
+         + "google_compute_engine";
+      String sshPrivateKey = null;
+      try {
+         sshPrivateKey = Files.toString(new File(sshPrivateKeyFileName), Charset.defaultCharset());
+      } catch (IOException e) {
+         System.err.println("Unable to load your SSH private key at " + sshPrivateKeyFileName
+                + "\nIt is required to perform any operations on your machine via SSH.\n"
+                + "See https://developers.google.com/compute/docs/instances#sshkeys for more details.\n"
+                + e.getMessage());
+         System.exit(1);
+      }
 
       ExecuteCommand executeApplication = new ExecuteCommand(serviceAccountEmailAddress, serviceAccountKey);
 
@@ -100,11 +112,16 @@ public class ExecuteCommand implements Closeable {
             System.err.format("Error: Instance %s could not be located in zone %s.%n", instanceName, zone);
             System.exit(1);
          }
-         executeApplication.executeSimpleCommand(instance, googleUserName, sshPrivateKey);
+         executeApplication.executeSimpleCommand(instance, userName, sshPrivateKey);
       } catch (Exception e) {
          e.printStackTrace();
       } finally {
-         executeApplication.close();
+         try {
+            executeApplication.close();
+         } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+         }
       }
    }
 

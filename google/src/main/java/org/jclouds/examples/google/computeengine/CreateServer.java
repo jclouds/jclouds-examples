@@ -65,38 +65,55 @@ public class CreateServer implements Closeable {
     * The second argument (args[1]) is a path to your service account private key PEM file without a password. It is
     *    used for server-to-server interactions (https://developers.google.com/console/help/new/#serviceaccounts).
     *    The key is not transmitted anywhere.
-    * The third argument (args[2]) is your Google user name.
-    * The fourth argument (args[3]) is a path to the file containing your SSH public key
-    *    (https://developers.google.com/compute/docs/instances#sshkeys). The key is needed to authorize your access to
-    *    the machine.
-    * The fifth argument (args[4]) is a path to the file containing your SSH private key, which is required to perform
-    *    any operations on your machine via SSH (https://developers.google.com/compute/docs/instances#sshkeys).
-    *    The key is not transmitted anywhere.
     *
     * Example:
     *
     * java org.jclouds.examples.google.computeengine.CreateServer \
     *    somecrypticname@developer.gserviceaccount.com \
-    *    /home/planetnik/Work/Cloud/OSS/certificate/gcp-oss.pem \
-    *    planetnik \
-    *    /home/planetnik/.ssh/google_compute_engine.pub
-    *    /home/planetnik/.ssh/google_compute_engine
+    *    /home/planetnik/Work/Cloud/OSS/certificate/gcp-oss.pem
     */
-   public static void main(final String[] args) throws IOException {
+   public static void main(final String[] args) {
       String serviceAccountEmailAddress = args[0];
-      String serviceAccountKey = Files.toString(new File(args[1]), Charset.defaultCharset());
-      String googleUserName = args[2];
-      String sshPublicKey = Files.toString(new File(args[3]), Charset.defaultCharset());
-      String sshPrivateKey = Files.toString(new File(args[4]), Charset.defaultCharset());
+      String serviceAccountKey = null;
+      try {
+         serviceAccountKey = Files.toString(new File(args[1]), Charset.defaultCharset());
+      } catch (IOException e) {
+         System.err.println("Cannot open service account private key PEM file: " + args[1] + "\n" + e.getMessage());
+         System.exit(1);
+      }
+      String userName = System.getProperty("user.name");
+      String sshPublicKey = null;
+      String sshPrivateKey = null;
+      String sshPublicKeyFileName = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
+         + "google_compute_engine.pub";
+      String sshPrivateKeyFileName = System.getProperty("user.home") + File.separator + ".ssh" + File.separator
+         + "google_compute_engine";
+      try {
+         sshPublicKey = Files.toString(new File(sshPublicKeyFileName), Charset.defaultCharset());
+         sshPrivateKey = Files.toString(new File(sshPrivateKeyFileName), Charset.defaultCharset());
+      } catch (IOException e) {
+         System.err.println("Unable to load your SSH keys.\n" + e.getMessage()
+                + "\nYour public key, which is required to authorize your access to the machine is expected to be at "
+                + sshPublicKeyFileName + " , and your private key, which is required to perform any operations "
+                + "on your machine via SSH, is expected to be at " + sshPrivateKeyFileName
+                + " .\nSee https://developers.google.com/compute/docs/instances#sshkeys for more details.\n"
+                + e.getMessage());
+         System.exit(1);
+      }
 
       CreateServer createServer = new CreateServer(serviceAccountEmailAddress, serviceAccountKey);
 
       try {
-         createServer.createServer(googleUserName, sshPublicKey, sshPrivateKey);
+         createServer.createServer(userName, sshPublicKey, sshPrivateKey);
       } catch (Exception e) {
          e.printStackTrace();
       } finally {
-         createServer.close();
+         try {
+            createServer.close();
+         } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+         }
       }
    }
 

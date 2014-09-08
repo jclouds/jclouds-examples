@@ -51,7 +51,6 @@ public class CreateTenantAndUser implements Closeable {
       try {
          Tenant tenant = createTenantAndUser.createTenant();
          createTenantAndUser.createUser(tenant);
-         createTenantAndUser.close();
       } catch (Exception e) {
          e.printStackTrace();
       } finally {

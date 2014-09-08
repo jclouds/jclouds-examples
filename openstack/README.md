@@ -1,5 +1,5 @@
 # OpenStack Examples
-Example code that uses jclouds to perform common tasks on an OpenStack Cloud. The class names are self explanatory and the code is well commented for you to follow along.
+Example code that uses jclouds to perform common tasks on an OpenStack Cloud. The class names are self-explanatory and the code is well commented for you to follow along.
 
 - [Requirements](#requirements)
 - [Environment](#environment)

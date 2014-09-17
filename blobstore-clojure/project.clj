@@ -21,4 +21,4 @@
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/tools.logging "0.2.3"]
                  [org.clojure/core.incubator "0.1.0"]
-                 [org.jclouds/jclouds-allblobstore "1.6.0"]])
+                 [org.apache.jclouds/jclouds-allblobstore "1.8.0"]])

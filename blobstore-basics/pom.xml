@@ -22,12 +22,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>blobstore-basics</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.8.0</version>
   <name>blobstore-basics</name>
   <description>jclouds blobstore example that creates a container, then displays the size of each container</description>
 
   <properties>
-    <jclouds.version>1.7.2</jclouds.version>
+    <jclouds.version>1.8.0</jclouds.version>
   </properties>
 
   <dependencies>

@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>jclouds-examples</artifactId>
-  <version>1.7.3-SNAPSHOT</version>
+  <version>1.8.0</version>
   <packaging>pom</packaging>
   <name>jclouds examples</name>
 
@@ -33,7 +33,7 @@
   </scm>
 
   <properties>
-    <jclouds.version>1.7.3</jclouds.version>
+    <jclouds.version>1.8.0</jclouds.version>
   </properties>
 
   <repositories>

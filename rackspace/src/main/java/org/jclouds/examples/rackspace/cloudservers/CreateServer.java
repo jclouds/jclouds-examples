@@ -109,7 +109,7 @@ public class CreateServer implements Closeable {
 
       System.out.format("  %s%n", nodeMetadata);
       System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);
-      System.out.format("  Password: %s%n", nodeMetadata.getCredentials().getPassword());
+      System.out.format("  Password: %s%n", nodeMetadata.getCredentials().getOptionalPassword().get());
    }
 
    /**

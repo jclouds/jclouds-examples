@@ -19,7 +19,6 @@
 package org.jclouds.examples.rackspace.cloudfiles;
 
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteSource;

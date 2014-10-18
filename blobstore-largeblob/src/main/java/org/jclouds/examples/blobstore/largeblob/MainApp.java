@@ -42,6 +42,7 @@ import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Files;
 import com.google.inject.Module;
 
 /**
@@ -149,7 +150,7 @@ public class MainApp {
          File input = new File(fileName);
          long length = input.length();
          // Add a Blob
-         Blob blob = blobStore.blobBuilder(objectName).payload(input)
+         Blob blob = blobStore.blobBuilder(objectName).payload(Files.asByteSource(input))
                .contentType(MediaType.APPLICATION_OCTET_STREAM).contentDisposition(objectName).build();
          // Upload a file
          String eTag = blobStore.putBlob(containerName, blob, multipart());

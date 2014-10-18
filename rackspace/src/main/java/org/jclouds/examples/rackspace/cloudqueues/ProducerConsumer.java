@@ -113,7 +113,7 @@ public class ProducerConsumer implements Closeable {
       executorService.execute(new Consumer("1"));
       executorService.execute(new Consumer("2"));
 
-      Future producerFuture = executorService.submit(new Producer("1"));
+      Future<?> producerFuture = executorService.submit(new Producer("1"));
       producerFuture.get();
 
       executorService.shutdown();

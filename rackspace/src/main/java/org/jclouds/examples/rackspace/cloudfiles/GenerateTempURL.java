@@ -25,7 +25,6 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
@@ -38,10 +37,8 @@ import org.jclouds.http.HttpResponse;
 import org.jclouds.http.HttpResponseException;
 import org.jclouds.io.Payload;
 import org.jclouds.io.Payloads;
-import org.jclouds.location.predicates.LocationPredicates;
 import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
 
-import com.google.common.collect.Sets;
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
 import com.google.common.io.Files;

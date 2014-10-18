@@ -26,20 +26,20 @@ import java.util.Set;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
-import org.jclouds.atmos.AtmosAsyncClient;
+import org.jclouds.atmos.AtmosApiMetadata;
 import org.jclouds.atmos.AtmosClient;
-import org.jclouds.azureblob.AzureBlobAsyncClient;
+import org.jclouds.azureblob.AzureBlobApiMetadata;
 import org.jclouds.azureblob.AzureBlobClient;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
-import org.jclouds.openstack.swift.SwiftAsyncClient;
+import org.jclouds.openstack.swift.SwiftApiMetadata;
 import org.jclouds.openstack.swift.SwiftClient;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 import org.jclouds.rest.RestContext;
-import org.jclouds.s3.S3AsyncClient;
+import org.jclouds.s3.S3ApiMetadata;
 import org.jclouds.s3.S3Client;
 
 import com.google.common.base.Charsets;
@@ -47,7 +47,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteSource;
-import com.google.inject.Module;
 
 /**
  * Demonstrates the use of {@link BlobStore}.
@@ -111,25 +110,23 @@ public class MainApp {
          blobStore.putBlob(containerName, blob);
 
          // Use Provider API
-         if (context.getBackendType().getRawType().equals(RestContext.class)) {
-            RestContext<?, ?> rest = context.unwrap();
-            Object object = null;
-            if (rest.getApi() instanceof S3Client) {
-               RestContext<S3Client, S3AsyncClient> providerContext = context.unwrap();
-               object = providerContext.getApi().headObject(containerName, blobName);
-            } else if (rest.getApi() instanceof SwiftClient) {
-               RestContext<SwiftClient, SwiftAsyncClient> providerContext = context.unwrap();
-               object = providerContext.getApi().getObjectInfo(containerName, blobName);
-            } else if (rest.getApi() instanceof AzureBlobClient) {
-               RestContext<AzureBlobClient, AzureBlobAsyncClient> providerContext = context.unwrap();
-               object = providerContext.getApi().getBlobProperties(containerName, blobName);
-            } else if (rest.getApi() instanceof AtmosClient) {
-               RestContext<AtmosClient, AtmosAsyncClient> providerContext = context.unwrap();
-               object = providerContext.getApi().headFile(containerName + "/" + blobName);
-            }
-            if (object != null) {
-               System.out.println(object);
-            }
+         ApiMetadata apiMetadata = context.unwrap().getProviderMetadata().getApiMetadata();
+         Object object = null;
+         if (apiMetadata instanceof S3ApiMetadata) {
+            S3Client api = context.unwrapApi(S3Client.class);
+            object = api.headObject(containerName, blobName);
+         } else if (apiMetadata instanceof SwiftApiMetadata) {
+            SwiftClient api = context.unwrapApi(SwiftClient.class);
+            object = api.getObjectInfo(containerName, blobName);
+         } else if (apiMetadata instanceof AzureBlobApiMetadata) {
+            RestContext<AzureBlobClient, ?> providerContext = context.unwrap();
+            object = providerContext.getApi().getBlobProperties(containerName, blobName);
+         } else if (apiMetadata instanceof AtmosApiMetadata) {
+            AtmosClient api = context.unwrapApi(AtmosClient.class);
+            object = api.headFile(containerName + "/" + blobName);
+         }
+         if (object != null) {
+            System.out.println(object);
          }
          
       } finally {

@@ -112,7 +112,7 @@ public class PublishSubscribe implements Closeable {
       executorService.execute(new Subscriber("1"));
       executorService.execute(new Subscriber("2"));
 
-      Future publisherFuture = executorService.submit(new Publisher("1"));
+      Future<?> publisherFuture = executorService.submit(new Publisher("1"));
       publisherFuture.get();
 
       executorService.shutdown();

@@ -64,8 +64,10 @@
     <module>blobstore-largeblob</module>
     <module>chef-basics</module>
     <module>compute-basics</module>
-    <module>rackspace</module>
     <module>google</module>
+    <module>glacier</module>
+    <module>openstack</module>
+    <module>rackspace</module>
 <!--
     TODO: These modules have bit-rotted:
     <module>blobstore-hdfs</module>

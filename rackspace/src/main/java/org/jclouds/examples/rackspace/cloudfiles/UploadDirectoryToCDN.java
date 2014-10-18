@@ -180,10 +180,10 @@ public class UploadDirectoryToCDN implements Closeable {
                                  STATIC_WEB_ERROR, "error.html");
 
       UpdateContainerOptions opts = new UpdateContainerOptions().headers(enableStaticWebHeaders);
-      cloudFiles.getContainerApiForRegion(REGION).update(container, opts);
+      cloudFiles.getContainerApi(REGION).update(container, opts);
 
       // enable the CDN container
-      URI cdnURI = cloudFiles.getCDNApiForRegion(REGION).enable(container);
+      URI cdnURI = cloudFiles.getCDNApi(REGION).enable(container);
       System.out.format("  Go to %s/%n", cdnURI);
    }
 

@@ -72,7 +72,7 @@ public class GetObject implements Closeable {
    private void getObject() {
       System.out.format("Get Object%n");
 
-      ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER);
+      ObjectApi objectApi = cloudFiles.getObjectApi(REGION, CONTAINER);
       SwiftObject object = objectApi.get("uploadObjectFromFile.txt", GetOptions.NONE);
 
       System.out.format("  %s%n", object);

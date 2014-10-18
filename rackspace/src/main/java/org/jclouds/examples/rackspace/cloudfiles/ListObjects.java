@@ -71,7 +71,7 @@ public class ListObjects implements Closeable {
    private void listObjects() {
       System.out.format("List Objects%n");
 
-      ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER);
+      ObjectApi objectApi = cloudFiles.getObjectApi(REGION, CONTAINER);
       ObjectList objects = objectApi.list(ListContainerOptions.NONE);
 
       for (SwiftObject object: objects) {
@@ -82,7 +82,7 @@ public class ListObjects implements Closeable {
    private void listObjectsWithFiltering() {
       System.out.format("List Objects With Filtering%n");
 
-      ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER);
+      ObjectApi objectApi = cloudFiles.getObjectApi(REGION, CONTAINER);
 
       ListContainerOptions filter = ListContainerOptions.Builder.prefix("createObjectFromString");
       ObjectList objects =  objectApi.list(filter);

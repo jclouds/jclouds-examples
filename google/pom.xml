@@ -22,11 +22,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>google-examples</artifactId>
-  <version>1.8.0</version>
+  <version>1.8.1</version>
   <name>google-examples</name>
 
   <properties>
-    <jclouds.version>1.8.0</jclouds.version>
+    <jclouds.version>1.8.1</jclouds.version>
   </properties>
 
   <dependencies>

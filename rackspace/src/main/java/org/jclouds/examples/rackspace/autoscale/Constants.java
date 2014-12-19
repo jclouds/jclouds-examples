@@ -29,4 +29,6 @@ public interface Constants {
    public static final String ZONE = System.getProperty("zone", "DFW");
 
    public static final String NAME = "jclouds-example";
+   public static final String SERVICE_NET = "11111111-1111-1111-1111-111111111111";
+   public static final String PUBLIC_NET = "00000000-0000-0000-0000-000000000000";
 }

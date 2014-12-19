@@ -73,7 +73,7 @@ public class CrossOriginResourceSharingContainer implements Closeable {
       cloudFiles = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudFilesApi.class);
-      containerApi = cloudFiles.getContainerApiForRegion(REGION);
+      containerApi = cloudFiles.getContainerApi(REGION);
    }
 
    /**

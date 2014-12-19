@@ -95,7 +95,7 @@ public class UploadObjects implements Closeable {
          ByteSource byteSource = Files.asByteSource(tempFile);
          Payload payload = Payloads.newByteSourcePayload(byteSource);
 
-         cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER)
+         cloudFiles.getObjectApi(REGION, CONTAINER)
             .put(filename + suffix, payload);
 
          System.out.format("  %s%s%n", filename, suffix);
@@ -115,7 +115,7 @@ public class UploadObjects implements Closeable {
       ByteSource source = ByteSource.wrap("uploadObjectFromString".getBytes());
       Payload payload = Payloads.newByteSourcePayload(source);
 
-      cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER).put(filename, payload);
+      cloudFiles.getObjectApi(REGION, CONTAINER).put(filename, payload);
 
       System.out.format("  %s%n", filename);
    }

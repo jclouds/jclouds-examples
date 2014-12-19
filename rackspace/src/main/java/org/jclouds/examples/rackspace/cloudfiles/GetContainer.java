@@ -66,7 +66,7 @@ public class GetContainer implements Closeable {
    private void getContainer() {
       System.out.format("Get Container%n");
 
-      Container container = cloudFiles.getContainerApiForRegion(REGION).get(CONTAINER);
+      Container container = cloudFiles.getContainerApi(REGION).get(CONTAINER);
       System.out.format("  %s%n", container);
    }
 

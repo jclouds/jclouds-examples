@@ -92,7 +92,7 @@ public class CloudFilesPublish implements Closeable {
                                  STATIC_WEB_ERROR, "error.html");
 
       CreateContainerOptions opts = new CreateContainerOptions().headers(enableStaticWebHeaders);
-      cloudFiles.getContainerApiForRegion(REGION).create(CONTAINER_PUBLISH, opts);
+      cloudFiles.getContainerApi(REGION).create(CONTAINER_PUBLISH, opts);
 
       System.out.format("  %s%n", CONTAINER_PUBLISH);
    }
@@ -108,7 +108,7 @@ public class CloudFilesPublish implements Closeable {
       try {
          Files.write("Hello Cloud Files", tempFile, Charsets.UTF_8);
 
-         ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER_PUBLISH);
+         ObjectApi objectApi = cloudFiles.getObjectApi(REGION, CONTAINER_PUBLISH);
 
          ByteSource byteSource = Files.asByteSource(tempFile);
          Payload payload = Payloads.newByteSourcePayload(byteSource);
@@ -126,7 +126,7 @@ public class CloudFilesPublish implements Closeable {
    private void enableCdnContainer() {
       System.out.format("Enable CDN Container%n");
 
-      CDNApi cdnApi = cloudFiles.getCDNApiForRegion(REGION);
+      CDNApi cdnApi = cloudFiles.getCDNApi(REGION);
       URI cdnURI = cdnApi.enable(CONTAINER_PUBLISH);
 
       System.out.format("  Go to %s/%s%s%n", cdnURI, FILENAME, SUFFIX);

@@ -76,21 +76,21 @@ public class DeleteObjectsAndContainer implements Closeable {
    private void deleteObjectsAndContainer() {
       System.out.format("Delete Container%n");
 
-      List<Container> containers = cloudFiles.getContainerApiForRegion(REGION)
+      List<Container> containers = cloudFiles.getContainerApi(REGION)
             .list(ListContainerOptions.Builder.prefix(CONTAINER)).toList();
 
       for (Container container: containers) {
          System.out.format("  %s%n", container.getName());
 
-         ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, container.getName());
-         ObjectList objects = objectApi.list(ListContainerOptions.NONE);
+         ObjectApi objectApi = cloudFiles.getObjectApi(REGION, container.getName());
+         ObjectList objects = objectApi.list();
 
          for (SwiftObject object: objects) {
             System.out.format("    %s%n", object.getName());
             objectApi.delete(object.getName());
          }
 
-         cloudFiles.getContainerApiForRegion(REGION).deleteIfEmpty(container.getName());
+         cloudFiles.getContainerApi(REGION).deleteIfEmpty(container.getName());
       }
    }
 

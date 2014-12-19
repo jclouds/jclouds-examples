@@ -18,20 +18,23 @@
  */
 package org.jclouds.examples.rackspace.cloudfiles;
 
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
-
-import java.io.Closeable;
-import java.io.IOException;
-
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Closeables;
 import org.jclouds.ContextBuilder;
-import org.jclouds.http.options.GetOptions;
 import org.jclouds.openstack.swift.v1.domain.SwiftObject;
 import org.jclouds.openstack.swift.v1.features.ObjectApi;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
-import com.google.common.io.Closeables;
+import java.io.BufferedOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.CONTAINER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 
 /**
  * Gets an object from a container and displays the results.
@@ -52,7 +55,8 @@ public class GetObject implements Closeable {
       GetObject getObject = new GetObject(args[0], args[1]);
 
       try {
-         getObject.getObject();
+         SwiftObject swiftObject = getObject.getObject();
+         getObject.writeObject(swiftObject);
       }
       catch (Exception e) {
          e.printStackTrace();
@@ -69,13 +73,33 @@ public class GetObject implements Closeable {
 
    }
 
-   private void getObject() {
+   private SwiftObject getObject() {
       System.out.format("Get Object%n");
 
-      ObjectApi objectApi = cloudFiles.getObjectApiForRegionAndContainer(REGION, CONTAINER);
-      SwiftObject object = objectApi.get("uploadObjectFromFile.txt", GetOptions.NONE);
+      ObjectApi objectApi = cloudFiles.getObjectApi(REGION, CONTAINER);
+      SwiftObject swiftObject = objectApi.get("uploadObjectFromFile.txt");
 
-      System.out.format("  %s%n", object);
+      System.out.format("  %s%n", swiftObject);
+
+      return swiftObject;
+   }
+
+   private void writeObject(SwiftObject swiftObject) throws IOException {
+      System.out.format("Write Object%n");
+
+      InputStream inputStream = swiftObject.getPayload().openStream();
+      File file = File.createTempFile("uploadObjectFromFile", ".txt");
+      BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+
+      try {
+         ByteStreams.copy(inputStream, outputStream);
+      }
+      finally {
+         inputStream.close();
+         outputStream.close();
+      }
+
+      System.out.format("  %s%n", file.getAbsolutePath());
    }
 
    /**

@@ -20,6 +20,8 @@ package org.jclouds.examples.rackspace.autoscale;
 
 import static org.jclouds.examples.rackspace.autoscale.Constants.NAME;
 import static org.jclouds.examples.rackspace.autoscale.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.autoscale.Constants.PUBLIC_NET;
+import static org.jclouds.examples.rackspace.autoscale.Constants.SERVICE_NET;
 import static org.jclouds.examples.rackspace.autoscale.Constants.ZONE;
 
 import java.io.Closeable;
@@ -101,8 +103,8 @@ public class CreatePolicy implements Closeable {
             .serverImageRef("0d589460-f177-4b0f-81c1-8ab8903ac7d8")
             .serverFlavorRef("2")
             .serverDiskConfig("AUTO")
-            .serverMetadata(ImmutableMap.of("notes","Server examples notes"))
-            .networks(ImmutableList.<String>of("internal", "public"))
+            .serverMetadata(ImmutableMap.of("notes", "Server examples notes"))
+            .networks(ImmutableList.of(SERVICE_NET, PUBLIC_NET))
             .personalities(ImmutableList.of(Personality.builder().path("filepath").contents("VGhpcyBpcyBhIHRlc3QgZmlsZS4=").build()))
             .type(LaunchConfigurationType.LAUNCH_SERVER)
             .build();

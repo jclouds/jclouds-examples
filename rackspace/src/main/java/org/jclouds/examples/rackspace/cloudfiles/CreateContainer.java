@@ -71,7 +71,7 @@ public class CreateContainer implements Closeable {
       CreateContainerOptions options = CreateContainerOptions.Builder
             .metadata(ImmutableMap.of("key1", "value1", "key2", "value2"));
 
-      cloudFiles.getContainerApiForRegion(REGION).create(CONTAINER, options);
+      cloudFiles.getContainerApi(REGION).create(CONTAINER, options);
 
       System.out.format("  %s%n", CONTAINER);
    }

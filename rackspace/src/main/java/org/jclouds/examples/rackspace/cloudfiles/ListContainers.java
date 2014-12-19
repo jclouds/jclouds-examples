@@ -67,7 +67,7 @@ public class ListContainers implements Closeable {
    private void listContainers() {
       System.out.format("List Containers%n");
 
-      List<Container> containers = cloudFiles.getContainerApiForRegion(REGION).list().toList();
+      List<Container> containers = cloudFiles.getContainerApi(REGION).list().toList();
       for (Container container: containers) {
          System.out.format("  %s%n", container);
       }

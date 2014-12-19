@@ -65,6 +65,7 @@ public class SmokeTest {
       GenerateTempURL.main(args);
       UploadObjects.main(args);
       ListObjects.main(args);
+      GetObject.main(args);
       CrossOriginResourceSharingContainer.main(args);
       DeleteObjectsAndContainer.main(args);
 

@@ -46,7 +46,7 @@ public class RemoveNodes implements Closeable {
    private final LoadBalancerApi lbApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -71,7 +71,7 @@ public class RemoveNodes implements Closeable {
       clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
+      lbApi = clbApi.getLoadBalancerApi(REGION);
    }
 
    private LoadBalancer getLoadBalancer() {
@@ -85,7 +85,7 @@ public class RemoveNodes implements Closeable {
    }
 
    private Set<Node> getNodes(LoadBalancer loadBalancer) {
-      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApi(REGION, loadBalancer.getId());
       Set<Node> nodes = Sets.newHashSet();
 
       for (Node node: nodeApi.list().concat()) {
@@ -100,7 +100,7 @@ public class RemoveNodes implements Closeable {
    private void removeNodesFromLoadBalancer(Set<Node> nodes, LoadBalancer loadBalancer) throws TimeoutException {
       System.out.format("Remove Nodes%n");
 
-      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApi(REGION, loadBalancer.getId());
       Iterable<Integer> nodeIds = Iterables.transform(nodes, new NodeToId());
 
       nodeApi.remove(nodeIds);

@@ -39,14 +39,14 @@ import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIO
 import static org.jclouds.examples.rackspace.cloudservers.Constants.*;
 
 /**
- * This example creates an Ubuntu 12.04 server with 1024 MB of RAM on the Rackspace Cloud.
+ * This example creates an Ubuntu 14.04 server with 1024 MB of RAM on the Rackspace Cloud.
  *
  */
 public class CreateServer implements Closeable {
    private final ComputeService computeService;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -86,7 +86,7 @@ public class CreateServer implements Closeable {
     * Template template = computeService.templateBuilder()
     *     .locationId(getLocationId())
     *     .osFamily(OsFamily.UBUNTU)
-    *     .osVersionMatches("12.04")
+    *     .osVersionMatches("14.04")
     *     .minRam(1024)
     *     .build();
     */
@@ -94,7 +94,7 @@ public class CreateServer implements Closeable {
       System.out.format("Create Server%n");
 
       Template template = computeService.templateBuilder()
-            .locationId(ZONE)
+            .locationId(REGION)
             .fromHardware(getHardware())
             .fromImage(getImage())
             .build();
@@ -141,7 +141,7 @@ public class CreateServer implements Closeable {
    /**
     * This method uses the generic ComputeService.listImages() to find the image.
     *
-    * @return An Ubuntu 12.04 Image
+    * @return An Ubuntu 14.04 Image
     */
    private Image getImage() {
       System.out.format("  Images%n");
@@ -151,13 +151,13 @@ public class CreateServer implements Closeable {
 
       for (Image image: images) {
          System.out.format("    %s%n", image);
-         if (image.getOperatingSystem().getName().equals("Ubuntu 12.04 LTS (Precise Pangolin)")) {
+         if (image.getOperatingSystem().getName().startsWith("Ubuntu 14.04 LTS")) {
             result = image;
          }
       }
 
       if (result == null) {
-         System.err.println("Image with Ubuntu 12.04 operating system not found. Using first image found.%n");
+         System.err.println("Image with Ubuntu 14.04 operating system not found. Using first image found.%n");
          result = images.iterator().next();
       }
 

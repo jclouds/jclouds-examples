@@ -45,7 +45,7 @@ public class Authentication implements Closeable {
    private final NovaApi nova;
 
     /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key or password
@@ -87,13 +87,13 @@ public class Authentication implements Closeable {
    }
 
    /**
-    * Calling getConfiguredZones() causes jclouds to authenticate. If authentication doesn't work, the call to
-    * getConfiguredZones() will result in an org.jclouds.rest.AuthorizationException
+    * Calling getConfiguredRegions() causes jclouds to authenticate. If authentication doesn't work, the call to
+    * getConfiguredRegions() will result in an org.jclouds.rest.AuthorizationException
     */
    private void authenticateOnCall() {
       System.out.format("Authenticate On Call%n");
 
-      nova.getConfiguredZones();
+      nova.getConfiguredRegions();
 
       System.out.format("  Authenticated%n");
    }

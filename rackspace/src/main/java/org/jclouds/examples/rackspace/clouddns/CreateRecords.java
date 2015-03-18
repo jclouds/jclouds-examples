@@ -43,7 +43,7 @@ public class CreateRecords implements Closeable {
    private final CloudDNSApi dnsApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -95,7 +95,7 @@ public class CreateRecords implements Closeable {
 
       Set<Record> createRecords = ImmutableSet.of(createTXTRecord, createARecord);
 
-      Set<RecordDetail> recordDetails = awaitComplete(dnsApi, dnsApi.getRecordApiForDomain(domainId).create(createRecords));
+      Set<RecordDetail> recordDetails = awaitComplete(dnsApi, dnsApi.getRecordApi(domainId).create(createRecords));
 
       for (RecordDetail recordDetail: recordDetails) {
          System.out.format("  %s%n", recordDetail);

@@ -38,7 +38,7 @@ public class SmokeTest {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key

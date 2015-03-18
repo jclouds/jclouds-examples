@@ -27,7 +27,7 @@ public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)
    // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudblockstorage-uk"
    public static final String PROVIDER = System.getProperty("provider.cbs", "rackspace-cloudblockstorage-us");
-   public static final String ZONE = System.getProperty("zone", "IAD");
+   public static final String REGION = System.getProperty("region", "IAD");
 
    public static final String NAME = "jclouds-example";
    public static final String POLL_PERIOD_TWENTY_SECONDS = String.valueOf(SECONDS.toMillis(20));

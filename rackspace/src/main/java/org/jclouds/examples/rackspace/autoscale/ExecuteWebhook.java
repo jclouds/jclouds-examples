@@ -19,7 +19,7 @@
 package org.jclouds.examples.rackspace.autoscale;
 
 import static org.jclouds.examples.rackspace.autoscale.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.autoscale.Constants.ZONE;
+import static org.jclouds.examples.rackspace.autoscale.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -43,13 +43,12 @@ import com.google.common.util.concurrent.Uninterruptibles;
  */
 public class ExecuteWebhook implements Closeable {
    private final AutoscaleApi autoscaleApi;
-   private final GroupApi groupApi;
    private final PolicyApi policyApi;
    private final WebhookApi webhookApi;
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -73,11 +72,11 @@ public class ExecuteWebhook implements Closeable {
             .credentials(username, apiKey)
             .buildApi(AutoscaleApi.class);
 
-      groupApi = autoscaleApi.getGroupApiForZone(ZONE);
+      GroupApi groupApi = autoscaleApi.getGroupApi(REGION);
       String groupId = Utils.getGroupId(groupApi);
-      policyApi = autoscaleApi.getPolicyApiForZoneAndGroup(ZONE, groupId);
+      policyApi = autoscaleApi.getPolicyApi(REGION, groupId);
       String policyId = Utils.getPolicyId(policyApi);
-      webhookApi = autoscaleApi.getWebhookApiForZoneAndGroupAndPolicy(ZONE, groupId, policyId);
+      webhookApi = autoscaleApi.getWebhookApi(REGION, groupId, policyId);
    }
 
    private void executeWebhook() {

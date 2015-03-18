@@ -47,7 +47,7 @@ public class Logging implements Closeable {
    private final NovaApi nova;
 
     /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -81,13 +81,13 @@ public class Logging implements Closeable {
    }
 
    private void getConfiguredZones() {
-       // Calling getConfiguredZones() talks to the cloud which gets logged
-       Set<String> zones = nova.getConfiguredZones();
+       // Calling getConfiguredRegions() talks to the cloud which gets logged
+       Set<String> regions = nova.getConfiguredRegions();
 
        System.out.format("Zones%n");
 
-       for (String zone : zones) {
-           System.out.format("  %s%n", zone);
+       for (String region : regions) {
+           System.out.format("  %s%n", region);
        }
    }
 

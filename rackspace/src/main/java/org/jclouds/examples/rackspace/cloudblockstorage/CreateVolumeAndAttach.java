@@ -25,7 +25,7 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PASSWORD;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.POLL_PERIOD_TWENTY_SECONDS;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.REGION;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.Closeable;
@@ -49,7 +49,7 @@ import org.jclouds.openstack.cinder.v1.options.CreateVolumeOptions;
 import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
-import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.RegionAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
@@ -72,7 +72,7 @@ public class CreateVolumeAndAttach implements Closeable {
    private final VolumeApi volumeApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -113,22 +113,22 @@ public class CreateVolumeAndAttach implements Closeable {
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
       novaApi = context.unwrapApi(NovaApi.class);
-      volumeAttachmentApi = novaApi.getVolumeAttachmentExtensionForZone(ZONE).get();
+      volumeAttachmentApi = novaApi.getVolumeAttachmentApi(REGION).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CinderApi.class);
-      volumeApi = cinderApi.getVolumeApiForZone(ZONE);
+      volumeApi = cinderApi.getVolumeApi(REGION);
    }
 
    private NodeMetadata createServer() throws RunNodesException, TimeoutException {
       System.out.format("Create Server%n");
 
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
+      RegionAndId regionAndId = RegionAndId.fromRegionAndId(REGION, "performance1-1");
       Template template = computeService.templateBuilder()
-            .locationId(ZONE)
+            .locationId(REGION)
             .osDescriptionMatches(".*Ubuntu 12.04.*")
-            .hardwareId(zoneAndId.slashEncode())
+            .hardwareId(regionAndId.slashEncode())
             .build();
 
       Set<? extends NodeMetadata> nodes = computeService.createNodesInGroup(NAME, 1, template);
@@ -136,7 +136,7 @@ public class CreateVolumeAndAttach implements Closeable {
       String publicAddress = nodeMetadata.getPublicAddresses().iterator().next();
 
       // We set the password to something we know so we can login in the DetachVolume example
-      novaApi.getServerApiForZone(ZONE).changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
+      novaApi.getServerApi(REGION).changeAdminPass(nodeMetadata.getProviderId(), PASSWORD);
 
       System.out.format("  %s%n", nodeMetadata);
       System.out.format("  Login: ssh %s@%s%n", nodeMetadata.getCredentials().getUser(), publicAddress);

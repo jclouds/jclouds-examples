@@ -22,7 +22,7 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PASSWORD;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ROOT;
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.REGION;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.Closeable;
@@ -41,7 +41,7 @@ import org.jclouds.openstack.cinder.v1.predicates.VolumePredicates;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.domain.Server;
 import org.jclouds.openstack.nova.v2_0.domain.VolumeAttachment;
-import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.RegionAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.VolumeAttachmentApi;
 import org.jclouds.openstack.nova.v2_0.features.ServerApi;
 import org.jclouds.scriptbuilder.ScriptBuilder;
@@ -58,7 +58,6 @@ import com.google.inject.Module;
  */
 public class DetachVolume implements Closeable {
    private final ComputeService computeService;
-   private final NovaApi novaApi;
    private final ServerApi serverApi;
    private final VolumeAttachmentApi volumeAttachmentApi;
 
@@ -67,7 +66,7 @@ public class DetachVolume implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -100,14 +99,14 @@ public class DetachVolume implements Closeable {
             .modules(modules)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
-      novaApi = context.unwrapApi(NovaApi.class);
-      serverApi = novaApi.getServerApiForZone(ZONE);
-      volumeAttachmentApi = novaApi.getVolumeAttachmentExtensionForZone(ZONE).get();
+      NovaApi novaApi = context.unwrapApi(NovaApi.class);
+      serverApi = novaApi.getServerApi(REGION);
+      volumeAttachmentApi = novaApi.getVolumeAttachmentApi(REGION).get();
 
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CinderApi.class);
-      volumeApi = cinderApi.getVolumeApiForZone(ZONE);
+      volumeApi = cinderApi.getVolumeApi(REGION);
    }
 
    /**
@@ -141,8 +140,8 @@ public class DetachVolume implements Closeable {
             .overrideLoginPassword(PASSWORD)
             .blockOnComplete(true);
 
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, volumeAttachment.getServerId());
-      ExecResponse response = computeService.runScriptOnNode(zoneAndId.slashEncode(), script, options);
+      RegionAndId regionAndId = RegionAndId.fromRegionAndId(REGION, volumeAttachment.getServerId());
+      ExecResponse response = computeService.runScriptOnNode(regionAndId.slashEncode(), script, options);
 
       if (response.getExitStatus() == 0) {
          System.out.format("  Exit Status: %s%n", response.getExitStatus());

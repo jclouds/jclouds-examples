@@ -37,7 +37,7 @@ public class ListLoadBalancers implements Closeable {
    private final CloudLoadBalancersApi clbApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -65,10 +65,10 @@ public class ListLoadBalancers implements Closeable {
    private void listLoadBalancers() {
       System.out.format("List Load Balancers%n");
 
-      for (String zone: clbApi.getConfiguredZones()) {
-         System.out.format("  %s%n", zone);
+      for (String region: clbApi.getConfiguredRegions()) {
+         System.out.format("  %s%n", region);
 
-         LoadBalancerApi lbApi = clbApi.getLoadBalancerApiForZone(zone);
+         LoadBalancerApi lbApi = clbApi.getLoadBalancerApi(region);
 
          for (LoadBalancer loadBalancer: lbApi.list().concat()) {
             System.out.format("    %s%n", loadBalancer);

@@ -24,7 +24,7 @@ import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIO
 import static org.jclouds.examples.rackspace.cloudservers.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudservers.Constants.POLL_PERIOD_TWENTY_SECONDS;
 import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.REGION;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
 
 import java.io.Closeable;
@@ -44,7 +44,7 @@ import org.jclouds.compute.options.RunScriptOptions;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
-import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.RegionAndId;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
@@ -122,7 +122,7 @@ public class CreateServerWithKeyPair implements Closeable {
     * This method is not necessary and is here for demonstration purposes only.
     */
    private void detectKeyPairExtension() {
-      Optional<? extends KeyPairApi> keyPairApiExtension = novaApi.getKeyPairExtensionForZone(ZONE);
+      Optional<? extends KeyPairApi> keyPairApiExtension = novaApi.getKeyPairApi(REGION);
 
       if (keyPairApiExtension.isPresent()) {
          System.out.format("  Key Pair Extension Present%n");
@@ -141,7 +141,7 @@ public class CreateServerWithKeyPair implements Closeable {
    private KeyPair createKeyPair() throws IOException {
       System.out.format("  Create Key Pair%n");
 
-      KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(ZONE).get();
+      KeyPairApi keyPairApi = novaApi.getKeyPairApi(REGION).get();
       KeyPair keyPair = keyPairApi.create(NAME);
 
       Files.write(keyPair.getPrivateKey(), keyPairFile, UTF_8);
@@ -159,11 +159,11 @@ public class CreateServerWithKeyPair implements Closeable {
 
       NovaTemplateOptions options = NovaTemplateOptions.Builder.keyPairName(keyPair.getName());
 
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
+      RegionAndId regionAndId = RegionAndId.fromRegionAndId(REGION, "performance1-1");
       Template template = computeService.templateBuilder()
-            .locationId(ZONE)
-            .osDescriptionMatches(".*Ubuntu 12.04.*")
-            .hardwareId(zoneAndId.slashEncode())
+            .locationId(REGION)
+            .osDescriptionMatches(".*Ubuntu 14.04.*")
+            .hardwareId(regionAndId.slashEncode())
             .options(options)
             .build();
 
@@ -209,7 +209,7 @@ public class CreateServerWithKeyPair implements Closeable {
    private void deleteKeyPair(KeyPair keyPair) {
       System.out.format("  Delete Key Pair%n");
 
-      KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(ZONE).get();
+      KeyPairApi keyPairApi = novaApi.getKeyPairApi(REGION).get();
       keyPairApi.delete(keyPair.getName());
 
       if (keyPairFile.delete()) {

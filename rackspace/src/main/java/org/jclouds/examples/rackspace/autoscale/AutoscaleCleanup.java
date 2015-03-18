@@ -20,7 +20,7 @@ package org.jclouds.examples.rackspace.autoscale;
 
 import static org.jclouds.examples.rackspace.autoscale.Constants.NAME;
 import static org.jclouds.examples.rackspace.autoscale.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.autoscale.Constants.ZONE;
+import static org.jclouds.examples.rackspace.autoscale.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class AutoscaleCleanup implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -73,7 +73,7 @@ public class AutoscaleCleanup implements Closeable {
             .credentials(username, apiKey)
             .buildApi(AutoscaleApi.class);
 
-      groupApi = autoscaleApi.getGroupApiForZone(ZONE);
+      groupApi = autoscaleApi.getGroupApi(REGION);
    }
 
    private void autoscaleCleanup() {
@@ -81,7 +81,7 @@ public class AutoscaleCleanup implements Closeable {
 
       // Remove ALL policies and groups with that name
       for (GroupState g : groupApi.listGroupStates()) {
-         PolicyApi pa = autoscaleApi.getPolicyApiForZoneAndGroup(ZONE, g.getId());
+         PolicyApi pa = autoscaleApi.getPolicyApi(REGION, g.getId());
          for(ScalingPolicy p : pa.list()) {
             if(p.getName().equals(NAME)) {
                System.out.format("Found matching policy: %s with cooldown %s%n", p.getId(), p.getCooldown());

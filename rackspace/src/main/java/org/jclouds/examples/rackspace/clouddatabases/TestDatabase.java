@@ -67,7 +67,7 @@ public class TestDatabase implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument  (args[0]) must be your username.
     * The second argument (args[1]) must be your API key.
@@ -101,12 +101,12 @@ public class TestDatabase implements Closeable {
       clbApi = ContextBuilder.newBuilder(provider)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
+      lbApi = clbApi.getLoadBalancerApi(REGION);
 
       troveApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(TroveApi.class);
-      instanceApi = troveApi.getInstanceApiForZone(ZONE);
+      instanceApi = troveApi.getInstanceApi(REGION);
    }
 
    /**

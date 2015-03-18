@@ -49,7 +49,7 @@ public class CRUDReverseDNSRecords implements Closeable {
    private final ReverseDNSApi reverseDNSApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -79,7 +79,7 @@ public class CRUDReverseDNSRecords implements Closeable {
       dnsApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudDNSApi.class);
-      reverseDNSApi = dnsApi.getReverseDNSApiForService(CLOUD_SERVERS);
+      reverseDNSApi = dnsApi.getReverseDNSApi(CLOUD_SERVERS);
    }
 
    private RecordDetail createReverseDNSRecords(NodeMetadata node) throws TimeoutException {
@@ -126,7 +126,7 @@ public class CRUDReverseDNSRecords implements Closeable {
    private void deleteAllReverseDNSRecords(NodeMetadata node) throws TimeoutException {
       System.out.format("Delete Reverse DNS Records%n");
 
-      awaitComplete(dnsApi, dnsApi.getReverseDNSApiForService(CLOUD_SERVERS).deleteAll(node.getUri()));
+      awaitComplete(dnsApi, dnsApi.getReverseDNSApi(CLOUD_SERVERS).deleteAll(node.getUri()));
 
       System.out.format("  Deleted all reverse DNS records%n");
    }

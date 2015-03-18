@@ -137,18 +137,18 @@ public class DeleteAll {
             .credentials(username, apiKey)
             .buildApi(CinderApi.class);
 
-      for (String zone : cinderApi.getConfiguredZones()) {
+      for (String region : cinderApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Snapshots in %s%n", zone);
-            SnapshotApi snapshotApi = cinderApi.getSnapshotApiForZone(zone);
+            System.out.format("Delete Snapshots in %s%n", region);
+            SnapshotApi snapshotApi = cinderApi.getSnapshotApi(region);
 
             for (Snapshot snapshot : snapshotApi.list()) {
                System.out.format("  %s%n", snapshot.getName());
                snapshotApi.delete(snapshot.getId());
             }
 
-            System.out.format("Delete Volumes in %s%n", zone);
-            VolumeApi volumeApi = cinderApi.getVolumeApiForZone(zone);
+            System.out.format("Delete Volumes in %s%n", region);
+            VolumeApi volumeApi = cinderApi.getVolumeApi(region);
 
             for (Volume volume : volumeApi.list()) {
                System.out.format("  %s%n", volume.getName());
@@ -167,19 +167,19 @@ public class DeleteAll {
             .credentials(username, apiKey)
             .buildApi(NovaApi.class);
 
-      for (String zone : novaApi.getConfiguredZones()) {
+      for (String region : novaApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Key Pairs in %s%n", zone);
-            KeyPairApi keyPairApi = novaApi.getKeyPairExtensionForZone(zone).get();
+            System.out.format("Delete Key Pairs in %s%n", region);
+            KeyPairApi keyPairApi = novaApi.getKeyPairApi(region).get();
 
             for (KeyPair keyPair : keyPairApi.list()) {
                System.out.format("  %s%n", keyPair.getName());
                keyPairApi.delete(keyPair.getName());
             }
 
-            System.out.format("Delete Servers in %s%n", zone);
-            VolumeAttachmentApi volumeAttachmentApi = novaApi.getVolumeAttachmentExtensionForZone(zone).get();
-            ServerApi serverApi = novaApi.getServerApiForZone(zone);
+            System.out.format("Delete Servers in %s%n", region);
+            VolumeAttachmentApi volumeAttachmentApi = novaApi.getVolumeAttachmentApi(region).get();
+            ServerApi serverApi = novaApi.getServerApi(region);
 
             for (Server server : serverApi.listInDetail().concat().toList()) {
                for (VolumeAttachment volumeAttachment : volumeAttachmentApi.listAttachmentsOnServer(server.getId())) {
@@ -202,21 +202,21 @@ public class DeleteAll {
             .credentials(username, apiKey)
             .buildApi(TroveApi.class);
 
-      for (String zone : troveApi.getConfiguredZones()) {
+      for (String region : troveApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Database Instances of DBs and Users in %s%n", zone);
-            InstanceApi instanceApi = troveApi.getInstanceApiForZone(zone);
+            System.out.format("Delete Database Instances of DBs and Users in %s%n", region);
+            InstanceApi instanceApi = troveApi.getInstanceApi(region);
 
             for (Instance instance : instanceApi.list()) {
                System.out.format("  %s%n", instance.getName());
-               DatabaseApi databaseApi = troveApi.getDatabaseApiForZoneAndInstance(zone, instance.getId());
+               DatabaseApi databaseApi = troveApi.getDatabaseApi(region, instance.getId());
 
                for (String database : databaseApi.list()) {
                   System.out.format("    %s%n", database);
                   databaseApi.delete(database);
                }
 
-               UserApi userApi = troveApi.getUserApiForZoneAndInstance(zone, instance.getId());
+               UserApi userApi = troveApi.getUserApi(region, instance.getId());
 
                for (User user : userApi.list()) {
                   System.out.format("    %s%n", user.getName());
@@ -259,10 +259,10 @@ public class DeleteAll {
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
 
-      for (String zone : clbApi.getConfiguredZones()) {
+      for (String region : clbApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Load Balancers in %s%n", zone);
-            LoadBalancerApi lbApi = clbApi.getLoadBalancerApiForZone(zone);
+            System.out.format("Delete Load Balancers in %s%n", region);
+            LoadBalancerApi lbApi = clbApi.getLoadBalancerApi(region);
 
             for (LoadBalancer loadBalancer : lbApi.list().concat()) {
                System.out.format("  %s%n", loadBalancer.getName());
@@ -282,10 +282,10 @@ public class DeleteAll {
             .buildApi(MarconiApi.class);
       UUID uuid = UUID.randomUUID(); // any UUID can be used to list all queues
 
-      for (String zone : marconiApi.getConfiguredZones()) {
+      for (String region : marconiApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Queues in %s%n", zone);
-            QueueApi queueApi = marconiApi.getQueueApiForZoneAndClient(zone, uuid);
+            System.out.format("Delete Queues in %s%n", region);
+            QueueApi queueApi = marconiApi.getQueueApi(region, uuid);
 
             for (Queue queue : queueApi.list(false).concat()) {
                System.out.format("  %s%n", queue.getName());
@@ -304,10 +304,10 @@ public class DeleteAll {
             .credentials(username, apiKey)
             .buildApi(AutoscaleApi.class);
 
-      for (String zone : autoscaleApi.getConfiguredZones()) {
+      for (String region : autoscaleApi.getConfiguredRegions()) {
          try {
-            System.out.format("Delete Autoscale Groups in %s%n", zone);
-            GroupApi groupApi = autoscaleApi.getGroupApiForZone(zone);
+            System.out.format("Delete Autoscale Groups in %s%n", region);
+            GroupApi groupApi = autoscaleApi.getGroupApi(region);
 
             for (GroupState groupState : groupApi.listGroupStates()) {
                System.out.format("  %s%n", groupState.getId());

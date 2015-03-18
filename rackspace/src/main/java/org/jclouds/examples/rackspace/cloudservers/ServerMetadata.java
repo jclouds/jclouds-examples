@@ -20,7 +20,7 @@ package org.jclouds.examples.rackspace.cloudservers;
 
 import static org.jclouds.examples.rackspace.cloudservers.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -43,11 +43,10 @@ import com.google.common.io.Closeables;
  */
 public class ServerMetadata implements Closeable {
    private final ComputeService computeService;
-   private final NovaApi novaApi;
    private final ServerApi serverApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -75,8 +74,8 @@ public class ServerMetadata implements Closeable {
             .credentials(username, apiKey)
             .buildView(ComputeServiceContext.class);
       computeService = context.getComputeService();
-      novaApi = context.unwrapApi(NovaApi.class);
-      serverApi = novaApi.getServerApiForZone(ZONE);
+      NovaApi novaApi = context.unwrapApi(NovaApi.class);
+      serverApi = novaApi.getServerApi(REGION);
    }
 
    /**

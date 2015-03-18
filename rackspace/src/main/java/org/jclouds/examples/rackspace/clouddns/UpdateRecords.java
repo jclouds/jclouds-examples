@@ -46,7 +46,7 @@ public class UpdateRecords implements Closeable {
    private final CloudDNSApi dnsApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -86,24 +86,24 @@ public class UpdateRecords implements Closeable {
    private void updateRecord(Domain domain) throws TimeoutException {
       System.out.format("Update Record%n");
 
-      RecordDetail recordDetail = dnsApi.getRecordApiForDomain(domain.getId()).getByNameAndTypeAndData(NAME, "A", "10.0.0.1");
+      RecordDetail recordDetail = dnsApi.getRecordApi(domain.getId()).getByNameAndTypeAndData(NAME, "A", "10.0.0.1");
       Record updateRecord = recordDetail.getRecord().toBuilder().data("10.0.1.0").build();
 
-      awaitComplete(dnsApi, dnsApi.getRecordApiForDomain(domain.getId()).update(recordDetail.getId(), updateRecord));
+      awaitComplete(dnsApi, dnsApi.getRecordApi(domain.getId()).update(recordDetail.getId(), updateRecord));
 
-      System.out.format("  %s%n", dnsApi.getRecordApiForDomain(domain.getId()).get(recordDetail.getId()));
+      System.out.format("  %s%n", dnsApi.getRecordApi(domain.getId()).get(recordDetail.getId()));
    }
 
    private void updateRecords(Domain domain) throws TimeoutException {
       System.out.format("Update Records%n");
 
-      Set<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("A").concat().toSet();
+      Set<RecordDetail> recordDetails = dnsApi.getRecordApi(domain.getId()).listByType("A").concat().toSet();
       Map<String, Record> idsToRecords = RecordFunctions.toRecordMap(recordDetails);
       Map<String, Record> updateRecords = Maps.transformValues(idsToRecords, updateTTLAndComment(235813, "New TTL"));
 
-      awaitComplete(dnsApi, dnsApi.getRecordApiForDomain(domain.getId()).update(updateRecords));
+      awaitComplete(dnsApi, dnsApi.getRecordApi(domain.getId()).update(updateRecords));
 
-      Iterable<RecordDetail> recordDetailsUpdated = dnsApi.getRecordApiForDomain(domain.getId()).listByType("A").concat();
+      Iterable<RecordDetail> recordDetailsUpdated = dnsApi.getRecordApi(domain.getId()).listByType("A").concat();
 
       for (RecordDetail recordDetailUpdated: recordDetailsUpdated) {
          System.out.format("  %s%n", recordDetailUpdated);

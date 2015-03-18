@@ -43,7 +43,7 @@ public class DeleteRecords implements Closeable {
    private final CloudDNSApi dnsApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -82,10 +82,10 @@ public class DeleteRecords implements Closeable {
    private void deleteRecords(Domain domain) throws TimeoutException {
       System.out.format("Delete Records%n");
 
-      Set<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("TXT").concat().toSet();
+      Set<RecordDetail> recordDetails = dnsApi.getRecordApi(domain.getId()).listByType("TXT").concat().toSet();
       Iterable<String> recordIds = Iterables.transform(recordDetails, GET_RECORD_ID);
 
-      awaitComplete(dnsApi, dnsApi.getRecordApiForDomain(domain.getId()).delete(recordIds));
+      awaitComplete(dnsApi, dnsApi.getRecordApi(domain.getId()).delete(recordIds));
 
       System.out.format("  Deleted %s records", Iterables.size(recordDetails));
    }

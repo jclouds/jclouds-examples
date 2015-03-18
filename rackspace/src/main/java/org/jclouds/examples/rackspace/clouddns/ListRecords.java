@@ -38,7 +38,7 @@ public class ListRecords implements Closeable {
    private final CloudDNSApi dnsApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -79,7 +79,7 @@ public class ListRecords implements Closeable {
    private void listRecords(Domain domain) {
       System.out.format("List Records%n");
 
-      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).list().concat();
+      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApi(domain.getId()).list().concat();
 
       for (RecordDetail recordDetail: recordDetails) {
          System.out.format("  %s%n", recordDetail);
@@ -89,7 +89,7 @@ public class ListRecords implements Closeable {
    private void listRecordsByNameAndType(Domain domain) {
       System.out.format("List Records by Name and Type%n");
 
-      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByNameAndType(NAME, "A").concat();
+      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApi(domain.getId()).listByNameAndType(NAME, "A").concat();
 
       for (RecordDetail recordDetail: recordDetails) {
          System.out.format("  %s%n", recordDetail);
@@ -99,7 +99,7 @@ public class ListRecords implements Closeable {
    private void listRecordsByType(Domain domain) {
       System.out.format("List Records by Type%n");
 
-      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApiForDomain(domain.getId()).listByType("MX").concat();
+      Iterable<RecordDetail> recordDetails = dnsApi.getRecordApi(domain.getId()).listByType("MX").concat();
 
       for (RecordDetail recordDetail: recordDetails) {
          System.out.format("  %s%n", recordDetail);

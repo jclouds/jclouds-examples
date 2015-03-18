@@ -27,7 +27,7 @@ public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)
    // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudqueues-uk"
    final String PROVIDER = System.getProperty("provider.cbs", "rackspace-cloudqueues-us");
-   final String ZONE = System.getProperty("zone", "IAD");
+   final String REGION = System.getProperty("region", "IAD");
 
    final UUID PRODUCER_ID = UUID.fromString("3381af92-2b9e-11e3-b191-71861300734a");
    final UUID CONSUMER_ID = UUID.fromString("3381af92-2b9e-11e3-b191-71861300734b");

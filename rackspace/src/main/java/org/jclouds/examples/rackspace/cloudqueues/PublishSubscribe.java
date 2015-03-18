@@ -48,7 +48,7 @@ import static org.jclouds.examples.rackspace.cloudqueues.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PUBLISHER_ID;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PUBLISHER_NAME;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.SUBSCRIBER_ID;
-import static org.jclouds.examples.rackspace.cloudqueues.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudqueues.Constants.REGION;
 import static org.jclouds.openstack.marconi.v1.options.StreamMessagesOptions.Builder.limit;
 
 /**
@@ -97,7 +97,7 @@ public class PublishSubscribe implements Closeable {
             .credentials(username, apiKey)
             // .modules(modules)
             .buildApi(MarconiApi.class);
-      queueApi = marconiApi.getQueueApiForZoneAndClient(ZONE, PUBLISHER_ID);
+      queueApi = marconiApi.getQueueApi(REGION, PUBLISHER_ID);
    }
 
    private void createQueue() {
@@ -147,7 +147,7 @@ public class PublishSubscribe implements Closeable {
 
       protected Publisher(String publisherName) {
          this.publisherName = publisherName;
-         messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, PUBLISHER_ID, NAME);
+         messageApi = marconiApi.getMessageApi(REGION, PUBLISHER_ID, NAME);
       }
 
       public void run() {
@@ -178,7 +178,7 @@ public class PublishSubscribe implements Closeable {
 
       protected Subscriber(String subscriberName) {
          this.subscriberName = subscriberName;
-         messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, SUBSCRIBER_ID, NAME);
+         messageApi = marconiApi.getMessageApi(REGION, SUBSCRIBER_ID, NAME);
       }
 
       /**

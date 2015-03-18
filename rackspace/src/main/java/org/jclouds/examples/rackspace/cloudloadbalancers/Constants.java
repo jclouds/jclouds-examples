@@ -26,7 +26,7 @@ public interface Constants {
    // The provider configures jclouds To use the Rackspace Cloud (US)
    // To use the Rackspace Cloud (UK) set the system property or default value to "rackspace-cloudloadbalancers-uk"
    public static final String PROVIDER = System.getProperty("provider.clb", "rackspace-cloudloadbalancers-us");
-   public static final String ZONE = System.getProperty("zone", "IAD");
+   public static final String REGION = System.getProperty("region", "IAD");
 
    public static final String NAME = "jclouds-example";
 }

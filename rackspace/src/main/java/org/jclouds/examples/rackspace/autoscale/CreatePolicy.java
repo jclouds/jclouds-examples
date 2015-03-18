@@ -22,7 +22,7 @@ import static org.jclouds.examples.rackspace.autoscale.Constants.NAME;
 import static org.jclouds.examples.rackspace.autoscale.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.autoscale.Constants.PUBLIC_NET;
 import static org.jclouds.examples.rackspace.autoscale.Constants.SERVICE_NET;
-import static org.jclouds.examples.rackspace.autoscale.Constants.ZONE;
+import static org.jclouds.examples.rackspace.autoscale.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class CreatePolicy implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -83,7 +83,7 @@ public class CreatePolicy implements Closeable {
             .credentials(username, apiKey)
             .buildApi(AutoscaleApi.class);
 
-      groupApi = autoscaleApi.getGroupApiForZone(ZONE);
+      groupApi = autoscaleApi.getGroupApi(REGION);
    }
 
    private void createPolicy() {

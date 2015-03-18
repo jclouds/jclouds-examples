@@ -36,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.NAME;
 import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudloadbalancers.Constants.REGION;
 import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.DISABLED;
 import static org.jclouds.rackspace.cloudloadbalancers.v1.domain.internal.BaseNode.Condition.ENABLED;
 
@@ -49,7 +49,7 @@ public class AddNodes implements Closeable {
    private final LoadBalancerApi lbApi;
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -74,7 +74,7 @@ public class AddNodes implements Closeable {
       clbApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CloudLoadBalancersApi.class);
-      lbApi = clbApi.getLoadBalancerApiForZone(ZONE);
+      lbApi = clbApi.getLoadBalancerApi(REGION);
    }
 
    private LoadBalancer getLoadBalancer() {
@@ -122,7 +122,7 @@ public class AddNodes implements Closeable {
    private void addNodesToLoadBalancer(Set<AddNode> addNodes, LoadBalancer loadBalancer) throws TimeoutException {
       System.out.format("Add Nodes%n");
 
-      NodeApi nodeApi = clbApi.getNodeApiForZoneAndLoadBalancer(ZONE, loadBalancer.getId());
+      NodeApi nodeApi = clbApi.getNodeApi(REGION, loadBalancer.getId());
       Set<Node> nodes = nodeApi.add(addNodes);
 
       // Wait for the Load Balancer to become Active before moving on

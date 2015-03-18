@@ -19,7 +19,7 @@
 package org.jclouds.examples.rackspace.cloudblockstorage;
 
 import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.NAME;
-import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class ListVolumeAttachments implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -73,8 +73,8 @@ public class ListVolumeAttachments implements Closeable {
             .credentials(username, apiKey)
             .buildApi(NovaApi.class);
 
-      serverApi = nova.getServerApiForZone(ZONE);
-      volumeAttachmentApi = nova.getVolumeAttachmentExtensionForZone(ZONE).get();
+      serverApi = nova.getServerApi(REGION);
+      volumeAttachmentApi = nova.getVolumeAttachmentApi(REGION).get();
    }
 
    /**

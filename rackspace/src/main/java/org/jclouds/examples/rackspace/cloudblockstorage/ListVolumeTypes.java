@@ -34,11 +34,11 @@ import static org.jclouds.examples.rackspace.cloudblockstorage.Constants.PROVIDE
  */
 public class ListVolumeTypes implements Closeable {
    private final CinderApi cinderApi;
-   private final Set<String> zones;
+   private final Set<String> regions;
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -61,16 +61,16 @@ public class ListVolumeTypes implements Closeable {
       cinderApi = ContextBuilder.newBuilder(PROVIDER)
             .credentials(username, apiKey)
             .buildApi(CinderApi.class);
-      zones = cinderApi.getConfiguredZones();
+      regions = cinderApi.getConfiguredRegions();
    }
 
    private void listVolumeTypes() {
       System.out.format("List Volumes Types%n");
 
-      for (String zone: zones) {
-         System.out.format("  %s%n", zone);
+      for (String region: regions) {
+         System.out.format("  %s%n", region);
 
-         for (VolumeType volumeType: cinderApi.getVolumeTypeApiForZone(zone).list()) {
+         for (VolumeType volumeType: cinderApi.getVolumeTypeApi(region).list()) {
             System.out.format("    %s%n", volumeType);
          }
       }

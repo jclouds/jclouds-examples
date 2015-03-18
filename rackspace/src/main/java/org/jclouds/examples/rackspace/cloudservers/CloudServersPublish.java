@@ -30,7 +30,7 @@ import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.options.RunScriptOptions;
-import org.jclouds.openstack.nova.v2_0.domain.zonescoped.ZoneAndId;
+import org.jclouds.openstack.nova.v2_0.domain.regionscoped.RegionAndId;
 import org.jclouds.predicates.SocketOpen;
 import org.jclouds.scriptbuilder.ScriptBuilder;
 import org.jclouds.scriptbuilder.domain.OsFamily;
@@ -60,7 +60,7 @@ public class CloudServersPublish implements Closeable {
 
    /**
     * To get a username and API key see
-    * http://www.jclouds.org/documentation/quickstart/rackspace/
+    * http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -113,11 +113,11 @@ public class CloudServersPublish implements Closeable {
    private Set<? extends NodeMetadata> createServer() throws RunNodesException, TimeoutException {
       System.out.format("Create Server%n");
 
-      ZoneAndId zoneAndId = ZoneAndId.fromZoneAndId(ZONE, "performance1-1");
+      RegionAndId regionAndId = RegionAndId.fromRegionAndId(REGION, "performance1-1");
       Template template = computeService.templateBuilder()
-            .locationId(ZONE)
-            .osDescriptionMatches(".*Ubuntu 12.04.*")
-            .hardwareId(zoneAndId.slashEncode())
+            .locationId(REGION)
+            .osDescriptionMatches(".*Ubuntu 14.04.*")
+            .hardwareId(regionAndId.slashEncode())
             .build();
 
       // This method will continue to poll for the server status and won't return until this server is ACTIVE

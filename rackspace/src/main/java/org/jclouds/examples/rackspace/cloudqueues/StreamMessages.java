@@ -44,7 +44,7 @@ import static org.jclouds.examples.rackspace.cloudqueues.Constants.PRODUCER_ID;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PRODUCER_NAME;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PROVIDER;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PUBLISHER_ID;
-import static org.jclouds.examples.rackspace.cloudqueues.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudqueues.Constants.REGION;
 import static org.jclouds.openstack.marconi.v1.options.StreamMessagesOptions.Builder.marker;
 
 /**
@@ -88,7 +88,7 @@ public class StreamMessages implements Closeable {
             .credentials(username, apiKey)
             // .modules(modules)
             .buildApi(MarconiApi.class);
-      queueApi = marconiApi.getQueueApiForZoneAndClient(ZONE, PUBLISHER_ID);
+      queueApi = marconiApi.getQueueApi(REGION, PUBLISHER_ID);
    }
 
    private void createQueue() {
@@ -98,7 +98,7 @@ public class StreamMessages implements Closeable {
    private void createMessages() throws ExecutionException, InterruptedException {
       System.out.format("Create Messages%n");
 
-      MessageApi messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, PRODUCER_ID, NAME);
+      MessageApi messageApi = marconiApi.getMessageApi(REGION, PRODUCER_ID, NAME);
       List<CreateMessage> createMessages = Lists.newArrayList();
 
       for (int i=0; i < 10; i++) {
@@ -123,7 +123,7 @@ public class StreamMessages implements Closeable {
    private void streamMessages() {
       System.out.format("Stream Messages%n");
 
-      MessageApi messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, CONSUMER_ID, NAME);
+      MessageApi messageApi = marconiApi.getMessageApi(REGION, CONSUMER_ID, NAME);
       MessageStream stream = messageApi.stream();
       String marker = "";
 

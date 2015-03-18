@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static org.jclouds.examples.rackspace.cloudservers.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudservers.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudservers.Constants.REGION;
 
 /**
  * This example lists servers filtered by Predicates. Run the CreateServer example before this to get some results.
@@ -44,7 +44,7 @@ public class ListServersWithFiltering implements Closeable {
 
 
    /**
-    * To get a username and API key see http://www.jclouds.org/documentation/quickstart/rackspace/
+    * To get a username and API key see http://jclouds.apache.org/guides/rackspace/
     *
     * The first argument (args[0]) must be your username
     * The second argument (args[1]) must be your API key
@@ -76,7 +76,7 @@ public class ListServersWithFiltering implements Closeable {
       System.out.format("List Servers By Parent Location Id%n");
 
       Set<? extends NodeMetadata> servers = computeService.listNodesDetailsMatching(NodePredicates
-            .parentLocationId(ZONE));
+            .parentLocationId(REGION));
 
       for (NodeMetadata nodeMetadata: servers) {
          System.out.format("  %s%n", nodeMetadata);

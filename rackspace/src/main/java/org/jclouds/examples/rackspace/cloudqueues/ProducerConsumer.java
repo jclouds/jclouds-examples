@@ -47,7 +47,7 @@ import static org.jclouds.examples.rackspace.cloudqueues.Constants.NUM_THREADS;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PRODUCER_ID;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PRODUCER_NAME;
 import static org.jclouds.examples.rackspace.cloudqueues.Constants.PROVIDER;
-import static org.jclouds.examples.rackspace.cloudqueues.Constants.ZONE;
+import static org.jclouds.examples.rackspace.cloudqueues.Constants.REGION;
 
 /**
  * Setting up a Producer/Consumer model in Cloud Queues consists of posting messages to your queue, consumers claiming
@@ -98,7 +98,7 @@ public class ProducerConsumer implements Closeable {
             .credentials(username, apiKey)
             // .modules(modules)
             .buildApi(MarconiApi.class);
-      queueApi = marconiApi.getQueueApiForZoneAndClient(ZONE, PRODUCER_ID);
+      queueApi = marconiApi.getQueueApi(REGION, PRODUCER_ID);
    }
 
    private void createQueue() {
@@ -148,7 +148,7 @@ public class ProducerConsumer implements Closeable {
 
       protected Producer(String producerName) {
          this.producerName = producerName;
-         messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, PRODUCER_ID, NAME);
+         messageApi = marconiApi.getMessageApi(REGION, PRODUCER_ID, NAME);
       }
 
       public void run() {
@@ -179,8 +179,8 @@ public class ProducerConsumer implements Closeable {
 
       protected Consumer(String consumerName) {
          this.consumerName = consumerName;
-         messageApi = marconiApi.getMessageApiForZoneAndClientAndQueue(ZONE, CONSUMER_ID, NAME);
-         claimApi = marconiApi.getClaimApiForZoneAndClientAndQueue(ZONE, CONSUMER_ID, NAME);
+         messageApi = marconiApi.getMessageApi(REGION, CONSUMER_ID, NAME);
+         claimApi = marconiApi.getClaimApi(REGION, CONSUMER_ID, NAME);
       }
 
       public void run() {

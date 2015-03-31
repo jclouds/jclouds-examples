@@ -74,11 +74,6 @@ To list all images (the *groupname* parameter is not used):
          -jar target/compute-basics-jar-with-dependencies.jar \
          openstack-nova tenantId:user password mygroup add
 
-### Virtualbox
-
-    java -jar target/compute-basics-jar-with-dependencies.jar virtualbox \ 
-          your-username your-password mygroup add
-
 ### Your own OpenStack Nova emulating EC2
 
     java \

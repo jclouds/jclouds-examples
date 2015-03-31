@@ -18,7 +18,6 @@ package org.jclouds.examples.blobstore.basics;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.contains;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -35,10 +34,9 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.openstack.swift.SwiftApiMetadata;
-import org.jclouds.openstack.swift.SwiftClient;
+import org.jclouds.openstack.swift.v1.SwiftApi;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
-import org.jclouds.rest.RestContext;
 import org.jclouds.s3.S3ApiMetadata;
 import org.jclouds.s3.S3Client;
 
@@ -116,11 +114,11 @@ public class MainApp {
             S3Client api = context.unwrapApi(S3Client.class);
             object = api.headObject(containerName, blobName);
          } else if (apiMetadata instanceof SwiftApiMetadata) {
-            SwiftClient api = context.unwrapApi(SwiftClient.class);
-            object = api.getObjectInfo(containerName, blobName);
+            SwiftApi api = context.unwrapApi(SwiftApi.class);
+            object = api.getObjectApi(containerName, blobName);
          } else if (apiMetadata instanceof AzureBlobApiMetadata) {
-            RestContext<AzureBlobClient, ?> providerContext = context.unwrap();
-            object = providerContext.getApi().getBlobProperties(containerName, blobName);
+            AzureBlobClient api = context.unwrapApi(AzureBlobClient.class);
+            object = api.getBlobProperties(containerName, blobName);
          } else if (apiMetadata instanceof AtmosApiMetadata) {
             AtmosClient api = context.unwrapApi(AtmosClient.class);
             object = api.headFile(containerName + "/" + blobName);

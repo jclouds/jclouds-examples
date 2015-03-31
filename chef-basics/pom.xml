@@ -27,7 +27,7 @@
   <description>jclouds chef example that adds a node to a group, then installs an Apache web server on all nodes</description>
   
   <properties>
-    <jclouds.version>1.8.0</jclouds.version>
+    <jclouds.version>1.9.0</jclouds.version>
   </properties>
 
   <dependencies>
@@ -51,11 +51,6 @@
       <artifactId>joyentcloud</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
-      <artifactId>virtualbox</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>      
     <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
          like below -->

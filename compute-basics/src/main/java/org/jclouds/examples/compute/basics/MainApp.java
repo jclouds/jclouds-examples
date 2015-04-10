@@ -52,7 +52,6 @@ import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.ExecResponse;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.compute.domain.OsFamily;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.domain.LoginCredentials;
@@ -144,9 +143,6 @@ public class MainApp {
             // that tested to work with java, which tends to be Ubuntu or CentOS
             TemplateBuilder templateBuilder = compute.templateBuilder();
 
-            if (providerIsGCE) {
-               templateBuilder.osFamily(OsFamily.CENTOS);
-            }
             // If you want to up the ram and leave everything default, you can 
             // just tweak minRam
             if (minRam != null)

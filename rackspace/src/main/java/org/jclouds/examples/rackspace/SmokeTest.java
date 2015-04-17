@@ -1,25 +1,25 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.jclouds.examples.rackspace;
 
 import java.io.IOException;
 
+import org.jclouds.examples.rackspace.cdn.CreateService;
+import org.jclouds.examples.rackspace.cdn.UpdateService;
 import org.jclouds.examples.rackspace.cloudblockstorage.*;
 import org.jclouds.examples.rackspace.clouddns.*;
 import org.jclouds.examples.rackspace.cloudfiles.*;
@@ -30,6 +30,8 @@ import org.jclouds.examples.rackspace.cloudqueues.StreamMessages;
 import org.jclouds.examples.rackspace.cloudservers.*;
 import org.jclouds.examples.rackspace.clouddatabases.*;
 import org.jclouds.examples.rackspace.autoscale.*;
+import org.jclouds.examples.rackspace.cdn.*;
+import org.jclouds.openstack.poppy.v1.domain.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
@@ -119,5 +121,10 @@ public class SmokeTest {
       ProducerConsumer.main(args);
       PublishSubscribe.main(args);
       StreamMessages.main(args);
+
+      CreateService.main(args);
+      UpdateService.main(args);
+      PurgeServiceAssets.main(args);
+      DeleteService.main(args);
    }
 }

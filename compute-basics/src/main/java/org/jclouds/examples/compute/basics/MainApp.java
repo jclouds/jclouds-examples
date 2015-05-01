@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,6 +33,7 @@ import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
 import static org.jclouds.scriptbuilder.domain.Statements.exec;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -54,8 +55,10 @@ import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.domain.Credentials;
 import org.jclouds.domain.LoginCredentials;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
+import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
@@ -65,6 +68,7 @@ import org.jclouds.sshj.config.SshjSshClientModule;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Predicates;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -85,15 +89,15 @@ public class MainApp {
    public static enum Action {
       ADD, RUN, EXEC, DESTROY, LISTIMAGES, LISTNODES;
    }
-   
+
    public static final Map<String, ApiMetadata> allApis = Maps.uniqueIndex(Apis.viewableAs(ComputeServiceContext.class),
         Apis.idFunction());
-   
+
    public static final Map<String, ProviderMetadata> appProviders = Maps.uniqueIndex(Providers.viewableAs(ComputeServiceContext.class),
         Providers.idFunction());
-   
+
    public static final Set<String> allKeys = ImmutableSet.copyOf(Iterables.concat(appProviders.keySet(), allApis.keySet()));
-   
+
    public static int PARAMETERS = 5;
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: provider identity credential groupName (add|exec|run|destroy)";
 
@@ -114,7 +118,7 @@ public class MainApp {
 
       // For GCE, the credential parameter is the path to the private key file
       if (providerIsGCE)
-         credential = getPrivateKeyFromFile(credential);
+         credential = getCredentialFromJsonKeyFile(credential);
 
       if (action == Action.RUN && args.length < PARAMETERS + 1)
          throw new IllegalArgumentException("please pass the local file to run as the last parameter");
@@ -124,7 +128,7 @@ public class MainApp {
          if (!file.exists())
             throw new IllegalArgumentException("file must exist! " + file);
       }
-      
+
       String minRam = System.getProperty("minRam");
 
       // note that you can check if a provider is present ahead of time
@@ -143,12 +147,12 @@ public class MainApp {
             // that tested to work with java, which tends to be Ubuntu or CentOS
             TemplateBuilder templateBuilder = compute.templateBuilder();
 
-            // If you want to up the ram and leave everything default, you can 
+            // If you want to up the ram and leave everything default, you can
             // just tweak minRam
             if (minRam != null)
                templateBuilder.minRam(Integer.parseInt(minRam));
-            
-            
+
+
             // note this will create a user with the same name as you on the
             // node. ex. you can connect via ssh publicip
             Statement bootInstructions = AdminAccess.standard();
@@ -185,7 +189,7 @@ public class MainApp {
          case RUN:
             System.out.printf(">> running [%s] on group %s as %s%n", file, groupName, login.identity);
 
-            // when running a sequence of commands, you probably want to have jclouds use the default behavior, 
+            // when running a sequence of commands, you probably want to have jclouds use the default behavior,
             // which is to fork a background process.
             responses = compute.runScriptOnNodesMatching(//
                   inGroup(groupName),
@@ -238,9 +242,12 @@ public class MainApp {
       }
    }
 
-   private static String getPrivateKeyFromFile(String filename) {
+   private static String getCredentialFromJsonKeyFile(String filename) {
       try {
-         return Files.toString(new File(filename), Charsets.UTF_8);
+         String fileContents = Files.toString(new File(filename), UTF_8);
+         Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(fileContents);
+         String credential = credentialSupplier.get().credential;
+         return credential;
       } catch (IOException e) {
          System.err.println("Exception reading private key from '%s': " + filename);
          e.printStackTrace();
@@ -271,7 +278,7 @@ public class MainApp {
                                              .credentials(identity, credential)
                                              .modules(modules)
                                              .overrides(properties);
-                                             
+
       System.out.printf(">> initializing %s%n", builder.getApiMetadata());
 
       return builder.buildView(ComputeServiceContext.class).getComputeService();

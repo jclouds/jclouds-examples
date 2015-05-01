@@ -89,8 +89,10 @@ To list all images (the *groupname* parameter is not used):
     java -jar target/compute-basics-jar-with-dependencies.jar \
          google-compute-engine \
          your-project-service-account-email@developer.gserviceaccount.com \
-         /path/to/private-key.pem \
+         /path/to/json-key.json \
          mygroup add
+
+For more information on service accounts and getting a JSON key see [here](https://developers.google.com/console/help/new/#serviceaccounts)
 
 ## License
 

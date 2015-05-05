@@ -31,7 +31,7 @@ import org.jclouds.examples.rackspace.cloudservers.*;
 import org.jclouds.examples.rackspace.clouddatabases.*;
 import org.jclouds.examples.rackspace.autoscale.*;
 import org.jclouds.examples.rackspace.cdn.*;
-import org.jclouds.openstack.poppy.v1.domain.*;
+import org.jclouds.examples.rackspace.cloudnetworks.*;
 
 /**
  * This example smoke tests all of the other examples in these packages.
@@ -126,5 +126,10 @@ public class SmokeTest {
       UpdateService.main(args);
       PurgeServiceAssets.main(args);
       DeleteService.main(args);
+
+      CreateNetwork.main(args);
+      CreateSubnet.main(args);
+      CreatePort.main(args);
+      CreateSecurityGroup.main(args);
    }
 }

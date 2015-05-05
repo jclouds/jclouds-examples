@@ -46,16 +46,16 @@ public class PurgeServiceAssets implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      PurgeServiceAssets createPolicy = new PurgeServiceAssets(args[0], args[1]);
+      PurgeServiceAssets purgeServiceAssets = new PurgeServiceAssets(args[0], args[1]);
 
       try {
-         createPolicy.updateService();
+         purgeServiceAssets.updateService();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
       finally {
-         createPolicy.close();
+         purgeServiceAssets.close();
       }
    }
 

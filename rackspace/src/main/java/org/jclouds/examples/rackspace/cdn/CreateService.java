@@ -57,16 +57,16 @@ public class CreateService implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      CreateService createPolicy = new CreateService(args[0], args[1]);
+      CreateService createService = new CreateService(args[0], args[1]);
 
       try {
-         createPolicy.createService();
+         createService.createService();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
       finally {
-         createPolicy.close();
+         createService.close();
       }
    }
 

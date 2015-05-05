@@ -14,32 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jclouds.examples.rackspace.cloudnetworks;
 
-package org.jclouds.examples.rackspace.cdn;
-
-import static org.jclouds.examples.rackspace.cdn.Constants.PROVIDER;
+import static org.jclouds.examples.rackspace.cloudnetworks.Constants.REGION;
 
 import java.io.Closeable;
 import java.io.IOException;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
-import org.jclouds.openstack.poppy.v1.PoppyApi;
-import org.jclouds.openstack.poppy.v1.domain.Service;
-import org.jclouds.openstack.poppy.v1.features.ServiceApi;
+import org.jclouds.openstack.neutron.v2.NeutronApi;
+import org.jclouds.openstack.neutron.v2.domain.Network;
+import org.jclouds.openstack.neutron.v2.features.NetworkApi;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Closeables;
-import com.google.inject.Module;
 
 /**
- * Updates a Poppy service. (Rackspace CDN).
- * This operation internally diffs a target Service with a currently exsiting source service
- * and automatically sends the json-patch diff to Poppy, which applies it.
+ * Demonstrates how to create a Poppy service on Rackspace (Rackspace CDN).
+ * Cleans up the service on fail.
  */
-public class UpdateService implements Closeable {
-   private final PoppyApi cdnApi;
-   private final ServiceApi serviceApi;
+public class CreateNetwork implements Closeable {
+   private final NeutronApi neutronApi;
 
    /**
     * To get a username and API key see
@@ -49,38 +43,35 @@ public class UpdateService implements Closeable {
     * The second argument (args[1]) must be your API key
     */
    public static void main(String[] args) throws IOException {
-      UpdateService updateService = new UpdateService(args[0], args[1]);
+      CreateNetwork createNetwork = new CreateNetwork(args[0], args[1]);
 
       try {
-         updateService.updateService();
+         createNetwork.createNetwork();
       }
       catch (Exception e) {
          e.printStackTrace();
       }
       finally {
-         updateService.close();
+         createNetwork.close();
       }
    }
 
-   public UpdateService(String username, String apiKey) {
-      cdnApi = ContextBuilder.newBuilder(PROVIDER)
+   public CreateNetwork(String username, String apiKey) {
+      neutronApi = ContextBuilder.newBuilder("rackspace-cloudnetworks-us")
             .credentials(username, apiKey)
-            .buildApi(PoppyApi.class);
-
-      serviceApi = cdnApi.getServiceApi();
+            .buildApi(NeutronApi.class);
    }
 
-   private void updateService() {
+   private void createNetwork() {
+      NetworkApi networkApi = neutronApi.getNetworkApi(REGION);
+      Network net = null;
       try {
-         Service serviceList = serviceApi.list().concat().toSet().iterator().next();
-
-         System.out.println("Update service " + serviceList.getId());
-         System.out.println("Status: " + serviceList.getStatus());
-
-         org.jclouds.openstack.poppy.v1.domain.UpdateService updated = serviceList.toUpdatableService().name("updated_name").build();
-         serviceApi.update(serviceList.getId(), serviceList, updated);
+         net = networkApi.create(Network.createBuilder("jclouds-test").build());
       } finally {
-         // Do nothing on fail.
+         // Cleanup
+         if (net != null) {
+            networkApi.delete(net.getId());
+         }
       }
    }
 
@@ -91,6 +82,6 @@ public class UpdateService implements Closeable {
     * You would use try-with-resources in the main method instead.
     */
    public void close() throws IOException {
-      Closeables.close(cdnApi, true);
+      Closeables.close(neutronApi, true);
    }
 }

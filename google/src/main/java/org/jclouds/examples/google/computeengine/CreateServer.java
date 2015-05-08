@@ -20,8 +20,10 @@ package org.jclouds.examples.google.computeengine;
 
 import static org.jclouds.compute.config.ComputeServiceProperties.POLL_INITIAL_PERIOD;
 import static org.jclouds.compute.config.ComputeServiceProperties.POLL_MAX_PERIOD;
+import static org.jclouds.examples.google.computeengine.Constants.IMAGE;
 import static org.jclouds.examples.google.computeengine.Constants.NAME;
 import static org.jclouds.examples.google.computeengine.Constants.POLL_PERIOD_TWENTY_SECONDS;
+import static org.jclouds.examples.google.computeengine.Constants.PROFILE;
 import static org.jclouds.examples.google.computeengine.Constants.PROVIDER;
 import static org.jclouds.examples.google.computeengine.Constants.ZONE;
 
@@ -41,6 +43,7 @@ import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
+import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.domain.LoginCredentials;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
@@ -50,27 +53,39 @@ import com.google.common.io.Files;
 import com.google.inject.Module;
 
 /**
- * This example creates a Debian Wheezy server on a f1-micro instance on the
- * Google Compute Engine.
+ * This example creates an instance on the Google Compute Engine.
+ *
+ * <p>
+ * It defaults to zone europe-west1-b, image debian-7-wheezy and profile
+ * f1-micro and can be configured with system properties, <code>zone</code>,
+ * <code>image</code> and <code>profile</code>.
+ *
+ * @see Constants
  */
 public class CreateServer implements Closeable {
+
    private final ComputeService computeService;
 
    /**
-    * To get a service account and its private key see [TODO: write some
-    * documentation on the website and put a link to it]
+    * To get a service account and its private key see See <a
+    * href="http://jclouds.apache.org/guides/google/"
+    * >http://jclouds.apache.org/guides/google/</a>
     *
+    * <p>
     * The first argument (args[0]) is your service account email address
     *    (https://developers.google.com/console/help/new/#serviceaccounts).
     * The second argument (args[1]) is a path to your service account private key PEM file without a password. It is
     *    used for server-to-server interactions (https://developers.google.com/console/help/new/#serviceaccounts).
     *    The key is not transmitted anywhere.
     *
+    * <p>
     * Example:
     *
+    * <pre>
     * java org.jclouds.examples.google.computeengine.CreateServer \
     *    somecrypticname@developer.gserviceaccount.com \
     *    /home/planetnik/Work/Cloud/OSS/certificate/gcp-oss.pem
+    * </pre>
     */
    public static void main(final String[] args) {
       String serviceAccountEmailAddress = args[0];
@@ -134,29 +149,36 @@ public class CreateServer implements Closeable {
    }
 
    /**
-    * Create a server based on a Template. This method uses Template.hardwareId() and Template.imageId() to
-    * also demonstrate iterating through Hardware and Images. Alternatively you do the same without iterating
-    * using the following Template.
+    * Create a server based on a Template.
     *
+    * <p>
+    * This method uses {@link TemplateBuilder#fromHardware(Hardware)} and
+    * {@link TemplateBuilder#fromImage(Image)} to also demonstrate iterating
+    * through Hardware and Images.
+    *
+    * <p>
+    * Alternatively you do the same without iterating, specifying the required
+    * details, for example:
+    *
+    * <pre>
     * Template template = computeService.templateBuilder()
     *     .locationId(getLocationId())
     *     .osFamily(OsFamily.CENTOS)
     *     .osVersionMatches("6")
     *     .minRam(28*1024)
     *     .build();
+    * </pre>
     */
    private void createServer(final String googleUserName, final String sshPublicKey, final String sshPrivateKey)
       throws RunNodesException, TimeoutException, IOException {
       System.out.format("Create Server%n");
 
-      // TODO: make fromHardware(...) and fromImage(...) work as well. Currently,
-      // fromHardware chooses a deprecated platform and the call fails, while using
-      // hardwareId() and fromImage() causes no image to be found.
       Template template = computeService.templateBuilder()
             .locationId(ZONE)
-            .hardwareId(getHardware().getId())
-            .imageId(getImage().getId())
+            .fromHardware(getHardware())
+            .fromImage(getImage())
             .build();
+
       // Authorize googleUserName to use the instance with their SSH key.
       template.getOptions()
             .overrideLoginCredentials((new LoginCredentials.Builder())
@@ -181,7 +203,8 @@ public class CreateServer implements Closeable {
    /**
     * This method uses the generic ComputeService.listHardwareProfiles() to find the hardware profile.
     *
-    * @return The Hardware for a f1-micro instance.
+    * @return The Hardware for {@link Constants#ZONE} and
+    *         {@link Constants#PROFILE}.
     */
    private Hardware getHardware() {
       System.out.format("  Hardware Profiles%n");
@@ -191,13 +214,13 @@ public class CreateServer implements Closeable {
 
       for (Hardware profile : profiles) {
          System.out.format("    %s%n", profile);
-         if (profile.getId().equals(ZONE + "/f1-micro")) {
+         if (ZONE.equals(profile.getLocation().getId()) && PROFILE.equals(profile.getName())) {
             result = profile;
          }
       }
 
       if (result == null) {
-         System.err.println("f1-micro flavor not found. Using first flavor found:");
+         System.err.println(PROFILE + " flavor not found. Using first flavor found:");
          result = profiles.iterator().next();
          System.err.format("-> %s%n", result);
       }
@@ -207,7 +230,7 @@ public class CreateServer implements Closeable {
    /**
     * This method uses the generic ComputeService.listImages() to find the image.
     *
-    * @return A Debian Wheezy Image
+    * @return An Image where the name starts with {@link Constants#IMAGE}
     */
    private Image getImage() {
       System.out.format("  Images%n");
@@ -217,13 +240,13 @@ public class CreateServer implements Closeable {
 
       for (Image image : images) {
          System.out.format("    %s%n", image);
-         if (image.getOperatingSystem().getVersion().equals("debian.7.wheezy")) {
+         if (image.getName().startsWith(IMAGE)) {
             result = image;
          }
       }
 
       if (result == null) {
-         System.err.println("Image with Debian Wheezy operating system not found. Using first image found:");
+         System.err.println("Image version " + IMAGE + " not found. Using first image found:");
          result = images.iterator().next();
          System.err.format("-> %s%n", result);
       }
@@ -234,6 +257,7 @@ public class CreateServer implements Closeable {
    /**
     * Always close your service when you're done with it.
     */
+   @Override
    public final void close() throws IOException {
       Closeables.close(computeService.getContext(), true);
    }

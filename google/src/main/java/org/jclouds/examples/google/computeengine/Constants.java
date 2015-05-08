@@ -25,8 +25,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public interface Constants {
    public static final String PROVIDER = System.getProperty("provider.cs", "google-compute-engine");
-   public static final String ZONE = System.getProperty("zone", "europe-west1-a");
-
+   public static final String ZONE = System.getProperty("zone", "europe-west1-b");
+   public static final String PROFILE = System.getProperty("profile", "f1-micro");
+   public static final String IMAGE = System.getProperty("image", "debian-7-wheezy");
    public static final String NAME = "jclouds-example";
    public static final String POLL_PERIOD_TWENTY_SECONDS = String.valueOf(SECONDS.toMillis(20));
 }

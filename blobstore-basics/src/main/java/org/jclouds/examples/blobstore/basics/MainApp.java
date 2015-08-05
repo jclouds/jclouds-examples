@@ -79,6 +79,7 @@ public class MainApp {
       String identity = args[1];
       String credential = args[2];
       String containerName = args[3];
+      String region = "some-region";
 
       // Init
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
@@ -115,7 +116,7 @@ public class MainApp {
             object = api.headObject(containerName, blobName);
          } else if (apiMetadata instanceof SwiftApiMetadata) {
             SwiftApi api = context.unwrapApi(SwiftApi.class);
-            object = api.getObjectApi(containerName, blobName);
+            object = api.getObjectApi(region, containerName).getWithoutBody(blobName);
          } else if (apiMetadata instanceof AzureBlobApiMetadata) {
             AzureBlobClient api = context.unwrapApi(AzureBlobClient.class);
             object = api.getBlobProperties(containerName, blobName);

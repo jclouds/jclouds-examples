@@ -33,6 +33,7 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
+import org.jclouds.domain.Location;
 import org.jclouds.googlecloudstorage.GoogleCloudStorageApi;
 import org.jclouds.googlecloudstorage.GoogleCloudStorageApiMetadata;
 import org.jclouds.openstack.swift.SwiftApiMetadata;
@@ -81,7 +82,6 @@ public class MainApp {
       String identity = args[1];
       String credential = args[2];
       String containerName = args[3];
-      String region = "some-region";
 
       // Init
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
@@ -90,9 +90,14 @@ public class MainApp {
 
       try {
 
+         ApiMetadata apiMetadata = context.unwrap().getProviderMetadata().getApiMetadata();
          // Create Container
          BlobStore blobStore = context.getBlobStore();
-         blobStore.createContainerInLocation(null, containerName);
+         Location location = null;
+         if (apiMetadata instanceof SwiftApiMetadata) {
+            location = Iterables.getFirst(blobStore.listAssignableLocations(), null);
+         }
+         blobStore.createContainerInLocation(location, containerName);
          String blobName = "test";
          ByteSource payload = ByteSource.wrap("testdata".getBytes(Charsets.UTF_8));
 
@@ -111,14 +116,13 @@ public class MainApp {
          blobStore.putBlob(containerName, blob);
 
          // Use Provider API
-         ApiMetadata apiMetadata = context.unwrap().getProviderMetadata().getApiMetadata();
          Object object = null;
          if (apiMetadata instanceof S3ApiMetadata) {
             S3Client api = context.unwrapApi(S3Client.class);
             object = api.headObject(containerName, blobName);
          } else if (apiMetadata instanceof SwiftApiMetadata) {
             SwiftApi api = context.unwrapApi(SwiftApi.class);
-            object = api.getObjectApi(region, containerName).getWithoutBody(blobName);
+            object = api.getObjectApi(location.getId(), containerName).getWithoutBody(blobName);
          } else if (apiMetadata instanceof AzureBlobApiMetadata) {
             AzureBlobClient api = context.unwrapApi(AzureBlobClient.class);
             object = api.getBlobProperties(containerName, blobName);

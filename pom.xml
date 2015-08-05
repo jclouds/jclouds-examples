@@ -64,7 +64,7 @@
     <module>blobstore-largeblob</module>
     <module>chef-basics</module>
     <module>compute-basics</module>
-    <module>google</module>
+    <module>google-lb</module>
     <module>glacier</module>
     <module>openstack</module>
     <module>rackspace</module>

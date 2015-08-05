@@ -41,6 +41,11 @@
       <artifactId>jclouds-allblobstore</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.jclouds.labs</groupId>
+      <artifactId>google-cloud-storage</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
     <!-- note that if you want a smaller distribution
          remove the above dependency and place something 
          like below -->

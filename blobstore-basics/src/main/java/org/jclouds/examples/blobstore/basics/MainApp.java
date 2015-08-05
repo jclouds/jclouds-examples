@@ -33,6 +33,8 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
+import org.jclouds.googlecloudstorage.GoogleCloudStorageApi;
+import org.jclouds.googlecloudstorage.GoogleCloudStorageApiMetadata;
 import org.jclouds.openstack.swift.SwiftApiMetadata;
 import org.jclouds.openstack.swift.v1.SwiftApi;
 import org.jclouds.providers.ProviderMetadata;
@@ -123,6 +125,9 @@ public class MainApp {
          } else if (apiMetadata instanceof AtmosApiMetadata) {
             AtmosClient api = context.unwrapApi(AtmosClient.class);
             object = api.headFile(containerName + "/" + blobName);
+         } else if (apiMetadata instanceof GoogleCloudStorageApiMetadata) {
+            GoogleCloudStorageApi api = context.unwrapApi(GoogleCloudStorageApi.class);
+            object = api.getObjectApi().getObject(containerName, blobName);
          }
          if (object != null) {
             System.out.println(object);

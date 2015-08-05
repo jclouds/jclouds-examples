@@ -131,7 +131,6 @@ public class MainApp {
       } finally {
          // Close connecton
          context.close();
-         System.exit(0);
       }
 
    }

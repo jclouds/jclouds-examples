@@ -18,8 +18,15 @@
  */
 package org.jclouds.examples.rackspace;
 
-import com.google.common.collect.Iterables;
-import com.google.common.io.Closeables;
+import static org.jclouds.examples.rackspace.clouddns.Constants.GET_DOMAIN_ID;
+import static org.jclouds.examples.rackspace.clouddns.Constants.IS_DOMAIN;
+import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
+
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeoutException;
+
 import org.jclouds.ContextBuilder;
 import org.jclouds.openstack.cinder.v1.CinderApi;
 import org.jclouds.openstack.cinder.v1.domain.Snapshot;
@@ -57,14 +64,8 @@ import org.jclouds.rackspace.cloudloadbalancers.v1.CloudLoadBalancersApi;
 import org.jclouds.rackspace.cloudloadbalancers.v1.domain.LoadBalancer;
 import org.jclouds.rackspace.cloudloadbalancers.v1.features.LoadBalancerApi;
 
-import java.io.IOException;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-
-import static org.jclouds.examples.rackspace.clouddns.Constants.GET_DOMAIN_ID;
-import static org.jclouds.examples.rackspace.clouddns.Constants.IS_DOMAIN;
-import static org.jclouds.rackspace.clouddns.v1.predicates.JobPredicates.awaitComplete;
+import com.google.common.collect.Iterables;
+import com.google.common.io.Closeables;
 
 /**
  * Indiscriminately delete all resources in all regions of an account.
@@ -222,6 +223,7 @@ public class DeleteAll {
                   System.out.format("    %s%n", user.getName());
                   userApi.delete(user.getName());
                }
+               instanceApi.delete(instance.getId());
             }
          } catch (Exception e) {
             e.printStackTrace();

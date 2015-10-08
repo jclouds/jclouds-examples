@@ -27,7 +27,7 @@
   <description>jclouds blobstore example that creates a container, then displays the size of each container</description>
 
   <properties>
-    <jclouds.version>1.9.0</jclouds.version>
+    <jclouds.version>1.9.1</jclouds.version>
   </properties>
 
   <dependencies>

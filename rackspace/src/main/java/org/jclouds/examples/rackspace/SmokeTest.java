@@ -66,6 +66,8 @@ public class SmokeTest {
       ListContainers.main(args);
       GenerateTempURL.main(args);
       UploadObjects.main(args);
+      // Only works when the examples run from a Rackspace Cloud Servers machine.
+      // UploadObjectsWithServiceNet.main(args);
       ListObjects.main(args);
       GetObject.main(args);
       CrossOriginResourceSharingContainer.main(args);

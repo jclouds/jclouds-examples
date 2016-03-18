@@ -41,6 +41,12 @@
       <artifactId>jclouds-sshj</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
+    <dependency>
+       <groupId>org.apache.jclouds.labs</groupId>
+       <artifactId>docker</artifactId>
+       <!-- TODO: Update version to variable jclouds.version on next release -->
+       <version>2.0.0-SNAPSHOT</version>
+    </dependency>
     <!-- Rackspace US dependencies -->
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>

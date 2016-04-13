@@ -101,6 +101,8 @@ public class MainApp {
    public static int PARAMETERS = 5;
    public static String INVALID_SYNTAX = "Invalid number of parameters. Syntax is: provider identity credential groupName (add|exec|run|destroy)";
 
+   public static final String PROPERTY_OAUTH_ENDPOINT = "oauth.endpoint";
+
    public static void main(String[] args) {
       if (args.length < PARAMETERS)
          throw new IllegalArgumentException(INVALID_SYNTAX);
@@ -267,6 +269,12 @@ public class MainApp {
       properties.setProperty(PROPERTY_EC2_CC_AMI_QUERY, "");
       long scriptTimeout = TimeUnit.MILLISECONDS.convert(20, TimeUnit.MINUTES);
       properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
+
+      // set oauth endpoint property if set in system property
+      String oAuthEndpoint = System.getProperty(PROPERTY_OAUTH_ENDPOINT);
+      if (oAuthEndpoint != null) {
+         properties.setProperty(PROPERTY_OAUTH_ENDPOINT, oAuthEndpoint);
+      }
 
       // example of injecting a ssh implementation
       Iterable<Module> modules = ImmutableSet.<Module> of(

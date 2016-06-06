@@ -25,6 +25,7 @@ import static org.jclouds.examples.rackspace.cloudfiles.Constants.REGION;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
@@ -38,6 +39,8 @@ import org.jclouds.http.HttpResponseException;
 import org.jclouds.io.Payload;
 import org.jclouds.io.Payloads;
 import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
+import org.jclouds.openstack.swift.v1.features.AccountApi;
+import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
 import com.google.common.io.ByteSource;
 import com.google.common.io.Closeables;
@@ -76,6 +79,7 @@ public class GenerateTempURL implements Closeable {
       GenerateTempURL generateTempURL = new GenerateTempURL(args[0], args[1]);
 
       try {
+         generateTempURL.updatePrivateURLKey();
          generateTempURL.createContainer();
          generateTempURL.generatePutTempURL();
          generateTempURL.generateGetTempURL();
@@ -103,6 +107,19 @@ public class GenerateTempURL implements Closeable {
             blobStore.createContainerInLocation(location, CONTAINER);
          System.out.format("Created container in %s%n", REGION);
       }
+   }
+
+   private void updatePrivateURLKey() throws IOException {
+      // The key can be changed to quickly expire all existing signed URLs.
+      AccountApi accountApi = blobStore
+            .getContext()
+            .unwrapApi(CloudFilesApi.class)
+            .getAccountApi(REGION);
+
+      String key = UUID.randomUUID().toString();
+      System.out.format("Setting key for signed URLs to %s%n", key);
+      accountApi.updateTemporaryUrlKey(key);
+      System.out.format("The key is now %s%n", accountApi.get().getMetadata().get("temp-url-key"));
    }
 
    private void generatePutTempURL() throws IOException {

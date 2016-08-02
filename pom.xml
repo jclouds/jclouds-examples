@@ -62,6 +62,7 @@
   <modules>
     <module>blobstore-basics</module>
     <module>blobstore-largeblob</module>
+    <module>blobstore-uploader</module>
     <module>chef-basics</module>
     <module>compute-basics</module>
     <module>google-lb</module>

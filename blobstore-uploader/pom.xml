@@ -28,7 +28,7 @@
 
 
    <properties>
-       <jclouds.version>1.8.1</jclouds.version>
+       <jclouds.version>1.9.2</jclouds.version>
    </properties>
 
    <dependencies>
@@ -43,8 +43,8 @@
            <version>1.0.13</version>
        </dependency>
        <dependency>
-           <groupId>org.apache.jclouds.labs</groupId>
-           <artifactId>rackspace-cloudfiles-us</artifactId>
+           <groupId>org.apache.jclouds</groupId>
+           <artifactId>jclouds-allblobstore</artifactId>
            <version>${jclouds.version}</version>
        </dependency>
        <dependency>

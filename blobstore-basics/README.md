@@ -10,14 +10,17 @@ Ensure you have maven 3.02 or higher installed, then execute 'mvn install' to bu
 
 Invoke the jar, passing the name of the cloud provider you with to access (ex. aws-s3, googlestorage), identity (ex. accesskey, username), credential (ex. secretkey, password), then the name of the container you'd like to create.
 
-Ex. for Amazon S3
+For Amazon S3
 
-java -jar target/blobstore-basics-jar-with-dependencies.jar aws-s3 accesskey secretkey myfavoritecontainer
+    java -jar target/blobstore-basics-jar-with-dependencies.jar aws-s3 accesskey secretkey myfavoritecontainer
 
-Ex. for Rackspace CloudFiles
+For Rackspace CloudFiles
 
-java -jar target/blobstore-basics-jar-with-dependencies.jar cloudfiles-us username apikey myfavoritecontainer
+    java -jar target/blobstore-basics-jar-with-dependencies.jar cloudfiles-us username apikey myfavoritecontainer
 
+For IBM SoftLayer ObjectStore in `ams01`
+
+    java -Djclouds.keystone.credential-type=tempAuthCredentials -Djclouds.endpoint=https://ams01.objectstorage.softlayer.net/auth/v1.0/ -jar target/blobstore-basics-jar-with-dependencies.jar openstack-swift username apikey myfavoritecontainer https://ams01.objectstorage.softlayer.net/auth/v1.0/
 
 ## License
 

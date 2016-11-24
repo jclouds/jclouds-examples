@@ -20,7 +20,7 @@
 <configuration>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>-  %msg%n</pattern>
+      <pattern>%msg%n</pattern>
     </encoder>
   </appender>
   <root level="info">

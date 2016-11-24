@@ -30,6 +30,7 @@ import static org.jclouds.compute.options.TemplateOptions.Builder.overrideLoginC
 import static org.jclouds.compute.options.TemplateOptions.Builder.runScript;
 import static org.jclouds.compute.predicates.NodePredicates.TERMINATED;
 import static org.jclouds.compute.predicates.NodePredicates.inGroup;
+import static org.jclouds.util.Closeables2.closeQuietly;
 
 import java.io.File;
 import java.util.List;
@@ -42,8 +43,8 @@ import java.util.concurrent.TimeUnit;
 import org.jclouds.ContextBuilder;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.apis.Apis;
+import org.jclouds.chef.ChefApi;
 import org.jclouds.chef.ChefApiMetadata;
-import org.jclouds.chef.ChefContext;
 import org.jclouds.chef.ChefService;
 import org.jclouds.chef.config.ChefProperties;
 import org.jclouds.chef.domain.BootstrapConfig;
@@ -70,6 +71,7 @@ import org.jclouds.scriptbuilder.statements.git.CloneGitRepo;
 import org.jclouds.scriptbuilder.statements.git.InstallGit;
 import org.jclouds.scriptbuilder.statements.login.AdminAccess;
 import org.jclouds.sshj.config.SshjSshClientModule;
+import org.jclouds.util.Closeables2;
 
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
@@ -132,6 +134,7 @@ public class MainApp {
                 action != Action.DESTROY ? getLoginForCommandExecution(action) : null;
 
         ComputeService compute = initComputeService(provider, identity, credential);
+        ChefApi chefApi = null;
 
         try {
             switch (action) {
@@ -194,9 +197,8 @@ public class MainApp {
                     break;
                 case CHEF:
                     // Create the connection to the Chef server
-                    ChefService chef =
-                            initChefService(System.getProperty("chef.client"),
-                                    System.getProperty("chef.validator"));
+                    chefApi = initChefService(System.getProperty("chef.client"), System.getProperty("chef.validator"));
+                    ChefService chef = chefApi.chefService();
 
                     // Build the runlist for the deployed nodes
                     System.out.println("Configuring node runlist in the Chef server...");
@@ -232,6 +234,9 @@ public class MainApp {
             error = 1;
         } finally {
             compute.getContext().close();
+            if (chefApi != null) {
+                closeQuietly(chefApi);
+            }
             System.exit(error);
         }
     }
@@ -283,7 +288,7 @@ public class MainApp {
         return builder.buildView(ComputeServiceContext.class).getComputeService();
     }
 
-    private static ChefService initChefService(final String client, final String validator) {
+    private static ChefApi initChefService(final String client, final String validator) {
         try {
             Properties chefConfig = new Properties();
             chefConfig.put(ChefProperties.CHEF_VALIDATOR_NAME, validator);
@@ -297,8 +302,7 @@ public class MainApp {
 
             System.out.printf(">> initializing %s%n", builder.getApiMetadata());
 
-            ChefContext context = builder.buildView(ChefContext.class);
-            return context.getChefService();
+            return builder.buildApi(ChefApi.class);
         } catch (Exception e) {
             System.err.println("error reading private key " + e.getMessage());
             System.exit(1);

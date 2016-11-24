@@ -87,10 +87,7 @@ public class CreateDatabase implements Closeable {
 
    private void createDatabase() throws TimeoutException {
       System.out.format("Create Database%n");
-
-      boolean result = databaseApi.create(NAME);
-
-      System.out.format("  %s%n", result);
+      databaseApi.create(NAME);
    }
 
    /**

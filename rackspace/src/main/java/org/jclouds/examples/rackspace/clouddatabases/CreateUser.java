@@ -85,10 +85,7 @@ public class CreateUser implements Closeable {
 
    private void createUser() throws TimeoutException {
       System.out.format("Create User%n");
-
-      boolean result = userApi.create(NAME, PASSWORD, NAME);
-
-      System.out.format("  %s%n", result);
+      userApi.create(NAME, PASSWORD, NAME);
    }
 
    /**

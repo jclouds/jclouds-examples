@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.jclouds.ContextBuilder;
-import org.jclouds.openstack.keystone.v2_0.config.CredentialTypes;
-import org.jclouds.openstack.keystone.v2_0.config.KeystoneProperties;
+import org.jclouds.openstack.keystone.auth.config.CredentialTypes;
+import org.jclouds.openstack.keystone.config.KeystoneProperties;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 
 import com.google.common.io.Closeables;

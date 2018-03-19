@@ -22,12 +22,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>chef-basics</artifactId>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
   <name>chef-basics</name>
   <description>jclouds chef example that adds a node to a group, then installs an Apache web server on all nodes</description>
   
   <properties>
-    <jclouds.version>2.0.0</jclouds.version>
+    <jclouds.version>2.1.0</jclouds.version>
   </properties>
 
   <dependencies>

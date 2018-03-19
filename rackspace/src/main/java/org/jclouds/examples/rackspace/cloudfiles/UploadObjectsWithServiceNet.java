@@ -34,7 +34,7 @@ import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.io.Payload;
 import org.jclouds.io.Payloads;
 import org.jclouds.openstack.swift.v1.blobstore.RegionScopedBlobStoreContext;
-import org.jclouds.openstack.v2_0.config.InternalUrlModule;
+import org.jclouds.openstack.keystone.catalog.config.InternalUrlModule;
 import org.jclouds.rackspace.cloudfiles.v1.CloudFilesApi;
 
 import com.google.common.base.Charsets;

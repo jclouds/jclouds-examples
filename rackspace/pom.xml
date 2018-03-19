@@ -22,11 +22,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>rackspace-examples</artifactId>
-  <version>2.0.0</version>
+  <version>2.1.0</version>
   <name>rackspace-examples</name>
 
   <properties>
-    <jclouds.version>2.0.0</jclouds.version>
+    <jclouds.version>2.1.0</jclouds.version>
   </properties>
 
   <repositories>
@@ -98,7 +98,7 @@
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudnetworks-us</artifactId>
       <version>${jclouds.version}</version>
     </dependency>
@@ -149,7 +149,7 @@
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
+      <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>rackspace-cloudnetworks-uk</artifactId>
       <version>${jclouds.version}</version>
     </dependency>

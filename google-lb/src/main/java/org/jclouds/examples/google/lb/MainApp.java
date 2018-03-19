@@ -61,7 +61,7 @@ import com.google.inject.Injector;
  */
 public class MainApp {
 
-   public static enum Action {
+   public enum Action {
       CREATE, REQUEST, DESTROY, DELETE_STARTUP_SCRIPT
    }
 
@@ -144,7 +144,12 @@ public class MainApp {
          // Make requests to create instances.
          ArrayList<Operation> operations = new ArrayList<Operation>();
          for (int i = 0; i < NUM_INSTANCES; i++){
-            Operation o = instanceApi.create(NewInstance.create("jclouds-lb-instance-" + i, machineTypeURL, networkURL, DEFAULT_IMAGE_URL));
+            Operation o = instanceApi.create(NewInstance.create(
+                    "jclouds-lb-instance-" + i,
+                    machineTypeURL,
+                    networkURL,
+                    null,
+                    DEFAULT_IMAGE_URL));
             System.out.println(" - instance");
             operations.add(o);
          }

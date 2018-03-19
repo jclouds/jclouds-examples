@@ -30,7 +30,7 @@ import org.jclouds.openstack.neutron.v2.domain.RuleEthertype;
 import org.jclouds.openstack.neutron.v2.domain.RuleProtocol;
 import org.jclouds.openstack.neutron.v2.domain.SecurityGroup;
 
-import org.jclouds.openstack.neutron.v2.extensions.SecurityGroupApi;
+import org.jclouds.openstack.neutron.v2.features.SecurityGroupApi;
 import com.google.common.io.Closeables;
 
 /**
@@ -68,12 +68,12 @@ public class CreateSecurityGroup implements Closeable {
    }
 
    private void createSecurityGroup() {
-      SecurityGroupApi sgApi = neutronApi.getSecurityGroupApi(REGION).get();
+      SecurityGroupApi sgApi = neutronApi.getSecurityGroupApi(REGION);
       Rule rule = null;
       SecurityGroup securityGroup = null;
 
       try {
-         sgApi = neutronApi.getSecurityGroupApi(REGION).get();
+         sgApi = neutronApi.getSecurityGroupApi(REGION);
 
          securityGroup = sgApi.create(
                SecurityGroup.createBuilder().name("jclouds-test").description("jclouds test security group")

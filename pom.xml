@@ -21,7 +21,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>jclouds-examples</artifactId>
-  <version>1.9.0</version>
+  <version>2.1.0</version>
   <packaging>pom</packaging>
   <name>jclouds examples</name>
 
@@ -33,7 +33,7 @@
   </scm>
 
   <properties>
-    <jclouds.version>1.9.0</jclouds.version>
+    <jclouds.version>2.1.0</jclouds.version>
   </properties>
 
   <repositories>
@@ -65,22 +65,12 @@
     <module>blobstore-uploader</module>
     <module>chef-basics</module>
     <module>compute-basics</module>
-    <module>google-lb</module>
     <module>glacier</module>
+    <module>google-lb</module>
     <module>openstack</module>
     <module>rackspace</module>
-<!--
-    TODO: These modules have bit-rotted:
-    <module>blobstore-hdfs</module>
-    <module>blobstore-karaf-shell</module>
-    <module>camel-notifications</module>
-    <module>cloudwatch-basics</module>
-    <module>ec2-computeservice-spot</module>
-    <module>ec2-createlamp</module>
-    <module>ec2-windows</module>
-    <module>minecraft-compute</module>
--->
   </modules>
+
   <build>
     <plugins>
       <plugin>

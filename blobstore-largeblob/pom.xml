@@ -22,12 +22,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.jclouds.examples</groupId>
   <artifactId>blobstore-largeblob</artifactId>
-  <version>1.8.0</version>
+  <version>2.1.0</version>
   <name>blobstore-largeblob</name>
   <description>jclouds blobstore example that creates a container, then uploads a large file using parallel multipart upload</description>
 
   <properties>
-    <jclouds.version>1.9.0</jclouds.version>
+    <jclouds.version>2.1.0</jclouds.version>
   </properties>
 
   <dependencies>

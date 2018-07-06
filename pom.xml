@@ -69,6 +69,7 @@
     <module>google-lb</module>
     <module>openstack</module>
     <module>rackspace</module>
+    <module>dimensiondata</module>
   </modules>
 
   <build>

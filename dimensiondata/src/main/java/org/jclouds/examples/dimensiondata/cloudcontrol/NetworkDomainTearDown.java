@@ -172,8 +172,14 @@ public class NetworkDomainTearDown
             {
                 if (server.state() == State.FAILED_ADD)
                 {
-                    logger.info("Server with Id %s is not in a FAILED_ADD state, manually run Clean Server operation.", server.id());
-                    continue;
+                    logger.info("Server with Id %s is in a FAILED_ADD state, running the clean server operation.", server.id());
+                    api.getServerApi().cleanServer(server.id());
+                    waitForServerDeleted(injector, server);
+                    if (api.getServerApi().getServer(server.id()) != null)
+                    {
+                        logger.info("Failed to clean Server with Id %s", server.id());
+                        continue;
+                    }
                 }
                 if (server.state() != State.NORMAL)
                 {

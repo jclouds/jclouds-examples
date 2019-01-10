@@ -19,7 +19,6 @@ package org.jclouds.examples.dimensiondata.cloudcontrol;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.inject.Injector;
 import org.jclouds.ContextBuilder;
 import org.jclouds.dimensiondata.cloudcontrol.DimensionDataCloudControlApi;
 import org.jclouds.dimensiondata.cloudcontrol.domain.Disk;
@@ -32,8 +31,6 @@ import org.jclouds.rest.ApiContext;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.jclouds.examples.dimensiondata.cloudcontrol.WaitForUtils.*;
 
 /**
  * This class will attempt to Deploy:
@@ -71,11 +68,6 @@ public class DeployNetworkDomainVlanAndServer
                 .modules(ImmutableSet.of(new SLF4JLoggingModule()))
                 .build())
         {
-            /*
-             * Retrieve the Guice injector from the context.
-             * We will use this for retrieving the some Predicates that are used by the following operations.
-             */
-            Injector injector = ctx.utils().injector();
             DimensionDataCloudControlApi api = ctx.getApi();
 
             /*
@@ -83,16 +75,15 @@ public class DeployNetworkDomainVlanAndServer
              */
             String tagKeyId = api.getTagApi().createTagKey("jclouds", "owner of the asset", true, false);
 
-            String networkDomainId = deployNetworkDomain(api, injector, tagKeyId);
-            String vlanId = deployVlan(api, injector, networkDomainId, tagKeyId);
+            String networkDomainId = deployNetworkDomain(api, tagKeyId);
+            String vlanId = deployVlan(api, networkDomainId, tagKeyId);
 
-            deployServer(api, injector, networkDomainId, vlanId, tagKeyId);
+            deployServer(api, networkDomainId, vlanId, tagKeyId);
         }
 
     }
 
-    private static void deployServer(DimensionDataCloudControlApi api, Injector injector, String
-            networkDomainId, String vlanId, String tagKeyId)
+    private static void deployServer(DimensionDataCloudControlApi api, String networkDomainId, String vlanId, String tagKeyId)
     {
         /*
          * The server we deploy will use a pre-configured image.
@@ -123,7 +114,8 @@ public class DeployNetworkDomainVlanAndServer
          * A Server deployment is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
          * has built in predicates that will block execution and check that the Server's State has moved from PENDING_ADD to NORMAL.
          */
-        waitForServerStartedAndNormal(injector, serverId);
+       api.getServerApi().serverStartedPredicate().apply(serverId);
+       api.getServerApi().serverNormalPredicate().apply(serverId);
 
         /*
          * Apply a Tag to the Server. We use AssetType SERVER.
@@ -140,7 +132,7 @@ public class DeployNetworkDomainVlanAndServer
         return api.getServerImageApi().listOsImages(DatacenterIdListFilters.Builder.datacenterId(ZONE)).iterator().next().id();
     }
 
-    private static String deployNetworkDomain(DimensionDataCloudControlApi api, Injector injector, String tagKeyId)
+    private static String deployNetworkDomain(DimensionDataCloudControlApi api, String tagKeyId)
     {
 
         /*
@@ -153,7 +145,7 @@ public class DeployNetworkDomainVlanAndServer
          * has built in predicates that will block execution and check that the Network Domain's State has moved from PENDING_ADD to NORMAL.
          * We pass the Network Domain Identifier we wish to check the state of.
          */
-        waitForNetworkDomainNormal(injector, networkDomainId);
+       api.getNetworkApi().networkDomainNormalPredicate().apply(networkDomainId);
 
         /*
          * Apply a Tag to the Network Domain. We use AssetType NETWORK_DOMAIN.
@@ -163,8 +155,7 @@ public class DeployNetworkDomainVlanAndServer
         return networkDomainId;
     }
 
-    private static String deployVlan(DimensionDataCloudControlApi api, Injector injector, String
-            networkDomainId, String tagKeyId)
+    private static String deployVlan(DimensionDataCloudControlApi api, String networkDomainId, String tagKeyId)
     {
 
         /*
@@ -177,7 +168,7 @@ public class DeployNetworkDomainVlanAndServer
          * A Vlan deployment is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
          * has built in predicates that will block execution and check that the Vlan's State has moved from PENDING_ADD to NORMAL.
          */
-        waitForVlanNormal(injector, vlanId);
+       api.getNetworkApi().vlanNormalPredicate().apply(vlanId);
 
         /*
          * Apply a Tag to the Vlan. We use AssetType VLAN.

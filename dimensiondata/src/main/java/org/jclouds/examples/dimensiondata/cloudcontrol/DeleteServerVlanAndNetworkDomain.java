@@ -19,7 +19,6 @@ package org.jclouds.examples.dimensiondata.cloudcontrol;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import org.jclouds.ContextBuilder;
 import org.jclouds.dimensiondata.cloudcontrol.DimensionDataCloudControlApi;
 import org.jclouds.dimensiondata.cloudcontrol.domain.Server;
@@ -28,8 +27,6 @@ import org.jclouds.dimensiondata.cloudcontrol.domain.Vlan;
 import org.jclouds.dimensiondata.cloudcontrol.options.DatacenterIdListFilters;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.rest.ApiContext;
-
-import static org.jclouds.examples.dimensiondata.cloudcontrol.WaitForUtils.*;
 
 /**
  * This class will attempt to delete the assets created in org.jclouds.examples.dimensiondata.cloudcontrol.DeployNetworkDomainVlanAndServer:
@@ -66,11 +63,6 @@ public class DeleteServerVlanAndNetworkDomain
                 .modules(ImmutableSet.of(new SLF4JLoggingModule()))
                 .build())
         {
-            /*
-             * Retrieve the Guice injector from the context.
-             * We will use this for retrieving the some Predicates that are used by the following operations.
-             */
-            Injector injector = ctx.utils().injector();
             DimensionDataCloudControlApi api = ctx.getApi();
 
             /*
@@ -81,9 +73,9 @@ public class DeleteServerVlanAndNetworkDomain
             final String serverName = "jclouds-server";
             final String vlanName = "jclouds-example-vlan";
 
-            deleteServer(api, injector, serverName);
-            deleteVlan(api, injector, vlanName, networkDomainId);
-            deleteNetworkDomain(api, injector, networkDomainId);
+            deleteServer(api, serverName);
+            deleteVlan(api, vlanName, networkDomainId);
+            deleteNetworkDomain(api, networkDomainId);
             deleteTagKey(api, "jclouds");
         }
     }
@@ -115,7 +107,7 @@ public class DeleteServerVlanAndNetworkDomain
         return api.getNetworkApi().listNetworkDomainsWithDatacenterIdAndName(ZONE, networkDomainName).concat().toList().get(0).id();
     }
 
-    private static void deleteVlan(DimensionDataCloudControlApi api, Injector injector, final String vlanName, String networkDomainId)
+    private static void deleteVlan(DimensionDataCloudControlApi api, final String vlanName, String networkDomainId)
     {
         /*
          * Find the Vlan that was deployed by listing all Vlans for the Network Domain and filtering by name
@@ -141,11 +133,11 @@ public class DeleteServerVlanAndNetworkDomain
              * A Vlan delete is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
              * has built in predicates that will block execution and check that the Vlan is not found.
              */
-            waitForDeleteVlan(injector, vlan);
+           api.getNetworkApi().vlanDeletedPredicate().apply(vlan.id());
         }
     }
 
-    private static void deleteNetworkDomain(DimensionDataCloudControlApi api, Injector injector, String networkDomainId)
+    private static void deleteNetworkDomain(DimensionDataCloudControlApi api, String networkDomainId)
     {
         /*
          * Network Domain is deleted using the id.
@@ -156,10 +148,10 @@ public class DeleteServerVlanAndNetworkDomain
          * A Network Domain delete is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
          * has built in predicates that will block execution and check that the Network Domain is not found.
          */
-        waitForDeleteNetworkDomain(injector, networkDomainId);
+       api.getNetworkApi().networkDomainDeletedPredicate().apply(networkDomainId);
     }
 
-    private static void deleteServer(DimensionDataCloudControlApi api, Injector injector, final String serverName)
+    private static void deleteServer(DimensionDataCloudControlApi api, final String serverName)
     {
         /*
          * We list all servers known to this organisation for the datacenter we are operating on. We filter the one that matches the server name we used to create it.
@@ -187,7 +179,7 @@ public class DeleteServerVlanAndNetworkDomain
                  * A Shutdown Server operation is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
                  * has built in predicates that will block execution and check that the Server is shutdown.
                  */
-                waitForServerStopped(injector, server);
+               api.getServerApi().serverStoppedPredicate().apply(server.id());
             }
 
             /*
@@ -199,7 +191,7 @@ public class DeleteServerVlanAndNetworkDomain
              * A Server delete is an asynchronous process. We need to wait for it to complete. The Dimension Data provider
              * has built in predicates that will block execution and check that the Server is not found.
              */
-            waitForServerDeleted(injector, server);
+           api.getServerApi().serverDeletedPredicate().apply(server.id());
 
         }
     }

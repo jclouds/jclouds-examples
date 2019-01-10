@@ -18,16 +18,19 @@ package org.jclouds.examples.dimensiondata.cloudcontrol;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.inject.Injector;
 import org.jclouds.ContextBuilder;
 import org.jclouds.dimensiondata.cloudcontrol.DimensionDataCloudControlApi;
-import org.jclouds.dimensiondata.cloudcontrol.domain.*;
+import org.jclouds.dimensiondata.cloudcontrol.domain.FirewallRule;
+import org.jclouds.dimensiondata.cloudcontrol.domain.NatRule;
+import org.jclouds.dimensiondata.cloudcontrol.domain.NetworkDomain;
+import org.jclouds.dimensiondata.cloudcontrol.domain.PublicIpBlock;
+import org.jclouds.dimensiondata.cloudcontrol.domain.Server;
+import org.jclouds.dimensiondata.cloudcontrol.domain.State;
+import org.jclouds.dimensiondata.cloudcontrol.domain.Vlan;
 import org.jclouds.dimensiondata.cloudcontrol.options.DatacenterIdListFilters;
 import org.jclouds.logging.Logger;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.rest.ApiContext;
-
-import static org.jclouds.examples.dimensiondata.cloudcontrol.WaitForUtils.*;
 
 /**
  * This example shows how a Network Domain and all of it's associated assets are removed.
@@ -58,13 +61,7 @@ public class NetworkDomainTearDown
                 .build())
         {
 
-            /*
-             * Retrieve the Guice injector from the context.
-             * We will use this for retrieving the some Predicates that are used by the following operations.
-             */
-            Injector injector = ctx.utils().injector();
             DimensionDataCloudControlApi api = ctx.getApi();
-
 
             logger.info("Deleting resources for network domain %s", networkDomainId);
             NetworkDomain networkDomain = api.getNetworkApi().getNetworkDomain(networkDomainId);
@@ -87,7 +84,7 @@ public class NetworkDomainTearDown
 
             deleteFirewallRules(networkDomainId, api);
 
-            deleteServers(api, injector, datacenterId);
+            deleteServers(api, datacenterId);
 
             ImmutableList<Server> servers = api.getServerApi().listServers().concat().toList();
             if (!servers.isEmpty())
@@ -99,9 +96,9 @@ public class NetworkDomainTearDown
                 }
                 return;
             }
-            deleteVlans(api, injector, networkDomain);
+            deleteVlans(api, networkDomain);
 
-            deleteNetworkDomain(networkDomainId, api, injector);
+            deleteNetworkDomain(networkDomainId, api);
         }
     }
 
@@ -135,14 +132,14 @@ public class NetworkDomainTearDown
         }
     }
 
-    private static void deleteNetworkDomain(String networkDomainId, DimensionDataCloudControlApi api, Injector injector)
+    private static void deleteNetworkDomain(String networkDomainId, DimensionDataCloudControlApi api)
     {
         logger.info("Deleting Network Domain with Id %s", networkDomainId);
         api.getNetworkApi().deleteNetworkDomain(networkDomainId);
-        waitForDeleteNetworkDomain(injector, networkDomainId);
+        api.getNetworkApi().networkDomainDeletedPredicate().apply(networkDomainId);
     }
 
-    private static void deleteVlans(DimensionDataCloudControlApi api, Injector injector, NetworkDomain networkDomain)
+    private static void deleteVlans(DimensionDataCloudControlApi api, NetworkDomain networkDomain)
     {
         for (Vlan vlan : api.getNetworkApi().listVlans(networkDomain.id()).concat().toList())
         {
@@ -155,7 +152,7 @@ public class NetworkDomainTearDown
                 }
                 logger.info("Deleting Vlan with Id %s", vlan.id());
                 api.getNetworkApi().deleteVlan(vlan.id());
-                waitForDeleteVlan(injector, vlan);
+               api.getNetworkApi().vlanDeletedPredicate().apply(vlan.id());
             }
             catch (Exception e)
             {
@@ -164,7 +161,7 @@ public class NetworkDomainTearDown
         }
     }
 
-    private static void deleteServers(DimensionDataCloudControlApi api, Injector injector, String datacenterId)
+    private static void deleteServers(DimensionDataCloudControlApi api, String datacenterId)
     {
         for (Server server : api.getServerApi().listServers(DatacenterIdListFilters.Builder.datacenterId(datacenterId)))
         {
@@ -174,7 +171,7 @@ public class NetworkDomainTearDown
                 {
                     logger.info("Server with Id %s is in a FAILED_ADD state, running the clean server operation.", server.id());
                     api.getServerApi().cleanServer(server.id());
-                    waitForServerDeleted(injector, server);
+                   api.getServerApi().serverDeletedPredicate().apply(server.id());
                     if (api.getServerApi().getServer(server.id()) != null)
                     {
                         logger.info("Failed to clean Server with Id %s", server.id());
@@ -190,11 +187,11 @@ public class NetworkDomainTearDown
                 {
                     logger.info("Shutting down Server with Id %s", server.id());
                     api.getServerApi().shutdownServer(server.id());
-                    waitForServerStopped(injector, server);
+                   api.getServerApi().serverStoppedPredicate().apply(server.id());
                 }
                 logger.info("Deleting Server with Id %s", server.id());
                 api.getServerApi().deleteServer(server.id());
-                waitForServerDeleted(injector, server);
+               api.getServerApi().serverDeletedPredicate().apply(server.id());
             }
             catch (Exception e)
             {

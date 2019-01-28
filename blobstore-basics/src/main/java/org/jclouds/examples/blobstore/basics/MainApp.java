@@ -16,9 +16,11 @@
  */
 package org.jclouds.examples.blobstore.basics;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.contains;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +36,7 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.StorageMetadata;
+import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.googlecloudstorage.GoogleCloudStorageApi;
 import org.jclouds.googlecloudstorage.GoogleCloudStorageApiMetadata;
@@ -45,10 +48,14 @@ import org.jclouds.s3.S3ApiMetadata;
 import org.jclouds.s3.S3Client;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteSource;
+import com.google.common.io.Files;
+
+import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 
 /**
  * Demonstrates the use of {@link BlobStore}.
@@ -85,6 +92,11 @@ public class MainApp {
       identity = args[1];
       credential = args[2];
       containerName = args[3];
+      boolean providerIsGCS = provider.equalsIgnoreCase("google-cloud-storage");
+
+      // For GCE, the credential parameter is the path to the private key file
+      if (providerIsGCS)
+	  credential = getCredentialFromJsonKeyFile(credential);
 
       // Init
       BlobStoreContext context = ContextBuilder.newBuilder(provider)
@@ -105,11 +117,11 @@ public class MainApp {
          ByteSource payload = ByteSource.wrap("testdata".getBytes(Charsets.UTF_8));
 
          // List Container Metadata
-         for (StorageMetadata resourceMd : blobStore.list()) {
-            if (containerName.equals(resourceMd.getName())) {
-               System.out.println(resourceMd);
-            }
-         }
+	 for (StorageMetadata resourceMd : blobStore.list()) {
+	     if (containerName.equals(resourceMd.getName())) {
+		 System.out.println(resourceMd);
+	     }
+	 }
 
          // Add Blob
          Blob blob = blobStore.blobBuilder(blobName)
@@ -142,10 +154,26 @@ public class MainApp {
          
       } finally {
          // delete cointainer
-         blobStore.deleteContainer(containerName);
+	  blobStore.deleteContainer(containerName);
          // Close connecton
          context.close();
       }
 
    }
+
+    private static String getCredentialFromJsonKeyFile(String filename) {
+	try {
+	    String fileContents = Files.toString(new File(filename), UTF_8);
+	    Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(fileContents);
+	    String credential = credentialSupplier.get().credential;
+	    return credential;
+	} catch (IOException e) {
+	    System.err.println("Exception reading private key from '%s': " + filename);
+	    e.printStackTrace();
+	    System.exit(1);
+	    return null;
+	}
+    }
+
+    
 }
